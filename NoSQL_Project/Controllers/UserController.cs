@@ -18,9 +18,9 @@ namespace NoSQL_Project.Controllers
         }
 
         [HttpPost]
-        public IActionResult Create(string name, string email)
+        public IActionResult Create(string name, string email, string password)
         {
-            var user = new User { Name = name, Email = email };
+            var user = new User { Name = name, Email = email, Password = password };
             _UserService.Add(user);
             return RedirectToAction("Index");
         }
