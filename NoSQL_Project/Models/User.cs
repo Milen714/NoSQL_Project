@@ -21,6 +21,8 @@ namespace NoSQL_Project.Models
         // Later we could add validation (e.g. DataAnnotations).
         public string Email { get; set; } = "";
 
+        public string Password { get; set; } = "";
+
 
     }
 }

@@ -52,6 +52,15 @@ namespace NoSQL_Project
             builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<IUserService, UserService>();
 
+
+            //Session
+            builder.Services.AddSession(options =>
+            {
+                options.IdleTimeout = TimeSpan.FromMinutes(60); // Set the timeout to 60 minutes
+                options.Cookie.HttpOnly = true; // Make the cookie HTTP-only   
+                options.Cookie.IsEssential = true; // Make the session cookie essential
+            });
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -67,11 +76,13 @@ namespace NoSQL_Project
 
             app.UseRouting();
 
+            app.UseSession();
+
             app.UseAuthorization();
 
             app.MapControllerRoute(
                 name: "default",
-                pattern: "{controller=Home}/{action=Index}/{id?}");
+                pattern: "{controller=Home}/{action=Login}/{id?}");
 
             app.Run();
         }
