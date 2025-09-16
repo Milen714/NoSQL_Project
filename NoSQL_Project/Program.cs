@@ -2,6 +2,8 @@
 using MongoDB.Driver;
 using NoSQL_Project.Repositories.Interfaces;
 using NoSQL_Project.Repositories;
+using NoSQL_Project.Services.Interfaces;
+using NoSQL_Project.Services;
 
 namespace NoSQL_Project
 {
@@ -47,6 +49,8 @@ namespace NoSQL_Project
             });
             // Add services to the container.
             builder.Services.AddControllersWithViews();
+            builder.Services.AddScoped<IUserRepository, UserRepository>();
+            builder.Services.AddScoped<IUserService, UserService>();
 
             var app = builder.Build();
 

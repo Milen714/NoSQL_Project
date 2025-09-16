@@ -1,18 +1,19 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using NoSQL_Project.Models;
 using NoSQL_Project.Repositories.Interfaces;
+using NoSQL_Project.Services.Interfaces;
 
 namespace NoSQL_Project.Controllers
 {
     public class UserController : Controller
     {
-        private readonly IUserRepository _repo;
+        private readonly IUserService _UserService;
 
-        public UserController(IUserRepository repo) => _repo = repo;
+        public UserController(IUserService userService) => _UserService = userService;
 
         public IActionResult Index()
         {
-            var users = _repo.GetAll();
+            var users = _UserService.GetAll();
             return View(users);
         }
 
@@ -20,7 +21,7 @@ namespace NoSQL_Project.Controllers
         public IActionResult Create(string name, string email)
         {
             var user = new User { Name = name, Email = email };
-            _repo.Add(user);
+            _UserService.Add(user);
             return RedirectToAction("Index");
         }
     }
