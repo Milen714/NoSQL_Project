@@ -1,0 +1,36 @@
+# Visual Studio
+.vs/
+*.vscode/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Build results
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Tt]emp/
+
+# NuGet
+*.nupkg
+*.snupkg
+*.nuget.props
+*.nuget.targets
+project.lock.json
+artifacts/
+
+# Others
+*.dbmdl
+*.bak
+*.backup
+*.BLOB
+*.log
+*.pdb
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Secrets
+.env
