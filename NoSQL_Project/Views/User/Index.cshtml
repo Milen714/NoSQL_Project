@@ -1,0 +1,24 @@
+﻿@model List<User>
+
+<h1>Users</h1>
+
+<form method="post" asp-action="Create">
+    <input name="name" placeholder="Name" required />
+    <input name="email" placeholder="Email" type="email" required />
+    <button type="submit">Add</button>
+</form>
+
+<table>
+    <thead>
+        <tr><th>Name</th><th>Email</th></tr>
+    </thead>
+    <tbody>
+        @foreach (var u in Model)
+        {
+            <tr>
+                <td>@u.Name</td>
+                <td>@u.Email</td>
+            </tr>
+        }
+    </tbody>
+</table>
