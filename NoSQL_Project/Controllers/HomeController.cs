@@ -27,7 +27,7 @@ namespace NoSQL_Project.Controllers
             if (user == null)
             {
                 // Failed login
-                ViewBag.ErrorMessage = "Invalid email or password.";
+                TempData["ErrorMessage"] = "Invalid Email or Password";
                 return View();
 
             }

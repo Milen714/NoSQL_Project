@@ -4,16 +4,17 @@
 
 <form action="/Home/Login" method="post">
 	<div>
-		<label for="email">Username:</label>
-		<input type="email" id="username" name="Email" required />
+		<label class="form-label" for="email">Email:</label>
+		<input class="form-text" type="email" id="username" name="Email" required />
 	</div>
 	<div>
-		<label for="password">Password:</label>
-		<input type="password" id="password" name="Password" required />
+		<label class="form-label" for="password">Password:</label>
+		<input class="form-text" type="password" id="password" name="Password" required />
 	</div>
-	<button type="submit">Login</button>
+	<button class="btn btn-outline-primary" type="submit">Login</button>
+	<a href="#">Forgoten password?</a>
 </form>
-@if (ViewBag.ErrorMessage != null)
+@if (TempData["ErrorMessage"] != null)
 {
-		<p class="alert-danger">@ViewBag.ErrorMessage</p>
+	<p class="alert-danger">@TempData["ErrorMessage"]</p>
 }

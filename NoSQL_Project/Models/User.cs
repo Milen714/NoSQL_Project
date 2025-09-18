@@ -15,7 +15,10 @@ namespace NoSQL_Project.Models
 
         // A simple string field for the user's name.
         // Default = "" so it's never null when creating a new User.
-        public string Name { get; set; } = "";
+        public string FirstName { get; set; } = "";
+        public string LastName { get; set; } = "";
+        public UserRoles Role { get; set; } = UserRoles.NormalUser;
+        public string PhoneNumber { get; set; } = "";
 
         // A simple string field for the user's email.
         // Later we could add validation (e.g. DataAnnotations).

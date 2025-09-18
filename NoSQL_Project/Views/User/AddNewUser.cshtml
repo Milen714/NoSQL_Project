@@ -1,0 +1,34 @@
+﻿@model NoSQL_Project.Models.User
+@{
+	ViewData["Title"] = "Add New User";
+}
+<h1>Add New User</h1>
+
+<form method="post" asp-action="AddNewUser">
+	<div>
+		<label class="form-label" for="FirstName">First Name:</label>
+		<input class="form-text" type="text" id="FirstName" name="FirstName" value="@Model.FirstName" required />
+	</div>
+	<div>
+		<label class="form-label" for="LastName">Last Name:</label>
+		<input  class="form-text" type="text" id="LastName" name="LastName" value="@Model.LastName" required />
+	</div>
+	<div>
+		<label class="form-label" for="Email">Email:</label>
+		<input class="form-text" type="email" id="Email" name="Email" value="@Model.Email" required />
+	</div>
+	<div>
+		<label  class="form-label" for="Password">Password:</label>
+		<input class="form-text" type="password" id="Password" name="Password" required />
+	</div>
+	<div>
+		<label class="form-label" for="Role">Role:</label>
+		<select class="form-select" id="Role" name="Role" required>
+			<option value="">Select Role</option>
+			<option value="Admin">Admin</option>
+			<option value="User">User</option>
+			<option value="NormalUser">NormalUser</option>
+		</select>
+	</div>
+	<button type="submit">Add User</button>
+</form>

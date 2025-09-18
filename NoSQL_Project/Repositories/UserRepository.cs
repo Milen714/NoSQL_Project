@@ -15,29 +15,55 @@ namespace NoSQL_Project.Repositories
             _users = db.GetCollection<User>("users");
         }
 
-        public List<User> GetAll() =>
-            _users.Find(_ => true).ToList();
+        public List<User> GetAll()
+        {
+            try
+            {
+                return _users.Find(_ => true).ToList();
+            }
+            catch (Exception ex)
+            {
+                
+                return new List<User>();
+            }
+        }
 
         public User GetUserByEmail(LoginModel model)
         {
-
-            User user = _users.Find(user => user.Email == model.Email).FirstOrDefault();
-            var hasher = new PasswordHasher<string>();
-            var result = hasher.VerifyHashedPassword(null, user.Password, model.Password);
-            if (result == PasswordVerificationResult.Success)
+            try
             {
-                return user;
+                User user = _users.Find(user => user.Email == model.Email).FirstOrDefault();
+                if (user == null)
+                    return null;
+
+                var hasher = new PasswordHasher<string>();
+                var result = hasher.VerifyHashedPassword(null, user.Password, model.Password);
+                if (result == PasswordVerificationResult.Success)
+                {
+                    return user;
+                }
+                return null;
             }
-            return null;
+            catch (Exception ex)
+            {
+                
+                return null;
+            }
         }
 
         public void Add(User user)
         {
-            
-            var hasher = new PasswordHasher<string>();
-            string hashedPassword = hasher.HashPassword(null, user.Password);
-            user.Password = hashedPassword;
-            _users.InsertOne(user);
+            try
+            {
+                var hasher = new PasswordHasher<string>();
+                string hashedPassword = hasher.HashPassword(null, user.Password);
+                user.Password = hashedPassword;
+                _users.InsertOne(user);
+            }
+            catch (Exception ex)
+            {
+                
+            }
         }
     }
 }

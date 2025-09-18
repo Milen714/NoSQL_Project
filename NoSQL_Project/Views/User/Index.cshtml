@@ -11,7 +11,7 @@
 @if (TempData["Success"] != null){
     <p class="alert-success">@TempData["Success"]</p>
 }
-
+<a class="btn btn-primary" href="/User/AddNewUser">Create New User</a>
 <table>
     <thead>
         <tr><th>Name</th><th>Email</th></tr>
@@ -20,8 +20,10 @@
         @foreach (var u in Model)
         {
             <tr>
-                <td>@u.Name</td>
+                <td>@u.FirstName</td>
                 <td>@u.Email</td>
+                <td>@u.Role</td>
+
             </tr>
         }
     </tbody>
