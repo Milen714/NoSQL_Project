@@ -1,20 +1,53 @@
 ﻿@{
-		ViewData["Title"] = "Login";
+    ViewData["Title"] = "Login";
+    Layout = "~/Views/Shared/_LoginLayout.cshtml";
 }
+<header>
+    <div class="Logo_container">
+        <div class="Logo"></div>
+        @* <h2 class="LogoText">Title Here </h2>  TITLE HERE !!!! TO DO*@
+    </div>
+    <h1>@ViewData["Title"]</h1>
+    <nav class="LoginPage_nav">
+        <ul class="navbar-nav flex-grow-1">
+            <li class="nav-item">
+                <form action="/Home/SetTheme" method="post">
+                    <article class="input_group">
+                        <label for="Theme">Theme</label>
+                        <select onchange="this.form.submit()" id="Theme" name="theme" class="input_field">
+                            <option style="color: black;" value="">@(
+                                    Context?.Request.Cookies["PreferedTheme"] ?? "Select Theme")</option>
+                            <option value="Dark">Dark</option>
+                            <option value="Light">Light</option>
+                        </select>
+                    </article>
+                </form>
+            </li>
+        </ul>
+    </nav>
+</header>
 
-<form action="/Home/Login" method="post">
-	<div>
-		<label class="form-label" for="email">Email:</label>
-		<input class="form-text" type="email" id="username" name="Email" required />
-	</div>
-	<div>
-		<label class="form-label" for="password">Password:</label>
-		<input class="form-text" type="password" id="password" name="Password" required />
-	</div>
-	<button class="btn btn-outline-primary" type="submit">Login</button>
-	<a href="#">Forgoten password?</a>
-</form>
+
+<div class="login_body">
+    <form action="/Home/Login" method="post">
+        <div>
+            <label class="form-label" for="email">Email:</label>
+            <input class="form-text" type="email" id="username" name="Email" required />
+        </div>
+        <div>
+            <label class="form-label" for="password">Password:</label>
+            <input class="form-text" type="password" id="password" name="Password" required />
+        </div>
+        <button class="btn btn-outline-primary" type="submit">Login</button>
+        <a href="#">Forgoten password?</a>
+    </form>
+</div>
 @if (TempData["ErrorMessage"] != null)
 {
 	<p class="alert-danger">@TempData["ErrorMessage"]</p>
+}
+@if (TempData["Success"] != null)
+{
+	<p class="alert-success">@TempData["Success"]</p>
+
 }

@@ -2,12 +2,7 @@
 
 <h1>Users</h1>
 
-<form method="post" asp-action="Create">
-    <input name="name" placeholder="Name" required />
-    <input name="email" placeholder="Email" type="email" required />
-    <input name="password" placeholder="Password" type="password" required />
-    <button type="submit">Add</button>
-</form>
+
 @if (TempData["Success"] != null){
     <p class="alert-success">@TempData["Success"]</p>
 }

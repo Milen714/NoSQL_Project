@@ -6,13 +6,13 @@ using NoSQL_Project.Services.Interfaces;
 
 namespace NoSQL_Project.Controllers
 {
-    public class UserController : Controller
+    public class UserController : BaseController
     {
         private readonly IUserService _UserService;
 
         public UserController(IUserService userService) => _UserService = userService;
 
-        [SessionAuthorize(UserRoles.Admin)]
+        //[SessionAuthorize(UserRoles.Admin)]
         public IActionResult Index()
         {
             var users = _UserService.GetAll();
@@ -23,11 +23,11 @@ namespace NoSQL_Project.Controllers
         {
             return View(new User());
         }
-        [SessionAuthorize(UserRoles.Admin)]
+        //[SessionAuthorize(UserRoles.Admin)]
         [HttpPost]
-        public IActionResult Create(string name, string email, string password)
+        public IActionResult AddNewUser(User user)
         {
-            var user = new User { FirstName = name, Email = email, Password = password };
+            User newUser = user;
             _UserService.Add(user);
             return RedirectToAction("Index");
         }

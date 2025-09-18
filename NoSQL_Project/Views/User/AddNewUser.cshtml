@@ -18,13 +18,38 @@
 		<input class="form-text" type="email" id="Email" name="Email" value="@Model.Email" required />
 	</div>
 	<div>
+		<label class="form-label" for="Phone">Phone:</label>
+		<input class="form-text" type="tel" id="Phone" name="PhoneNumber" value="@Model.PhoneNumber" required />
+	</div>
+	<div>
 		<label  class="form-label" for="Password">Password:</label>
 		<input class="form-text" type="password" id="Password" name="Password" required />
 	</div>
 	<div>
 		<label class="form-label" for="Role">Role:</label>
-		<select class="form-select" id="Role" name="Role" required>
+		<select style="color: black;" class="form-select" id="Role" name="Role" required>
 			<option value="">Select Role</option>
+			@{
+				UserRoles[] roles = (UserRoles[])Enum.GetValues(typeof(UserRoles));
+				foreach(var role in roles)
+				{
+					<option style="color: black;" value="@role">@role</option>
+				}
+
+			}
+		</select>
+	</div>
+	<div>
+		<label class="form-label" for="Location">Location:</label>
+		<select class="form-select" id="Location" name="Location" required>
+			<option value="">Select Location</option>
+			@{
+				FranchiseLocation[] locations = (FranchiseLocation[])Enum.GetValues(typeof(FranchiseLocation));
+				foreach (var location in locations)
+				{
+					<option style="color: black;" value="@location">@location</option>
+				}
+			}
 			<option value="Admin">Admin</option>
 			<option value="User">User</option>
 			<option value="NormalUser">NormalUser</option>
