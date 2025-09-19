@@ -59,8 +59,6 @@ namespace NoSQL_Project
                 options.IdleTimeout = TimeSpan.FromMinutes(60); // Set the timeout to 60 minutes
                 options.Cookie.HttpOnly = true; // Make the cookie HTTP-only   
                 options.Cookie.IsEssential = true; // Make the session cookie essential
-                options.Cookie.SameSite = SameSiteMode.Lax;
-                options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
             });
 
             var app = builder.Build();
