@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "lQ5tSsOIovU=",
+  "dgSpecHash": "8H+on4KKlzQ=",
   "success": true,
-  "projectFilePath": "C:\\Users\\milen\\source\\repos\\NoSQL\\NoSQL_Project\\NoSQL_Project_Tests\\NoSQL_Project_Tests.csproj",
+  "projectFilePath": "C:\\Users\\milen\\source\\repos\\NoSQL_Project\\NoSQL_Project_Tests\\NoSQL_Project_Tests.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\milen\\.nuget\\packages\\coverlet.collector\\6.0.0\\coverlet.collector.6.0.0.nupkg.sha512",
     "C:\\Users\\milen\\.nuget\\packages\\dnsclient\\1.6.1\\dnsclient.1.6.1.nupkg.sha512",
