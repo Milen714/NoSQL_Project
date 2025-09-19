@@ -23,7 +23,7 @@ namespace NoSQL_Project.Controllers
         [HttpPost]
         public IActionResult Login(LoginModel loginModel)
         {
-            User user = _userService.GetUserByEmail(loginModel);
+            User user = _userService.AuthenticateUser(loginModel);
             if (user == null)
             {
                 // Failed login
