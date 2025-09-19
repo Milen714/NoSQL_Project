@@ -8,6 +8,6 @@ build_property.PlatformNeutralAssembly =
 build_property.EnforceExtendedAnalyzerRules = 
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.RootNamespace = NoSQL_Project_Tests
-build_property.ProjectDir = C:\Users\milen\source\repos\NoSQL\NoSQL_Project\NoSQL_Project_Tests\
+build_property.ProjectDir = C:\Users\milen\source\repos\NoSQL_Project\NoSQL_Project_Tests\
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 

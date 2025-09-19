@@ -21,5 +21,10 @@ namespace NoSQL_Project.Services
         {
             return _userRepository.GetAll();
         }
+
+        public User GetUserByEmail(LoginModel model)
+        {
+            return _userRepository.GetUserByEmail(model);
+        }
     }
 }

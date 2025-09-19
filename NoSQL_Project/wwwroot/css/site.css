@@ -1,6 +1,12 @@
 html {
   font-size: 14px;
 }
+*{
+    color: white;
+}
+option{
+    color: black;
+}
 
 @media (min-width: 768px) {
   html {
@@ -19,4 +25,9 @@ html {
 
 body {
   margin-bottom: 60px;
+}
+
+body {
+    
+    background: linear-gradient( to bottom, #001E2B 0%, #001E2B 50%, #112733 50%, #112733 100% );
 }
