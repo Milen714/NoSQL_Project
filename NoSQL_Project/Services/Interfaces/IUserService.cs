@@ -10,6 +10,8 @@ namespace NoSQL_Project.Services.Interfaces
         public User GetUserByEmail(string email);
         public Task<string> GeneratePasswordResetTokenAsync(User user);
         public User AuthenticateUser(LoginModel model);
+        public User HashUserPassword(User user);
+        Task UpdateUser(User user);
 
 
 

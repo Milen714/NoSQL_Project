@@ -42,44 +42,39 @@ namespace NoSQL_Project.Controllers
                 await _emailSenderService.SendEmailAsync(model.Email, "Reset Password",
                     $"Please reset your password by <a href='{callbackUrl}'>clicking here</a>.");
 
-                return RedirectToAction("ForgotPasswordConfirmation");
+                TempData["Success"] = "Password reset link has been sent to your email.";
+                return RedirectToAction("Login", "Home");
             }
             return View(model);
 
         }
 
         [HttpGet]
-        public IActionResult ResetPassword(string token, string userId)
+        public IActionResult ResetPassword(string userId, string token)
         {
-            if (token == null || userId == null)
+            User user = _userService.FindById(userId);
+            if (user == null || user.RessetToken != token || user.RessetTokenExpiry < DateTime.UtcNow)
             {
-                return RedirectToAction("Error");
+                return BadRequest("Invalid or expired resset link");
             }
             return View(new ResetPasswordViewModel { Token = token, UserId = userId });
         }
         [HttpPost]
         public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
         {
-            if (!ModelState.IsValid)
-                return View(model);
-
-            var user = _userService.FindById(model.UserId);
-            if (user == null)
+            User user = _userService.FindById(model.UserId);
+            if (user == null || user.RessetToken != model.Token || user.RessetTokenExpiry < DateTime.UtcNow)
             {
-                return RedirectToAction("ResetPasswordConfirmation");
+                return BadRequest("Invalid or expired resset link");
             }
+            user.Password = model.Password;
+            user = _userService.HashUserPassword(user);
+            user.RessetToken = null;
+            user.RessetTokenExpiry = null;
+            await _userService.UpdateUser(user);
 
-            var result = await _userService.ResetPasswordAsync(user, model.Token, model.Password);
-            if (result.Succeeded)
-            {
-                return RedirectToAction("ResetPasswordConfirmation");
-            }
-
-            foreach (var error in result.Errors)
-            {
-                ModelState.AddModelError("", error.Description);
-            }
-            return View(model);
+            TempData["Success"] = "Password has been reset successfully";
+            return RedirectToAction("Login", "Home");
         }
 
     }

@@ -11,6 +11,7 @@ namespace NoSQL_Project.Repositories.Interfaces
         public User GetUserByEmail(string email);
         public User HashUserPassword(User user);
         public User AuthenticateUser(LoginModel model);
+        Task UpdateUser(User user);
 
         // Future:
         // User? GetById(string id);

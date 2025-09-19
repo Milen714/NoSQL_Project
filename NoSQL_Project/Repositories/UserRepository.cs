@@ -72,6 +72,12 @@ namespace NoSQL_Project.Repositories
             User user = _users.Find(user => user.Id == id).FirstOrDefault();
             return user;
         }
+        public async Task UpdateUser(User user)
+        {
+            FilterDefinition<User> filter =
+                    Builders<User>.Filter.Eq(u => u.Id, user.Id);
+            await _users.ReplaceOneAsync(filter, user);
+        }
     }
 }
 

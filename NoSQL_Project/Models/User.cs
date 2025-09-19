@@ -27,6 +27,9 @@ namespace NoSQL_Project.Models
         public string Password { get; set; } = "";
         public FranchiseLocation Location { get; set; }
 
+        public string RessetToken { get; set; } = "";
+        public DateTime? RessetTokenExpiry { get; set; }
+
         public User()
         {
             
