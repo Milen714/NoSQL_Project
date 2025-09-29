@@ -6,7 +6,12 @@ namespace NoSQL_Project.Repositories.Interfaces
     {
         List<User> GetAll();
         void Add(User user);
-        public User GetUserByEmail(LoginModel model);
+        
+        public User FindById(string id);
+        public User GetUserByEmail(string email);
+        public User HashUserPassword(User user);
+        public User AuthenticateUser(LoginModel model);
+        Task UpdateUser(User user);
 
         // Future:
         // User? GetById(string id);

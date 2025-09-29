@@ -2,16 +2,11 @@
 
 <h1>Users</h1>
 
-<form method="post" asp-action="Create">
-    <input name="name" placeholder="Name" required />
-    <input name="email" placeholder="Email" type="email" required />
-    <input name="password" placeholder="Password" type="password" required />
-    <button type="submit">Add</button>
-</form>
+
 @if (TempData["Success"] != null){
     <p class="alert-success">@TempData["Success"]</p>
 }
-
+<a class="btn btn-primary" href="/User/AddNewUser">Create New User</a>
 <table>
     <thead>
         <tr><th>Name</th><th>Email</th></tr>
@@ -20,8 +15,12 @@
         @foreach (var u in Model)
         {
             <tr>
-                <td>@u.Name</td>
-                <td>@u.Email</td>
+                <td>@u.FirstName</td>
+                <td>@u.EmailAddress</td>
+                <td>@u.UserType</td>
+                <td>@u.Location.Branch</td>
+                <td>@u.Location.BranchCode</td>
+
             </tr>
         }
     </tbody>

@@ -1,4 +1,10 @@
-﻿<!DOCTYPE html>
+﻿@using NoSQL_Project.Models
+@using NoSQL_Project.Commons
+@using NoSQL_Project.Models.Enums
+@{
+    User? loggedInUser = ViewBag.LoggedInEmployee as User;
+}
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -7,6 +13,7 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/NoSQL_Project.styles.css" asp-append-version="true" />
+    
 </head>
 <body>
     <header>
@@ -14,7 +21,7 @@
             <div class="container-fluid">
                 <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">NoSQL_Project</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
+                aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
@@ -28,6 +35,14 @@
                         <li class="nav-item">
                             <a style="font-size: 24px; font-weight: 600;" class="nav-link text-dark" asp-area="" asp-controller="User" asp-action="Index">Users</a>
                         </li>
+                        @{
+                            if (loggedInUser != null && loggedInUser.UserType == UserType.Service_employee)
+                            {
+                                <li class="nav-item">
+                                    <p>@loggedInUser.FirstName @loggedInUser.LastName</p>
+                                </li>
+                            }
+                        }
                     </ul>
                 </div>
             </div>

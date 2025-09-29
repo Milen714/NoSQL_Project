@@ -6,7 +6,7 @@ using NoSQL_Project.Commons;
 
 namespace NoSQL_Project.Controllers
 {
-    public class HomeController : Controller
+    public class HomeController : BaseController
     {
         private readonly ILogger<HomeController> _logger;
         private readonly IUserService _userService;
@@ -23,11 +23,11 @@ namespace NoSQL_Project.Controllers
         [HttpPost]
         public IActionResult Login(LoginModel loginModel)
         {
-            User user = _userService.GetUserByEmail(loginModel);
+            User user = _userService.AuthenticateUser(loginModel);
             if (user == null)
             {
                 // Failed login
-                ViewBag.ErrorMessage = "Invalid email or password.";
+                TempData["ErrorMessage"] = "Invalid Email or Password";
                 return View();
 
             }
@@ -41,6 +41,32 @@ namespace NoSQL_Project.Controllers
         public IActionResult Index()
         {
             return View();
+        }
+        [HttpPost]
+        public IActionResult SetTheme(string? theme)
+        {
+            try
+            {
+                if (theme != null)
+                {
+                    CookieOptions options = new CookieOptions()
+                    {
+                        Expires = DateTime.Now.AddDays(5),
+                        Path = "/",
+                        Secure = false,
+                        HttpOnly = true,
+                        IsEssential = true
+                    };
+                    Response.Cookies.Append("PreferedTheme", theme, options);
+                }
+                TempData["Success"] = $"Theme set successfully!{theme}";
+                return RedirectToAction("Login");
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"Failed to set theme: {ex.Message}";
+                return RedirectToAction("Login");
+            }
         }
 
         public IActionResult Privacy()

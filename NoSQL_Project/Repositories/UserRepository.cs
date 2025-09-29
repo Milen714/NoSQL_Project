@@ -12,32 +12,71 @@ namespace NoSQL_Project.Repositories
 
         public UserRepository(IMongoDatabase db)
         {
-            _users = db.GetCollection<User>("users");
+            _users = db.GetCollection<User>("USERS");
         }
 
-        public List<User> GetAll() =>
-            _users.Find(_ => true).ToList();
-
-        public User GetUserByEmail(LoginModel model)
+        public List<User> GetAll()
         {
+            try
+            {
+                return _users.Find(_ => true).ToList();
+            }
+            catch (Exception ex)
+            {
 
-            User user = _users.Find(user => user.Email == model.Email).FirstOrDefault();
+                return new List<User>();
+            }
+        }
+
+        public User GetUserByEmail(string email)
+        {
+            User user = _users.Find(user => user.EmailAddress == email).FirstOrDefault();
+            return user;
+        }
+        public User AuthenticateUser(LoginModel model)
+        {
+            User existingUser = GetUserByEmail(model.Email);
+            if (existingUser == null)
+                return null;
             var hasher = new PasswordHasher<string>();
-            var result = hasher.VerifyHashedPassword(null, user.Password, model.Password);
+            var result = hasher.VerifyHashedPassword(null, existingUser.PasswordHash, model.Password);
             if (result == PasswordVerificationResult.Success)
             {
-                return user;
+                return existingUser;
             }
             return null;
-        }
 
+        }
+        public User HashUserPassword(User user)
+        {
+            var hasher = new PasswordHasher<string>();
+            string hashedPassword = hasher.HashPassword(null, user.PasswordHash);
+            user.PasswordHash = hashedPassword;
+            return user;
+        }
         public void Add(User user)
         {
-            
-            var hasher = new PasswordHasher<string>();
-            string hashedPassword = hasher.HashPassword(null, user.Password);
-            user.Password = hashedPassword;
-            _users.InsertOne(user);
+            try
+            {
+                var hashedUser = HashUserPassword(user);
+                _users.InsertOne(hashedUser);
+            }
+            catch (Exception ex)
+            {
+
+            }
+        }
+
+        public User FindById(string id)
+        {
+            User user = _users.Find(user => user.Id == id).FirstOrDefault();
+            return user;
+        }
+        public async Task UpdateUser(User user)
+        {
+            FilterDefinition<User> filter =
+                    Builders<User>.Filter.Eq(u => u.Id, user.Id);
+            await _users.ReplaceOneAsync(filter, user);
         }
     }
 }
