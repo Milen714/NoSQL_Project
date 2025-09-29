@@ -12,7 +12,7 @@ namespace NoSQL_Project.Repositories
 
         public UserRepository(IMongoDatabase db)
         {
-            _users = db.GetCollection<User>("users");
+            _users = db.GetCollection<User>("USERS");
         }
 
         public List<User> GetAll()
