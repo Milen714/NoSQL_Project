@@ -12,7 +12,7 @@ namespace NoSQL_Project.Repositories
 
         public UserRepository(IMongoDatabase db)
         {
-            _users = db.GetCollection<User>("users");
+            _users = db.GetCollection<User>("USERS");
         }
 
         public List<User> GetAll()
@@ -23,47 +23,60 @@ namespace NoSQL_Project.Repositories
             }
             catch (Exception ex)
             {
-                
+
                 return new List<User>();
             }
         }
 
-        public User GetUserByEmail(LoginModel model)
+        public User GetUserByEmail(string email)
         {
-            try
-            {
-                User user = _users.Find(user => user.Email == model.Email).FirstOrDefault();
-                if (user == null)
-                    return null;
-
-                var hasher = new PasswordHasher<string>();
-                var result = hasher.VerifyHashedPassword(null, user.Password, model.Password);
-                if (result == PasswordVerificationResult.Success)
-                {
-                    return user;
-                }
-                return null;
-            }
-            catch (Exception ex)
-            {
-                
-                return null;
-            }
+            User user = _users.Find(user => user.EmailAddress == email).FirstOrDefault();
+            return user;
         }
+        public User AuthenticateUser(LoginModel model)
+        {
+            User existingUser = GetUserByEmail(model.Email);
+            if (existingUser == null)
+                return null;
+            var hasher = new PasswordHasher<string>();
+            var result = hasher.VerifyHashedPassword(null, existingUser.PasswordHash, model.Password);
+            if (result == PasswordVerificationResult.Success)
+            {
+                return existingUser;
+            }
+            return null;
 
+        }
+        public User HashUserPassword(User user)
+        {
+            var hasher = new PasswordHasher<string>();
+            string hashedPassword = hasher.HashPassword(null, user.PasswordHash);
+            user.PasswordHash = hashedPassword;
+            return user;
+        }
         public void Add(User user)
         {
             try
             {
-                var hasher = new PasswordHasher<string>();
-                string hashedPassword = hasher.HashPassword(null, user.Password);
-                user.Password = hashedPassword;
-                _users.InsertOne(user);
+                var hashedUser = HashUserPassword(user);
+                _users.InsertOne(hashedUser);
             }
             catch (Exception ex)
             {
-                
+
             }
+        }
+
+        public User FindById(string id)
+        {
+            User user = _users.Find(user => user.Id == id).FirstOrDefault();
+            return user;
+        }
+        public async Task UpdateUser(User user)
+        {
+            FilterDefinition<User> filter =
+                    Builders<User>.Filter.Eq(u => u.Id, user.Id);
+            await _users.ReplaceOneAsync(filter, user);
         }
     }
 }
