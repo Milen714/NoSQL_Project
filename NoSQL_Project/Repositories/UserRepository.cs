@@ -30,7 +30,7 @@ namespace NoSQL_Project.Repositories
 
         public User GetUserByEmail(string email)
         {
-            User user = _users.Find(user => user.Email == email).FirstOrDefault();
+            User user = _users.Find(user => user.EmailAddress == email).FirstOrDefault();
             return user;
         }
         public User AuthenticateUser(LoginModel model)
@@ -39,7 +39,7 @@ namespace NoSQL_Project.Repositories
             if (existingUser == null)
                 return null;
             var hasher = new PasswordHasher<string>();
-            var result = hasher.VerifyHashedPassword(null, existingUser.Password, model.Password);
+            var result = hasher.VerifyHashedPassword(null, existingUser.PasswordHash, model.Password);
             if (result == PasswordVerificationResult.Success)
             {
                 return existingUser;
@@ -50,8 +50,8 @@ namespace NoSQL_Project.Repositories
         public User HashUserPassword(User user)
         {
             var hasher = new PasswordHasher<string>();
-            string hashedPassword = hasher.HashPassword(null, user.Password);
-            user.Password = hashedPassword;
+            string hashedPassword = hasher.HashPassword(null, user.PasswordHash);
+            user.PasswordHash = hashedPassword;
             return user;
         }
         public void Add(User user)

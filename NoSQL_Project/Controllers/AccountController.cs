@@ -67,7 +67,7 @@ namespace NoSQL_Project.Controllers
             {
                 return BadRequest("Invalid or expired resset link");
             }
-            user.Password = model.Password;
+            user.PasswordHash = model.Password;
             user = _userService.HashUserPassword(user);
             user.RessetToken = null;
             user.RessetTokenExpiry = null;

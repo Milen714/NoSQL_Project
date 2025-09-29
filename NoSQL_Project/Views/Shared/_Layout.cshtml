@@ -1,5 +1,6 @@
 ﻿@using NoSQL_Project.Models
 @using NoSQL_Project.Commons
+@using NoSQL_Project.Models.Enums
 @{
     User? loggedInUser = ViewBag.LoggedInEmployee as User;
 }
@@ -35,7 +36,7 @@
                             <a style="font-size: 24px; font-weight: 600;" class="nav-link text-dark" asp-area="" asp-controller="User" asp-action="Index">Users</a>
                         </li>
                         @{
-                            if (loggedInUser != null && loggedInUser.Role == UserRoles.Admin)
+                            if (loggedInUser != null && loggedInUser.UserType == UserType.Service_employee)
                             {
                                 <li class="nav-item">
                                     <p>@loggedInUser.FirstName @loggedInUser.LastName</p>
