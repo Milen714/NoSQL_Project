@@ -5,5 +5,6 @@ namespace NoSQL_Project.Services.Interfaces
     public interface ILocationService
     {
         Task<List<Location>> GetAllLocations();
+        Task<Location> GetLocationById(string id);
     }
 }

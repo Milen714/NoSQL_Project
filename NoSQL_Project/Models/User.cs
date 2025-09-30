@@ -66,7 +66,10 @@ namespace NoSQL_Project.Models
         [BsonElement("location")]
         public UserLocationRef Location { get; set; } = default!;
 
+        [BsonElement("resset_token")]
         public string RessetToken { get; set; } = "";
+
+        [BsonElement("resset_token_expiry")]
         public DateTime? RessetTokenExpiry { get; set; }
     }
 }

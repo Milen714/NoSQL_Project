@@ -7,7 +7,7 @@ namespace NoSQL_Project.Models
     {
         [BsonElement("locationId")]
         [BsonRepresentation(BsonType.ObjectId)]
-        public ObjectId LocationId { get; set; }
+        public string? LocationId { get; set; }
 
         [BsonElement("branch")]
         [BsonIgnoreIfNull]
@@ -21,9 +21,7 @@ namespace NoSQL_Project.Models
         [BsonIgnoreIfNull]
         public string? BranchCode { get; set; }
 
-        public UserLocationRef()
-        {
-        }
+       
         public void MapLocation(Location location)
         {
             LocationId = location.Id;

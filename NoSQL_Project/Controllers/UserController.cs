@@ -1,6 +1,7 @@
 ﻿using ChapeauPOS.Commons;
 using Microsoft.AspNetCore.Mvc;
 using NoSQL_Project.Models;
+using NoSQL_Project.Models.Enums;
 using NoSQL_Project.Repositories.Interfaces;
 using NoSQL_Project.Services.Interfaces;
 
@@ -17,7 +18,7 @@ namespace NoSQL_Project.Controllers
             _userService = userService;
         }
 
-        //[SessionAuthorize(UserRoles.Admin)]
+        [SessionAuthorize(UserType.Service_employee)]
         public IActionResult Index()
         {
             var users = _userService.GetAll();
@@ -31,11 +32,22 @@ namespace NoSQL_Project.Controllers
         }
         //[SessionAuthorize(UserRoles.Admin)]
         [HttpPost]
-        public IActionResult AddNewUser(User user)
+        public IActionResult AddNewUser(User user, string locationId)
         {
-            User newUser = user;
-            _userService.Add(user);
-            return RedirectToAction("Index");
+            try
+            {
+                Location userLocation = _locationService.GetLocationById(locationId).Result;
+                UserLocationRef userLocationRef = new UserLocationRef();
+                userLocationRef.MapLocation(userLocation);
+                user.Location = userLocationRef;
+                _userService.Add(user);
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                string errorMessage = ex.Message;
+                return View(user);
+            }
         }
     }
 }

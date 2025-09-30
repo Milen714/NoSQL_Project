@@ -19,7 +19,19 @@ namespace NoSQL_Project.Repositories
             }
             catch (Exception ex)
             {
-                return new List<Location>();
+                throw new Exception(ex.Message);
+            }
+        }
+        public async Task<Location> GetLocationById(string id)
+        {
+            try
+            {
+                Location location = await _locations.Find(location => location.Id == id).FirstOrDefaultAsync();
+                return location;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
             }
         }
     }

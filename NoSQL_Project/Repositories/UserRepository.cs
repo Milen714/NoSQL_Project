@@ -65,7 +65,7 @@ namespace NoSQL_Project.Repositories
             }
             catch (Exception ex)
             {
-
+                Console.WriteLine(ex.Message);
             }
         }
 

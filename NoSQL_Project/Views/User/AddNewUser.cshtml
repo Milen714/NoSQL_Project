@@ -42,7 +42,7 @@
 	</div>
 	<div>
 		<label class="form-label" for="Location">Location:</label>
-		<select class="form-select" id="Location" name="Location" required>
+		<select class="form-select" id="Location" name="locationId" required>
 			<option value="">Select Location</option>
 			@{
 				if (ViewBag.Locations != null)
@@ -50,9 +50,7 @@
 					List<Location> dbLocations = ViewBag.Locations;
 					foreach (var location in dbLocations)
 					{
-						UserLocationRef locationRef = new UserLocationRef();
-						locationRef.MapLocation(location);
-						<option style="color: black;" value="@locationRef">@location.Branch</option>
+						<option style="color: black;" value="@location.Id">@location.Branch</option>
 					}
 				}
 			}

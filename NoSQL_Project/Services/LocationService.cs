@@ -15,5 +15,10 @@ namespace NoSQL_Project.Services
         {
             return _locationRepository.GetAllLocations();
         }
+
+        public async Task<Location> GetLocationById(string id)
+        {
+            return await _locationRepository.GetLocationById(id);
+        }
     }
 }
