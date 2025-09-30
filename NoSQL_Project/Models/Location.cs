@@ -6,8 +6,7 @@ namespace NoSQL_Project.Models
     public class Location
     {
         [BsonId]
-        [BsonRepresentation(BsonType.ObjectId)]
-        public string? Id { get; set; }
+        public ObjectId Id { get; set; }
 
         [BsonElement("branch")]
         public string Branch { get; set; } = default!;

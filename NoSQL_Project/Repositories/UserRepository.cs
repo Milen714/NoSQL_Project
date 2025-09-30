@@ -19,11 +19,13 @@ namespace NoSQL_Project.Repositories
         {
             try
             {
-                return _users.Find(_ => true).ToList();
+                var users = _users.Find(_ => true).ToList();
+                return users;
             }
             catch (Exception ex)
             {
-
+                Console.WriteLine(ex.Message);
+                
                 return new List<User>();
             }
         }
