@@ -4,6 +4,7 @@ using NoSQL_Project.Repositories.Interfaces;
 using NoSQL_Project.Repositories;
 using NoSQL_Project.Services.Interfaces;
 using NoSQL_Project.Services;
+using NoSQL_Project.Models.PasswordResset;
 
 namespace NoSQL_Project
 {
@@ -59,9 +60,19 @@ namespace NoSQL_Project
                 options.IdleTimeout = TimeSpan.FromMinutes(60); // Set the timeout to 60 minutes
                 options.Cookie.HttpOnly = true; // Make the cookie HTTP-only   
                 options.Cookie.IsEssential = true; // Make the session cookie essential
-                options.Cookie.SameSite = SameSiteMode.Lax;
-                options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
             });
+
+            // Email service
+            builder.Services.Configure<EmailSettings>(options =>
+            {
+                options.SmtpServer = Environment.GetEnvironmentVariable("SMTP_SERVER");
+                options.SmtpPort = int.Parse(Environment.GetEnvironmentVariable("SMTP_PORT") ?? "587");
+                options.SenderName = Environment.GetEnvironmentVariable("SMTP_SENDER_NAME");
+                options.SenderEmail = Environment.GetEnvironmentVariable("SMTP_SENDER_EMAIL");
+                options.Username = Environment.GetEnvironmentVariable("SMTP_USERNAME");
+                options.Password = Environment.GetEnvironmentVariable("SMTP_PASSWORD");
+            });
+            builder.Services.AddTransient<IEmailSenderService, GmailSenderService>();
 
             var app = builder.Build();
 

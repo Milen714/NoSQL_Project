@@ -2,14 +2,15 @@
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc;
 using NoSQL_Project.Commons;
+using NoSQL_Project.Models.Enums;
 
 namespace ChapeauPOS.Commons
 {
     public class SessionAuthorizeAttribute : ActionFilterAttribute
     {
-        private readonly UserRoles[] _allowedRoles;
+        private readonly UserType[] _allowedRoles;
 
-        public SessionAuthorizeAttribute(params UserRoles[] allowedRoles)
+        public SessionAuthorizeAttribute(params UserType[] allowedRoles)
         {
             _allowedRoles = allowedRoles;
         }
@@ -19,7 +20,7 @@ namespace ChapeauPOS.Commons
             var httpContext = context.HttpContext;
             var employee = httpContext.Session.GetObject<User>("LoggedInUser");
 
-            if (employee == null || !_allowedRoles.Contains(employee.Role))
+            if (employee == null || !_allowedRoles.Contains(employee.UserType))
             {
                 var controller = (Controller)context.Controller;
                 controller.TempData["ErrorMessage"] = "You do not have permission to access this page.";
