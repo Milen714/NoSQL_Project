@@ -25,8 +25,7 @@ namespace NoSQL_Project.Repositories
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                
-                return new List<User>();
+                throw new Exception("Could not retrieve users.");
             }
         }
 
@@ -65,7 +64,10 @@ namespace NoSQL_Project.Repositories
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                if (ex.Message.Contains("DuplicateKey"))
+                {
+                    throw new Exception("A user with this email already exists.");
+                }
             }
         }
 

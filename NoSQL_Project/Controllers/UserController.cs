@@ -21,8 +21,16 @@ namespace NoSQL_Project.Controllers
         [SessionAuthorize(UserType.Service_employee)]
         public IActionResult Index()
         {
-            var users = _userService.GetAll();
-            return View(users);
+            try
+            {
+                var users = _userService.GetAll();
+                return View(users);
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"Could not retrieve users: {ex.Message}";
+                return View(new List<User>());
+            }
         }
 
         public IActionResult AddNewUser()
@@ -45,7 +53,7 @@ namespace NoSQL_Project.Controllers
             }
             catch (Exception ex)
             {
-                string errorMessage = ex.Message;
+                TempData["Error"] = $"Failed to fullfill your submision: {ex.Message}";
                 return View(user);
             }
         }

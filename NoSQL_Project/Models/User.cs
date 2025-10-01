@@ -58,7 +58,6 @@ namespace NoSQL_Project.Models
         [BsonElement("phone_number")]
         public string PhoneNumber { get; set; } = default!;
 
-        // NEW: store hashed password (e.g., bcrypt/argon2 hash string)
         [BsonElement("password_hash")]
         [BsonIgnoreIfNull]
         public string? PasswordHash { get; set; }

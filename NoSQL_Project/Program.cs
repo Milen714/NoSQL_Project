@@ -54,6 +54,7 @@ namespace NoSQL_Project
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<ILocationRepository, LocationRepository>();
             builder.Services.AddScoped<ILocationService, LocationService>();
+            builder.Services.AddScoped<IIncidentRepository, IncidentRepository>();
 
 
             //Session

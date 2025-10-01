@@ -1,3 +1,28 @@
+:root {
+    /* --- Primary Brand & Accent Colors --- */
+    --color-primary-dark: #121828; /* Dark sidebar background (Navigation) */
+    --color-primary-blue: #3f6cf2; /* Primary interactive blue (Active buttons, selected links, 'Add new incident') */
+    --color-primary-link-active: #2979ff; /* Blue for the active 'Incidents' link/tab */
+    --color-text-light: #fefefe; /* White/Light text on dark background */
+    /* --- Background & Border Colors --- */
+    --color-bg-light: #ffffff; /* Main content area background */
+    --color-bg-subtle: #f9f9fb; /* Subtle light gray for hover/secondary elements (e.g., table row hover) */
+    --color-border-subtle: #e0e0e0; /* Light gray border (e.g., search bar border, table dividers) */
+    --color-border-focus: #c5c5c5; /* Slightly darker border for focus/separators */
+    --color-text-dark: #333333; /* Dark gray/Black for main body text */
+    --color-text-secondary: #888888; /* Lighter gray for secondary text (e.g., dates, small labels) */
+    /* --- Status & Level Colors --- */
+    --color-status-resolved: #e8f9ee; /* Light Green background for 'Resolved' status tag */
+    --color-status-resolved-text: #28a745; /* Darker Green text for 'Resolved' status tag */
+    --color-status-open: #f5b0ae; /* Light Red background for 'Open' status/level tag */
+    --color-status-open-text: #dc3545; /* Darker Red text for 'Open' status/level tag (or High Priority) */
+    --color-status-acknowledged: #fff3cd; /* Light Yellow background for 'Acknowledged' status tag */
+    --color-status-acknowledged-text: #ffc107; /* Darker Yellow text for 'Acknowledged' status tag */
+    --color-level-medium: #ffe6a7; /* Light Orange/Yellow for 'Medium' level tag */
+    --color-level-medium-text: #ff9800; /* Darker Orange text for 'Medium' level tag */
+}
+
+
 html {
   font-size: 14px;
 }
