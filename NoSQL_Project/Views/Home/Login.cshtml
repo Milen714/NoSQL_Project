@@ -4,7 +4,7 @@
 }
 <header>
     <div class="Logo_container">
-        <div class="Logo"></div>
+        <div class="Logo"><img src="/assets/GGLogo.svg" alt="GardenGroupLogo" /></div>
         @* <h2 class="LogoText">Title Here </h2>  TITLE HERE !!!! TO DO*@
     </div>
     <h1>@ViewData["Title"]</h1>
@@ -31,15 +31,15 @@
 <div class="login_body">
     <form action="/Home/Login" method="post">
         <div>
-            <label class="form-label" for="email">Email:</label>
-            <input class="form-text" type="email" id="username" name="Email" required />
+            <input class="form_input" type="email" id="username" name="Email" placeholder="Email" required />
         </div>
         <div>
-            <label class="form-label" for="password">Password:</label>
-            <input class="form-text" type="password" id="password" name="Password" required />
+            <input class="form_input" type="password" id="password" placeholder="Password" name="Password" required />
         </div>
-        <button class="btn btn-outline-primary" type="submit">Login</button>
-        <a href="/Account/ForgotPassword">Forgoten password?</a>
+        <div class="horizontal_container login_button_container">
+            <button class="button_primary" type="submit">Login</button>
+            <a class="forgotten_password_button" href="/Account/ForgotPassword">Forgoten password?</a>
+        </div>
     </form>
 </div>
 @if (TempData["ErrorMessage"] != null)
