@@ -13,52 +13,54 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/NoSQL_Project.styles.css" asp-append-version="true" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Nunito+Sans:opsz,wght@6..12,200..1000&family=Roboto+Mono:ital,wght@0,100..700;1,100..700&display=swap" rel="stylesheet">
     
 </head>
-<body>
+<body class="Main_Layout_BodyContainer">
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+        <nav class="main_nav_parent">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">NoSQL_Project</a>
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index"><img src="/assets/GGLogoSmaller.svg" alt="Logo" /></a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                aria-expanded="false" aria-label="Toggle navigation">
+                        aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                <div class="nav_ul_container">
+                    <ul class="nav_ul">
+                        <div class="nav_buttons_container">
+
+                        <li class="nav_li ">
+                            <a class="nav_li_a " asp-area="" asp-controller="User" asp-action="Index">Users</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                        <li class="nav_li">
+                            <a class="nav_li_a" asp-area="" asp-controller="Incident" asp-action="Index">Dashboard</a>
                         </li>
-                        <li class="nav-item">
-                            <a style="font-size: 24px; font-weight: 600;" class="nav-link text-dark" asp-area="" asp-controller="User" asp-action="Index">Users</a>
-                        </li>
-                        @{
-                            if (loggedInUser != null && loggedInUser.UserType == UserType.Service_employee)
-                            {
-                                <li class="nav-item">
-                                    <p>@loggedInUser.FirstName @loggedInUser.LastName</p>
-                                </li>
-                            }
-                        }
-                    </ul>
                 </div>
+                @{
+                if (loggedInUser != null && loggedInUser.UserType == UserType.Service_employee)
+                {
+                <li class="nav-item">
+                    <p>@loggedInUser.FirstName @loggedInUser.LastName</p>
+                            <div class="button_primary">
+                    <a href="/Home/Logout">Logout</a>
+                    </div>
+                </li>
+                }
+                }
+                </ul>
+            </div>
             </div>
         </nav>
     </header>
-    <div class="container">
+    <div class="main_container">
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2025 - NoSQL_Project - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-        </div>
-    </footer>
+    
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
