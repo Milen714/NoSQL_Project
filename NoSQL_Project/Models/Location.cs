@@ -9,6 +9,7 @@ namespace NoSQL_Project.Models
         [BsonRepresentation(BsonType.ObjectId)]
         public string? Id { get; set; }
 
+
         [BsonElement("branch")]
         public string Branch { get; set; } = default!;
 

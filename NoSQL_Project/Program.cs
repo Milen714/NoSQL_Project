@@ -52,6 +52,10 @@ namespace NoSQL_Project
             builder.Services.AddControllersWithViews();
             builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<IUserService, UserService>();
+            builder.Services.AddScoped<ILocationRepository, LocationRepository>();
+            builder.Services.AddScoped<ILocationService, LocationService>();
+            builder.Services.AddScoped<IIncidentRepository, IncidentRepository>();
+            builder.Services.AddScoped<IIncidentService, IncidentService>();
 
 
             //Session
