@@ -1,8 +1,23 @@
-﻿@model NoSQL_Project.Models.User
+﻿@using NoSQL_Project.Models.Enums
+@model NoSQL_Project.Models.User
 @{
 	ViewData["Title"] = "Add New User";
 }
 <h1>Add New User</h1>
+@{
+	if (TempData["Error"] != null)
+	{
+		<div class="alert alert-danger">
+			@TempData["Error"]
+		</div>
+	}
+	if (TempData["SuccessMessage"] != null)
+	{
+		<div class="alert alert-success">
+			@TempData["SuccessMessage"]
+		</div>
+	}
+}
 
 <form method="post" asp-action="AddNewUser">
 	<div>
@@ -15,7 +30,7 @@
 	</div>
 	<div>
 		<label class="form-label" for="Email">Email:</label>
-		<input class="form-text" type="email" id="Email" name="Email" value="@Model.EmailAddress" required />
+		<input class="form-text" type="email" id="Email" name="EmailAddress" value="@Model.EmailAddress" required />
 	</div>
 	<div>
 		<label class="form-label" for="Phone">Phone:</label>
@@ -23,14 +38,14 @@
 	</div>
 	<div>
 		<label  class="form-label" for="Password">Password:</label>
-		<input class="form-text" type="password" id="Password" name="Password" required />
+		<input class="form-text" type="password" id="Password" name="PasswordHash" required />
 	</div>
 	<div>
 		<label class="form-label" for="Role">Role:</label>
-		<select style="color: black;" class="form-select" id="Role" name="Role" required>
+		<select style="color: black;" class="form-select" id="Role" name="UserType" required>
 			<option value="">Select Role</option>
 			@{
-				UserRoles[] roles = (UserRoles[])Enum.GetValues(typeof(UserRoles));
+				UserType[] roles = (UserType[])Enum.GetValues(typeof(UserType));
 				foreach(var role in roles)
 				{
 					<option style="color: black;" value="@role">@role</option>
@@ -41,19 +56,23 @@
 	</div>
 	<div>
 		<label class="form-label" for="Location">Location:</label>
-		<select class="form-select" id="Location" name="Location" required>
+		<select class="form-select" id="Location" name="locationId" required>
 			<option value="">Select Location</option>
 			@{
-				FranchiseLocation[] locations = (FranchiseLocation[])Enum.GetValues(typeof(FranchiseLocation));
-				foreach (var location in locations)
+				if (ViewBag.Locations != null)
 				{
-					<option style="color: black;" value="@location">@location</option>
+					List<Location> dbLocations = ViewBag.Locations;
+					foreach (var location in dbLocations)
+					{
+						<option style="color: black;" value="@location.Id">@location.Branch</option>
+					}
 				}
 			}
-			<option value="Admin">Admin</option>
-			<option value="User">User</option>
-			<option value="NormalUser">NormalUser</option>
+			
 		</select>
 	</div>
 	<button type="submit">Add User</button>
 </form>
+@{
+	
+}

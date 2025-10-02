@@ -35,8 +35,20 @@ namespace NoSQL_Project.Controllers
             TempData["Success"] = "Login successful!";
             HttpContext.Session.SetObject("LoggedInUser", user);
             return RedirectToAction("Index", "User");
+        }
 
-
+        public IActionResult Logout()
+        {
+            try
+            {
+                HttpContext.Session.Remove("LoggedInUser");
+                return RedirectToAction("Login", "Home");
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"Logout failed: {ex.Message}";
+                return RedirectToAction("Login");
+            }
         }
         public IActionResult Index()
         {
