@@ -19,17 +19,34 @@ namespace NoSQL_Project.Controllers
         }
 
         [SessionAuthorize(UserType.Service_employee)]
-        public IActionResult Index()
+        public async Task<IActionResult> Index(string searchString, int pageNumber, string currentFilter)
         {
             try
             {
-                var users = _userService.GetAll();
-                return View(users);
+                if (searchString != null)
+                {
+                    pageNumber = 1;
+                }
+                else
+                {
+                    searchString = currentFilter;
+                }
+
+                var users = _userService.GetAll().Where(u => u.UserType == UserType.Service_employee);
+
+                if (pageNumber < 1)
+                {
+                    pageNumber = 1;
+                }
+
+                int pageSize = 10;
+                return View(await PaginatedList<User>.CreateAsync(users, pageNumber, pageSize));
+
             }
             catch (Exception ex)
             {
                 TempData["Error"] = $"Could not retrieve users: {ex.Message}";
-                return View(new List<User>());
+                return View(new PaginatedList<User>(new List<User>(), 0, 1, 1));
             }
         }
 

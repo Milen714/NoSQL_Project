@@ -12,6 +12,18 @@ namespace NoSQL_Project.Repositories
             _incidents = db.GetCollection<Incident>("INCIDENTS");
         }
 
-
+        public IQueryable<Incident> GetAll()
+        {
+            try
+            {
+                IQueryable<Incident> incidents = _incidents.AsQueryable();
+                return incidents;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                throw new Exception($"Could not retrieve incidents: {ex.Message}");
+            }
+        }
     }
 }

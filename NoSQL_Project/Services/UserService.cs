@@ -45,9 +45,9 @@ namespace NoSQL_Project.Services
 
         }
 
-        public List<User> GetAll()
+        public IQueryable<User> GetAll()
         {
-            return _userRepository.GetAll();
+            return _userRepository.GetAll(); 
         }
 
         public User GetUserByEmail(string email)

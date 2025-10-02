@@ -2,6 +2,7 @@
     /* --- Primary Brand & Accent Colors --- */
     --color-primary-dark: #121828; /* Dark sidebar background (Navigation) */
     --color-primary-blue: #3f6cf2; /* Primary interactive blue (Active buttons, selected links, 'Add new incident') */
+    --color-primary-blue-accent: #ebf5ff;
     --color-primary-link-active: #2979ff; /* Blue for the active 'Incidents' link/tab */
     --color-text-light: #fefefe; /* White/Light text on dark background */
     /* --- Background & Border Colors --- */
@@ -11,15 +12,22 @@
     --color-border-focus: #c5c5c5; /* Slightly darker border for focus/separators */
     --color-text-dark: #333333; /* Dark gray/Black for main body text */
     --color-text-secondary: #888888; /* Lighter gray for secondary text (e.g., dates, small labels) */
+    --color-tableheader-offwhite: #F9FBFC; /* Lighter gray for secondary text (e.g., dates, small labels) */
     /* --- Status & Level Colors --- */
-    --color-status-resolved: #e8f9ee; /* Light Green background for 'Resolved' status tag */
-    --color-status-resolved-text: #28a745; /* Darker Green text for 'Resolved' status tag */
+    --color-status-resolved: #D6F6F4;
+    --color-status-resolved-text: #5CC9C2;
+    --color-status-inProgress: #FFF0DE;
+    --color-status-inProgress-text: #EE9F33;
     --color-status-open: #f5b0ae; /* Light Red background for 'Open' status/level tag */
     --color-status-open-text: #dc3545; /* Darker Red text for 'Open' status/level tag (or High Priority) */
     --color-status-acknowledged: #fff3cd; /* Light Yellow background for 'Acknowledged' status tag */
     --color-status-acknowledged-text: #ffc107; /* Darker Yellow text for 'Acknowledged' status tag */
-    --color-level-medium: #ffe6a7; /* Light Orange/Yellow for 'Medium' level tag */
-    --color-level-medium-text: #ff9800; /* Darker Orange text for 'Medium' level tag */
+    --color-level-low: #FEE3E5;
+    --color-level-low-text: #FC4556; /* Darker Orange text for 'Medium' level tag */
+    --color-level-medium: #FF94A0;
+    --color-level-medium-text: white; /* Darker Orange text for 'Medium' level tag */
+    --color-level-high-text: white;
+    --color-level-high: #FD4B5C;
     --colors-Grey-accentSideBar: #3B4D66;
     --colors-Grey-SideBar: #13263F;
     /*FONTS*/
@@ -57,12 +65,13 @@ body {
 }
 /*Button*/
 .button_primary {
+    text-decoration:none;
     width: 60%;
     height: 40px;
     margin: 10px auto;
     justify-content: center;
     display: block;
-    color: #fff;
+    color: white;
     background: #573b8a;
     font-size: 1em;
     font-weight: bold;
@@ -149,8 +158,16 @@ body {
     margin-top: 20px;
     border-top-left-radius: 20px;
 }
-.nav_li{
+.main_container {
+    width: 100%;
+    color: black;
+    background-color: white;
+    margin-top: 20px;
+    padding: 16px;
+    border-top-left-radius: 20px;
+}
 
+.nav_li {
 }
 .nav_li_a {
     text-decoration: none;
@@ -172,4 +189,65 @@ body {
 
 }
 .nav_buttons_container {
+}
+
+/*TABLESSS*/
+.table_NICE {
+    border: 2px solid #dad9dc;
+    border-radius: 10px;
+    border-collapse: collapse;
+    overflow: hidden;
+    margin: 25px 0;
+    font-size: 0.9em;
+    min-width: 400px;
+    
+}
+.table_NICE thead tr{
+    background-color: #f3f3f3;
+    text-align: left;
+
+}
+.table_NICE th, .table_NICE td{
+    padding: 12px 15px;
+}
+.table_NICE tbody tr{
+    border-bottom: 1px solid #dddddd
+}
+.table_NICE_body tr:hover{
+    background-color: var(--color-primary-blue-accent);
+}
+.priority_label {
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-weight: 600;
+    font-size: 0.8em;
+    text-align:center;
+}
+.priority_low {
+    background-color: var(--color-level-low);
+    color: var(--color-level-low-text);
+}
+.priority_medium {
+    background-color: var(--color-level-medium);
+    color: var(--color-level-medium-text);
+}
+.priority_high {
+    background-color: var(--color-level-high);
+    color: white;
+}
+.priority_critical {
+    background-color: darkred;
+    color: white;
+}
+.status_open {
+    background-color: var(--color-level-low);
+    color: var(--color-level-low-text);
+}
+.status_in_progress {
+    background-color: var(--color-status-inProgress);
+    color: var(--color-status-inProgress-text);
+}
+.status_closed {
+    background-color: var(--color-status-resolved);
+    color: var(--color-status-resolved-text);
 }

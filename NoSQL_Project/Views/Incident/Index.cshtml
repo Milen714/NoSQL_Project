@@ -1,41 +1,78 @@
-﻿@model PaginatedList<User>
-
-<h1>Users</h1>
-
-
-@if (TempData["Success"] != null){
+﻿@using NoSQL_Project.Models.Enums
+@model PaginatedList<NoSQL_Project.Models.Incident>
+@{
+    ViewData["Title"] = "Incidents";
+}
+<h1>Incidents</h1>
+@if (TempData["Success"] != null)
+{
     <p class="alert-success">@TempData["Success"]</p>
 }
-@if(TempData["Error"] != null)
+@if (TempData["Error"] != null)
 {
     <p class="alert-danger">@TempData["Error"]</p>
 }
-<a class="btn btn-primary" href="/User/AddNewUser">Create New User</a>
+<a class="btn btn-primary" href="/Incident/Create">Create New Incident</a>
 <table class="table_NICE">
     <thead>
         <tr>
-            <th>Name</th>
-            <th>Email</th>
-            <th>User Type</th>
-            <th>Branch</th>
-            <th>BranchCode</th>
+            <th>Level</th>
+            <th>Title</th>
+            <th>Status</th>
+            <th>Assigned to</th>
+            <th>Reported At</th>
+            <th>SLA</th>
         </tr>
     </thead>
     <tbody class="table_NICE_body">
-        @foreach (var u in Model.Items)
+        @foreach (Incident incident in Model.Items)
         {
-            <tr>
-                <td>@u.FirstName</td>
-                <td>@u.EmailAddress</td>
-                <td>@u.UserType</td>
-                <td>@u.Location.Branch</td>
-                <td>@u.Location.BranchCode</td>
+            string incidentStatusStyle = "";
+            string priorityLevelStyle = "";
+            switch (incident.Priority)
+            {
+                case Priority.low:
+                    priorityLevelStyle = "priority_low";
+                    break;
+                case Priority.medium:
+                    priorityLevelStyle = "priority_medium";
+                    break;
+                case Priority.high:
+                    priorityLevelStyle = "priority_high";
+                    break;
+                case Priority.critical:
+                    priorityLevelStyle = "priority_critical";
+                    break;
+            }
+            switch (incident.Status)
+            {
+				case IncidentStatus.open:
+					incidentStatusStyle = "status_open";
+					break;
+				case IncidentStatus.resolved:
+					incidentStatusStyle = "status_in_progress";
+					break;
+				case IncidentStatus.closed_without_resolve:
+					incidentStatusStyle = "status_closed";
+					break;
+            }
 
-            </tr>
-        }
-    </tbody>
-</table>
+        <tr>
+            
+            <td>
+                <div class="priority_label @priorityLevelStyle">@incident.Priority</div>
+            </td>
+            <td>@incident.Subject</td>
+            <td>
+                <div class="priority_label @incidentStatusStyle">@incident.Status</div>
+            </td>
+            <td>@(incident.AssignedTo != null ? $"{incident.AssignedTo.FirstName} {incident.AssignedTo.LastName}" : "Unassigned")</td>
 
+            <td>@incident.ReportedAt.ToString("g")</td>
+            <td>@incident.Deadline.ToString("g")</td>
+        </tr>
+		}
+	</tbody>
 <div class="row">
     <div class="col-md-6">
     </div>

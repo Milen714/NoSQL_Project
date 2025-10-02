@@ -15,11 +15,12 @@ namespace NoSQL_Project.Repositories
             _users = db.GetCollection<User>("USERS");
         }
 
-        public List<User> GetAll()
+        public IQueryable<User> GetAll()
         {
             try
             {
-                var users = _users.Find(_ => true).ToList();
+                //var users = _users.Find(_ => true).ToList();
+                var users = _users.AsQueryable();
                 return users;
             }
             catch (Exception ex)

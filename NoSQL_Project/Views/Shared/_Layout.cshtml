@@ -35,7 +35,7 @@
                             <a class="nav_li_a " asp-area="" asp-controller="User" asp-action="Index">Users</a>
                         </li>
                         <li class="nav_li">
-                            <a class="nav_li_a" asp-area="" asp-controller="User" asp-action="Index">Dashboard</a>
+                            <a class="nav_li_a" asp-area="" asp-controller="Incident" asp-action="Index">Dashboard</a>
                         </li>
                 </div>
                 @{
@@ -43,6 +43,9 @@
                 {
                 <li class="nav-item">
                     <p>@loggedInUser.FirstName @loggedInUser.LastName</p>
+                            <div class="button_primary">
+                    <a href="/Home/Logout">Logout</a>
+                    </div>
                 </li>
                 }
                 }
@@ -51,7 +54,7 @@
             </div>
         </nav>
     </header>
-    <div class="container">
+    <div class="main_container">
         <main role="main" class="pb-3">
             @RenderBody()
         </main>

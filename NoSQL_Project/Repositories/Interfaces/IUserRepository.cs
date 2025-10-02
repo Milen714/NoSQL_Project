@@ -4,7 +4,7 @@ namespace NoSQL_Project.Repositories.Interfaces
 {
     public interface IUserRepository
     {
-        List<User> GetAll();
+        IQueryable<User> GetAll();
         void Add(User user);
         
         public User FindById(string id);
