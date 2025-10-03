@@ -1,0 +1,81 @@
+﻿@using NoSQL_Project.Models.Enums
+@model NoSQL_Project.Models.Incident
+@{
+	ViewData["Title"] = "Incident Details";
+}
+<h1 class="incident_details_title">Incident Details</h1>
+@if (TempData["Error"] != null)
+{
+	<div class="alert alert-danger">
+		@TempData["Error"]
+	</div>
+}
+@{
+    string incidentStatusStyle = "";
+    string priorityLevelStyle = "";
+    // Determine priority style
+    switch (Model.Priority)
+    {
+        case Priority.low:
+            priorityLevelStyle = "priority_low";
+            break;
+        case Priority.medium:
+            priorityLevelStyle = "priority_medium";
+            break;
+        case Priority.high:
+            priorityLevelStyle = "priority_high";
+            break;
+        case Priority.critical:
+            priorityLevelStyle = "priority_critical";
+            break;
+    }
+    // Determine status style
+    switch (Model.Status)
+    {
+        case IncidentStatus.open:
+            incidentStatusStyle = "status_open";
+            break;
+        case IncidentStatus.resolved:
+            incidentStatusStyle = "status_closed";
+            break;
+        case IncidentStatus.closed_without_resolve:
+            incidentStatusStyle = "status_in_progress";
+            break;
+    }
+}
+
+	<div class="incident_layout">
+		<header class="incident_main_header">
+			<h4>@Model.Location.Branch > #ID @Model.Id</h4>
+			<h2>@Model.Subject</h2>
+			<p>@Model.Description</p>
+		</header>
+
+		<article class="incident_other_information">
+        <h3 class="incident_details_title title">Other Information</h3>
+			<div class="other_information_row">
+				<p>Priority:</p>
+                <div class="priority_label @priorityLevelStyle">@Model.Priority</div>
+			</div>
+            <div class="other_information_row">
+				<p>Status:</p>
+                <div class="priority_label @incidentStatusStyle">@Model.Status</div>
+			</div>
+            <div class="other_information_row">
+                <p>SLA:</p>
+                <h4>@Model.Deadline.ToString("g")</h4>
+            </div>
+            <div class="other_information_row">
+                <p>Created on:</p>
+                <h4>@Model.ReportedAt.ToString("g")</h4>
+            </div>
+            <div class="other_information_row">
+                <p>Reported by:</p>
+                <h4>@Model.ReportedBy.FirstName @Model.ReportedBy.LastName</h4>
+            </div>
+            <div class="other_information_row">
+                <p>Branch:</p>
+                <h4>@Model.Location.Branch</h4>
+            </div>
+		</article>
+	</div>

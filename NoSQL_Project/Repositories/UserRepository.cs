@@ -15,27 +15,27 @@ namespace NoSQL_Project.Repositories
             _users = db.GetCollection<User>("USERS");
         }
 
-        public List<User> GetAll()
+        public async Task<List<User>> GetAll()
         {
             try
             {
-                return _users.Find(_ => true).ToList();
+                
+                return await _users.Find(_ => true).ToListAsync();
             }
             catch (Exception ex)
             {
-
-                return new List<User>();
+                Console.WriteLine(ex.Message);
+                throw new Exception("Could not retrieve users.");
             }
         }
 
-        public User GetUserByEmail(string email)
+        public async Task<User> GetUserByEmailAsync(string email)
         {
-            User user = _users.Find(user => user.EmailAddress == email).FirstOrDefault();
-            return user;
+            return await _users.Find(user => user.EmailAddress == email).FirstOrDefaultAsync();
         }
-        public User AuthenticateUser(LoginModel model)
+        public async Task<User> AuthenticateUserAsync(LoginModel model)
         {
-            User existingUser = GetUserByEmail(model.Email);
+            User existingUser = await GetUserByEmailAsync(model.Email);
             if (existingUser == null)
                 return null;
             var hasher = new PasswordHasher<string>();
@@ -59,20 +59,23 @@ namespace NoSQL_Project.Repositories
             try
             {
                 var hashedUser = HashUserPassword(user);
-                _users.InsertOne(hashedUser);
+                _users.InsertOneAsync(hashedUser);
             }
             catch (Exception ex)
             {
-
+                if (ex.Message.Contains("DuplicateKey"))
+                {
+                    throw new Exception("A user with this email already exists.");
+                }
             }
         }
 
-        public User FindById(string id)
+        public async Task<User> FindByIdAsync(string id)
         {
-            User user = _users.Find(user => user.Id == id).FirstOrDefault();
+            User user = await _users.Find(user => user.Id == id).FirstOrDefaultAsync();
             return user;
         }
-        public async Task UpdateUser(User user)
+        public async Task UpdateUserAsync(User user)
         {
             FilterDefinition<User> filter =
                     Builders<User>.Filter.Eq(u => u.Id, user.Id);

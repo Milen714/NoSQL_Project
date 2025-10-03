@@ -1,4 +1,4 @@
-﻿@model List<User>
+﻿@model PaginatedList<User>
 
 <h1>Users</h1>
 
@@ -6,14 +6,25 @@
 @if (TempData["Success"] != null){
     <p class="alert-success">@TempData["Success"]</p>
 }
+@if(TempData["Error"] != null)
+{
+    <p class="alert-danger">@TempData["Error"]</p>
+}
 <a class="btn btn-primary" href="/User/AddNewUser">Create New User</a>
-<table>
-    <thead>
-        <tr><th>Name</th><th>Email</th></tr>
-    </thead>
-    <tbody>
-        @foreach (var u in Model)
-        {
+<div class="table_NICE_container">
+    <table class="table_NICE">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>User Type</th>
+                <th>Branch</th>
+                <th>BranchCode</th>
+            </tr>
+        </thead>
+        <tbody class="table_NICE_body">
+            @foreach (var u in Model.Items)
+            {
             <tr>
                 <td>@u.FirstName</td>
                 <td>@u.EmailAddress</td>
@@ -22,6 +33,59 @@
                 <td>@u.Location.BranchCode</td>
 
             </tr>
-        }
-    </tbody>
-</table>
+            }
+        </tbody>
+    </table>
+</div>
+<div class="row">
+    <div class="col-md-6">
+    </div>
+    <div class="col-md-6">
+        <nav>
+            <ul class="pagination justify-content-center">
+                <li class="page-item @(Model.PageIndex == 1 ? "disabled" : "")">
+                    <a class="page-link text-black" asp-route-pageNumber="1"
+                       asp-route-sortOrder="@ViewData["CurrentSort"]"
+                       asp-route-currentFilter="@ViewData["CurrentFilter"]">
+                        <span>First</span>
+                    </a>
+                </li>
+
+                <li class="page-item @(Model.HasPreviousPage ? "" : "disabled")">
+                    <a class="page-link text-black" asp-route-pageNumber="@(Model.PageIndex - 1)"
+                       asp-route-sortOrder="@ViewData["CurrentSort"]"
+                       asp-route-currentFilter="@ViewData["CurrentFilter"]">
+                        <span>Previous</span>
+                    </a>
+                </li>
+
+                @for (int i = 1; i <= Model.TotalPages; i++)
+                {
+                    <li class="page-item @(Model.PageIndex == i ? "active" : "")">
+                        <a class="page-link text-black" asp-route-pageNumber="@i"
+                           asp-route-sortOrder="@ViewData["CurrentSort"]"
+                           asp-route-currentFilter="@ViewData["CurrentFilter"]">@i</a>
+                    </li>
+                }
+
+                <li class="page-item @(Model.HasNextPage ? "" : "disabled")">
+                    <a class="page-link text-black" asp-route-pageNumber="@(Model.PageIndex + 1)"
+                       asp-route-sortOrder="@ViewData["CurrentSort"]"
+                       asp-route-currentFilter="@ViewData["CurrentFilter"]">
+                        <span>Next</span>
+                    </a>
+                </li>
+                <li class="page-item @(Model.PageIndex == Model.TotalPages ? "disabled" : "")">
+                    <a class="page-link text-black" asp-route-pageNumber="@Model.TotalPages"
+                       asp-route-sortOrder="@ViewData["CurrentSort"]"
+                       asp-route-currentFilter="@ViewData["CurrentFilter"]">
+                        <span>Last</span>
+                    </a>
+                </li>
+
+
+            </ul>
+        </nav>
+    </div>
+</div>
+</div>

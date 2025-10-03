@@ -21,9 +21,9 @@ namespace NoSQL_Project.Controllers
             return View();
         }
         [HttpPost]
-        public IActionResult Login(LoginModel loginModel)
+        public async Task<IActionResult> Login(LoginModel loginModel)
         {
-            User user = _userService.AuthenticateUser(loginModel);
+            User user = await _userService.AuthenticateUserAsync(loginModel);
             if (user == null)
             {
                 // Failed login
@@ -35,8 +35,20 @@ namespace NoSQL_Project.Controllers
             TempData["Success"] = "Login successful!";
             HttpContext.Session.SetObject("LoggedInUser", user);
             return RedirectToAction("Index", "User");
+        }
 
-
+        public IActionResult Logout()
+        {
+            try
+            {
+                HttpContext.Session.Remove("LoggedInUser");
+                return RedirectToAction("Login", "Home");
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"Logout failed: {ex.Message}";
+                return RedirectToAction("Login");
+            }
         }
         public IActionResult Index()
         {
