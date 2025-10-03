@@ -244,12 +244,16 @@ body {
 .table_NICE_body tr:hover{
     background-color: var(--color-primary-blue-accent);
 }
+.incident_href{
+    text-decoration:none;
+    color: black;
+}
 .priority_label {
     padding: 5px 10px;
     border-radius: 5px;
     font-weight: 600;
     font-size: 0.7em;
-    text-align:center;
+    text-align: center;
 }
 .priority_low {
     background-color: var(--color-level-low);
@@ -301,4 +305,26 @@ body {
 /*  CHARTS*/
 .charts_container{
     display: flex;
+}
+/*INCIDENT Screen*/
+.incident_details_title{
+    width: fit-content;
+    margin: 10px 10px 20px 10px;
+    border-bottom: 2px solid var(--color-accent-grey-darker);
+}
+.title{
+    margin: 0;
+}
+.incident_layout {
+    display: flex;
+    justify-content: space-around;
+}
+.other_information_row{
+    display: flex;
+    justify-content: space-around;
+}
+.other_information_row div{
+    text-align:center;
+    height: fit-content;
+    padding: 10px;
 }

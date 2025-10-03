@@ -29,7 +29,7 @@ namespace NoSQL_Project.Controllers
                     searchString = currentFilter;
                 }
 
-                var incidents = _incidentService.GetAll().Where(i => i.Status == IncidentStatus.closed_without_resolve);
+                var incidents = _incidentService.GetAllIncidentsPerStatus(IncidentStatus.open, "").Result;
 
                 if (pageNumber < 1)
                 {
@@ -44,6 +44,25 @@ namespace NoSQL_Project.Controllers
             {
                 TempData["Error"] = $"Could not retrieve Incidents: {ex.Message}";
                 return View(new PaginatedList<User>(new List<User>(), 0, 1, 1));
+            }
+        }
+
+        public async Task<IActionResult> IncidentDetails(string id)
+        {
+            try
+            {
+                Incident incident = await _incidentService.GetIncidentByIdAsync(id);
+                if (incident == null)
+                {
+                    TempData["Error"] = "Incident not found.";
+                    return RedirectToAction("Index");
+                }
+                return View(incident);
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"Could not retrieve incident details: {ex.Message}";
+                return RedirectToAction("Index");
             }
         }
     }
