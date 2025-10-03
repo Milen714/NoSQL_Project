@@ -83,6 +83,12 @@ namespace NoSQL_Project.Repositories
                     Builders<User>.Filter.Eq(u => u.Id, user.Id);
             await _users.ReplaceOneAsync(filter, user);
         }
+
+        //public void DeleteEmployee(string id)
+        //{
+        //    FilterDefinition<User> filter = Builders<Users>.Filter.Eq(u => u.Id, user.id);
+        //    _users.DeleteOne(filter);
+        //}
     }
 }
 
