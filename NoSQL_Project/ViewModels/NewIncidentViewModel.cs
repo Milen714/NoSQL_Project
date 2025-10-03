@@ -7,7 +7,7 @@ namespace NoSQL_Project.ViewModels
 {
     public class NewIncidentViewModel
     {
-        // [Required]
+        
         public string Subject { get; set; }
         public IncidentType IncidentType { get; set; }
         public Priority Priority { get; set; }

@@ -22,7 +22,7 @@ namespace NoSQL_Project.Services
             return _incidentRepository.GetAll();
         }		
 
-		public async void CreateNewIncidentAsync(NewIncidentViewModel model)
+		public async Task CreateNewIncidentAsync(NewIncidentViewModel model)
 		{
 			string locationBranchName = model.LocationBranchName.ToString();
 
@@ -43,7 +43,7 @@ namespace NoSQL_Project.Services
 			};
 
 			//create the incident
-			_incidentRepository.CreateNewIncidentAsync(newIncident);
+			await _incidentRepository.CreateNewIncidentAsync(newIncident);
 
 		}
 	}

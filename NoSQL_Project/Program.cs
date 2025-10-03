@@ -5,10 +5,8 @@ using NoSQL_Project.Repositories;
 using NoSQL_Project.Services.Interfaces;
 using NoSQL_Project.Services;
 using NoSQL_Project.Models.PasswordResset;
-using NoSQL_Project.Repositories.Incidents;
-using NoSQL_Project.Services.Incidents;
-using NoSQL_Project.Repositories.Locations;
-using NoSQL_Project.Services.Locations;
+using Microsoft.AspNetCore.Authentication.Cookies;
+
 
 namespace NoSQL_Project
 {
@@ -56,10 +54,6 @@ namespace NoSQL_Project
             builder.Services.AddControllersWithViews();
             builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<IUserService, UserService>();
-            builder.Services.AddScoped<ILocationRepository, LocationRepository>();
-            builder.Services.AddScoped<ILocationService, LocationService>();
-            builder.Services.AddScoped<IIncidentRepository, IncidentRepository>();
-            builder.Services.AddScoped<IIncidentService, IncidentService>();
 
 			builder.Services.AddScoped<IIncidentRepository, IncidentRepository>();
 			builder.Services.AddScoped<IIncidentService, IncidentService>();

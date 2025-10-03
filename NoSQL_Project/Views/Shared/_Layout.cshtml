@@ -37,6 +37,9 @@
                         <li class="nav_li">
                             <a class="nav_li_a" asp-area="" asp-controller="Incident" asp-action="Index">Dashboard</a>
                         </li>
+                        <li class="nav_li">
+                            <a class="nav_li_a" asp-area="" asp-controller="Incident" asp-action="CreateIncident">Create Incident</a>
+                        </li>
                 </div>
                 @{
                 if (loggedInUser != null && loggedInUser.UserType == UserType.Service_employee)

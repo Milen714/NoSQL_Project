@@ -17,9 +17,9 @@ namespace NoSQL_Project.Repositories
 			_incidents = db.GetCollection<Incident>("INCIDENTS");
 		}
 
-		public async void CreateNewIncidentAsync(Incident newIncident)
+		public async Task CreateNewIncidentAsync(Incident newIncident)
 		{
-			_incidents.InsertOne(newIncident);
+			await _incidents.InsertOneAsync(newIncident);
 		}
 
 

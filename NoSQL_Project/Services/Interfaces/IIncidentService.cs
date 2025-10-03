@@ -7,6 +7,6 @@ namespace NoSQL_Project.Services.Interfaces
     {
         IQueryable<Incident> GetAll();
 
-		void CreateNewIncidentAsync(NewIncidentViewModel model);
+		Task CreateNewIncidentAsync(NewIncidentViewModel model);
 	}
 }

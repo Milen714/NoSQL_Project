@@ -25,9 +25,13 @@
 
 	<!--Reported by-->
 	<div class="form-group" style="margin-bottom: 15px;">
-		<label asp-for="Reporter.UserId" class="control-label">Reported by User:</label>
-		<input asp-for="Reporter.UserId" type="hidden" />
+		<label>Reported by:</label>
 		<span>@Model.Reporter.FirstName @Model.Reporter.LastName</span>
+
+		<input asp-for="Reporter.UserId" type="hidden" />
+		<input asp-for="Reporter.FirstName" type="hidden" />
+		<input asp-for="Reporter.LastName" type="hidden" />
+		<input asp-for="Reporter.EmailAddress" type="hidden" />
 	</div>
 
 	<!--Priority-->

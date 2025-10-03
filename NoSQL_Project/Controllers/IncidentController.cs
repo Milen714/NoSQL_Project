@@ -1,15 +1,14 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using NoSQL_Project.Models.Enums;
+using MongoDB.Bson;
+using NoSQL_Project.Commons;
 using NoSQL_Project.Models;
-using System.Security.Claims;
-using NoSQL_Project.ViewModels;
-using NoSQL_Project.Repositories.Incidents;
-using NoSQL_Project.Services.Interfaces;
-using NoSQL_Project.Services.Incidents;
+using NoSQL_Project.Models.Enums;
 using NoSQL_Project.Repositories.Interfaces;
 using NoSQL_Project.Services;
-using MongoDB.Bson;
+using NoSQL_Project.Services.Interfaces;
+using NoSQL_Project.ViewModels;
+using System.Security.Claims;
 
 namespace NoSQL_Project.Controllers
 {
@@ -27,31 +26,29 @@ namespace NoSQL_Project.Controllers
 		[HttpGet]
         public async Task<IActionResult> CreateIncident()
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            //if (string.IsNullOrEmpty(userId))
-            //    return Unauthorized();
+			var user = HttpContext.Session.GetObject<User>("LoggedInUser");
+			if (user == null)
+			{
+				return Unauthorized();
+			}
 
-            var reporterUser = await _userService.GetReporterSnapshotAsync(userId);
-			//if (reporterUser is null)
-			// return Forbid(); // o maneja el caso con un mensaje
-			// 
-			
+			var reporterUser = new ReporterSnapshot
+			{
+				UserId = ObjectId.Parse(user.Id),
+				FirstName = user.FirstName,
+				LastName = user.LastName,
+				EmailAddress = user.EmailAddress
+			};
 
 			var viewModel = new NewIncidentViewModel
-            {
-				Reporter = new ReporterSnapshot
-				{
-					UserId = ObjectId.Parse("68daf4894feb5ff46478b788"),
-					FirstName = "William",
-					LastName = "Kok"
-				},
-				//Reporter = reporterUser,
+			{
+				Reporter = reporterUser,
 
 				// Defaults
 				Priority = Priority.medium,
-                Deadline = 14,
-                IncidentType = IncidentType.software,           
-            };
+				Deadline = 14,
+				IncidentType = IncidentType.software,
+			};
 
             return View(viewModel);
         }
@@ -64,7 +61,7 @@ namespace NoSQL_Project.Controllers
 				return View(model);
 			}
 
-			_incidentService.CreateNewIncidentAsync(model);
+			await _incidentService.CreateNewIncidentAsync(model);
 
 			return RedirectToAction("Index", "Home"); 
 		}
