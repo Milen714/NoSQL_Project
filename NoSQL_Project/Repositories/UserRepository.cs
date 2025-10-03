@@ -15,16 +15,18 @@ namespace NoSQL_Project.Repositories
             _users = db.GetCollection<User>("USERS");
         }
 
-        public List<User> GetAll()
+        public IQueryable<User> GetAll()
         {
             try
             {
-                return _users.Find(_ => true).ToList();
+                //var users = _users.Find(_ => true).ToList();
+                var users = _users.AsQueryable();
+                return users;
             }
             catch (Exception ex)
             {
-
-                return new List<User>();
+                Console.WriteLine(ex.Message);
+                throw new Exception("Could not retrieve users.");
             }
         }
 
@@ -63,7 +65,10 @@ namespace NoSQL_Project.Repositories
             }
             catch (Exception ex)
             {
-
+                if (ex.Message.Contains("DuplicateKey"))
+                {
+                    throw new Exception("A user with this email already exists.");
+                }
             }
         }
 

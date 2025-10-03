@@ -12,6 +12,7 @@ namespace NoSQL_Project.Services
         public GmailSenderService(IOptions<EmailSettings> settings)
         {
             _emailSettings = settings.Value;
+            Console.WriteLine(_emailSettings.Username, _emailSettings.SmtpPort, _emailSettings.SmtpServer);
         }
         public async Task SendEmailAsync(string email, string subject, string htmlMessage)
         {

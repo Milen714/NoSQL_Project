@@ -4,7 +4,7 @@ namespace NoSQL_Project.Services.Interfaces
 {
     public interface IUserService
     {
-        List<User> GetAll();
+        IQueryable<User> GetAll();
         void Add(User user);
         public User FindById(string id);
         public User GetUserByEmail(string email);
