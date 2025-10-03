@@ -19,5 +19,8 @@ namespace NoSQL_Project.Services.Interfaces
         // User? GetById(string id);
         // void Update(User user);
         // void Delete(string id);
-    }
+
+        public Task<ReporterSnapshot> GetReporterSnapshotAsync(string userId);
+
+	}
 }

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using MongoDB.Bson;
 using NoSQL_Project.Models;
 using NoSQL_Project.Repositories.Interfaces;
 using NoSQL_Project.Services.Interfaces;
@@ -64,5 +65,21 @@ namespace NoSQL_Project.Services
         {
             return _userRepository.HashUserPassword(user);
         }
-    }
+
+        public async Task<ReporterSnapshot> GetReporterSnapshotAsync(string userId)
+		{
+			var user = FindById(userId);
+
+			if (user == null) 
+                return null;
+
+			return new ReporterSnapshot
+			{
+			    UserId = ObjectId.Parse(user.Id),
+			    FirstName = user.FirstName,
+				LastName = user.LastName,
+                EmailAddress = user.EmailAddress
+			};
+		}
+	}
 }

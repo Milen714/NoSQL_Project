@@ -17,7 +17,9 @@ namespace NoSQL_Project.Repositories.Interfaces
         // User? GetById(string id);
         // void Update(User user);
         // void Delete(string id);
-    }
+
+
+	}
 }
 
 

@@ -1,0 +1,74 @@
+﻿@using NoSQL_Project.Models.Enums
+
+@model NoSQL_Project.ViewModels.NewIncidentViewModel
+
+@{
+	ViewBag.Title = "Create Ticket";
+}
+
+<h2>Create Ticket</h2>
+
+<form asp-action="CreateIncident" method="post">
+
+	<!--Subject-->
+	<div class="form-group" style="margin-bottom: 15px;">
+		<label asp-for="Subject" class="control-label">Subject:</label>
+		<input asp-for="Subject" class="form-control" required />
+	</div>
+
+	<!--Type-->
+	<div class="form-group" style="margin-bottom: 15px;">
+		<label asp-for="IncidentType" class="control-label">Type</label>
+		<select asp-for="IncidentType" asp-items="Html.GetEnumSelectList<IncidentType>()" class="form-control" required> </select>
+
+	</div>
+
+	<!--Reported by-->
+	<div class="form-group" style="margin-bottom: 15px;">
+		<label asp-for="Reporter.UserId" class="control-label">Reported by User:</label>
+		<input asp-for="Reporter.UserId" type="hidden" />
+		<span>@Model.Reporter.FirstName @Model.Reporter.LastName</span>
+	</div>
+
+	<!--Priority-->
+	<div class="form-group" style="margin-bottom: 15px;">
+		<label asp-for="Priority" class="control-label">Priority</label>
+		<select asp-for="Priority" asp-items="Html.GetEnumSelectList<Priority>()" class="form-control" required>
+		
+		</select>
+	</div>
+
+
+	<!--Deadline-->
+	<div class="form-group" style="margin-bottom: 15px;">
+		<label asp-for="Deadline" class="control-label"></label>
+		<select asp-for="Deadline" class="form-control" required>
+			<option value="7">7 days</option>
+			<option value="14">14 days</option>
+			<option value="28">28 days</option>
+		</select>
+	</div>
+
+	<!--Location-->
+	<div class="form-group" style="margin-bottom: 15px;">
+		<label asp-for="LocationBranchName" class="control-label"></label>
+		<select asp-for="LocationBranchName" asp-items="Html.GetEnumSelectList<FranchiseLocation>()" class="form-control" required>
+		</select>
+	</div>
+
+
+	<!--Description-->
+	<div class="form-group" style="margin-bottom: 15px;">
+		<label asp-for="Description" class="control-label"></label>
+		<textarea asp-for="Description" class="form-control" rows="4" placeholder="Describe the incident" required></textarea>
+	</div>
+
+	<div style="display: flex; justify-content: space-between; margin-top: 20px;">
+		<!--<a asp-controller="Incident" asp-action="CreateNewIncident" class="btn btn-secondary">Return</a>-->
+		<button type="submit" class="btn btn-primary">Save</button>
+	</div>
+</form>
+
+
+
+

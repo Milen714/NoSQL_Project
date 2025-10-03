@@ -5,6 +5,10 @@ using NoSQL_Project.Repositories;
 using NoSQL_Project.Services.Interfaces;
 using NoSQL_Project.Services;
 using NoSQL_Project.Models.PasswordResset;
+using NoSQL_Project.Repositories.Incidents;
+using NoSQL_Project.Services.Incidents;
+using NoSQL_Project.Repositories.Locations;
+using NoSQL_Project.Services.Locations;
 
 namespace NoSQL_Project
 {
@@ -19,10 +23,10 @@ namespace NoSQL_Project
 
             builder.Services.AddScoped<IUserRepository, UserRepository>();
 
-            // 1) Register MongoClient as a SINGLETON (one shared instance for the whole app)
-            // WHY: MongoClient is thread-safe and internally manages a connection pool.
-            // Reusing one instance is fast and efficient. Creating many clients would waste resources.
-            builder.Services.AddSingleton<IMongoClient>(sp =>
+			// 1) Register MongoClient as a SINGLETON (one shared instance for the whole app)
+			// WHY: MongoClient is thread-safe and internally manages a connection pool.
+			// Reusing one instance is fast and efficient. Creating many clients would waste resources.
+			builder.Services.AddSingleton<IMongoClient>(sp =>
             {
                 // Read the connection string from configuration (env var via .env)
                 var conn = builder.Configuration["Mongo:ConnectionString"];
@@ -53,9 +57,15 @@ namespace NoSQL_Project
             builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<IUserService, UserService>();
 
+			builder.Services.AddScoped<IIncidentRepository, IncidentRepository>();
+			builder.Services.AddScoped<IIncidentService, IncidentService>();
 
-            //Session
-            builder.Services.AddSession(options =>
+			builder.Services.AddScoped<ILocationRepository, LocationRepository>();
+			builder.Services.AddScoped<ILocationService, LocationService>();
+
+
+			//Session
+			builder.Services.AddSession(options =>
             {
                 options.IdleTimeout = TimeSpan.FromMinutes(60); // Set the timeout to 60 minutes
                 options.Cookie.HttpOnly = true; // Make the cookie HTTP-only   
