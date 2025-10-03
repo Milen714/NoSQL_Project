@@ -1,14 +1,14 @@
 ﻿@using NoSQL_Project.Models.Enums
 @model NoSQL_Project.Models.Incident
 @{
-	ViewData["Title"] = "Incident Details";
+    ViewData["Title"] = "Incident Details";
 }
 <h1 class="incident_details_title">Incident Details</h1>
 @if (TempData["Error"] != null)
 {
-	<div class="alert alert-danger">
-		@TempData["Error"]
-	</div>
+    <div class="alert alert-danger">
+        @TempData["Error"]
+    </div>
 }
 @{
     string incidentStatusStyle = "";
@@ -44,23 +44,24 @@
     }
 }
 
-	<div class="incident_layout">
-		<header class="incident_main_header">
-			<h4>@Model.Location.Branch > #ID @Model.Id</h4>
-			<h2>@Model.Subject</h2>
-			<p>@Model.Description</p>
-		</header>
+<div class="incident_layout">
+    <header class="incident_main_header">
+        <h4>@Model.Location.Branch > #ID @Model.Id</h4>
+        <h2>@Model.Subject</h2>
+        <p>@Model.Description</p>
+    </header>
 
-		<article class="incident_other_information">
-        <h3 class="incident_details_title title">Other Information</h3>
-			<div class="other_information_row">
-				<p>Priority:</p>
-                <div class="priority_label @priorityLevelStyle">@Model.Priority</div>
-			</div>
+    <article class="incident_other_information">
+        <div class="other_information_container">
+            <h3 class="incident_details_title title">Other Information</h3>
             <div class="other_information_row">
-				<p>Status:</p>
+                <p>Priority:</p>
+                <div class="priority_label @priorityLevelStyle">@Model.Priority</div>
+            </div>
+            <div class="other_information_row">
+                <p>Status:</p>
                 <div class="priority_label @incidentStatusStyle">@Model.Status</div>
-			</div>
+            </div>
             <div class="other_information_row">
                 <p>SLA:</p>
                 <h4>@Model.Deadline.ToString("g")</h4>
@@ -76,6 +77,45 @@
             <div class="other_information_row">
                 <p>Branch:</p>
                 <h4>@Model.Location.Branch</h4>
+            </div>
+        </div>
+        <div class="incident_management_buttons">
+            <form action="/Incident/Escalate" method="post">
+                <input type="hidden" name="incidentId" value="@Model.Id" />
+                <div>
+                    <select class="escalate_select" onchange="this.form.submit()" id="escalate_button" name="escalateTo">
+                        <option value="">@Model.Priority.ToString().ToUpper()</option>
+                        @{
+                            var priorities = Enum.GetValues(typeof(Priority)).Cast<Priority>();
+                            foreach (Priority priority in priorities)
+                            {
+                                if(priority != Model.Priority)
+                                {
+                                    <option value="@priority">@priority.ToString().ToUpper()</option>
+                                }
+                            }
+                        }
+                        </select>
+                </div>
+                </form>
+                <form action="/Incident/ChangeStatus" method="post">
+                    <input type="hidden" name="incidentId" value="@Model.Id" />
+                <div>
+                    <select class="status_select" onchange="this.form.submit()" id="escalate_button" name="status">
+                        <option value="">@Model.Status.ToString().ToUpper()</option>
+                        @{
+                            var statuses = Enum.GetValues(typeof(IncidentStatus)).Cast<IncidentStatus>();
+                            foreach (IncidentStatus status in statuses)
+                            {
+                                if (status != Model.Status)
+                                {
+                                    <option value="@status">@status.ToString().ToUpper()</option>
+                                }
+                            }
+                        }
+                    </select>
+                </div>
+                </form>
             </div>
 		</article>
 	</div>

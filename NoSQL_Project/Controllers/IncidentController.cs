@@ -65,5 +65,15 @@ namespace NoSQL_Project.Controllers
                 return RedirectToAction("Index");
             }
         }
+        [HttpPost]
+        public IActionResult Escalate(string incidentId, Priority escalateTo)
+        {
+            return RedirectToAction("IncidentDetails", new {id = incidentId});
+        }
+        [HttpPost]
+        public IActionResult ChangeStatus(string incidentId, IncidentStatus status)
+        {
+            return RedirectToAction("IncidentDetails", new { id = incidentId });
+        }
     }
 }
