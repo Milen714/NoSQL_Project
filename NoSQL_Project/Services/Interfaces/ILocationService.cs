@@ -6,5 +6,8 @@ namespace NoSQL_Project.Services.Interfaces
     {
         Task<List<Location>> GetAllLocations();
         Task<Location> GetLocationById(string id);
-    }
+
+		Task<LocationSnapshot> GetLocationSnapshotAsync(string locationBranchName);
+		Task<Location> GetLocationByName(string locationBranchName);
+	}
 }

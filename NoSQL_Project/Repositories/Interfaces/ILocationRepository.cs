@@ -6,5 +6,7 @@ namespace NoSQL_Project.Repositories.Interfaces
     {
         Task<List<Location>> GetAllLocations();
         Task<Location> GetLocationById(string id);
-    }
+
+		Task<Location> GetLocationByName(string locationName);
+	}
 }

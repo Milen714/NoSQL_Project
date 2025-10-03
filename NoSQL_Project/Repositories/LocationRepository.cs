@@ -11,7 +11,14 @@ namespace NoSQL_Project.Repositories
         {
             _locations = db.GetCollection<Location>("LOCATIONS");
         }
-        public async Task<List<Location>> GetAllLocations()
+
+		public async Task<Location> GetLocationByName(string locationName)
+		{
+			Location location = _locations.Find(location => location.Branch == locationName).FirstOrDefault();
+			return location;
+		}
+
+		public async Task<List<Location>> GetAllLocations()
         {
             try
             {
