@@ -40,7 +40,7 @@ namespace NoSQL_Project.Controllers
                 }
 
                 int pageSize = 10;
-                return View(await PaginatedList<User>.CreateAsync(users, pageNumber, pageSize));
+                return View(PaginatedList<User>.CreateAsync(users, pageNumber, pageSize));
 
             }
             catch (Exception ex)

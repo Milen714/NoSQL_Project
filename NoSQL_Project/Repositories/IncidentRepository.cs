@@ -1,4 +1,5 @@
-﻿using MongoDB.Driver;
+﻿using MongoDB.Bson;
+using MongoDB.Driver;
 using NoSQL_Project.Models;
 using NoSQL_Project.Repositories.Interfaces;
 
@@ -12,12 +13,11 @@ namespace NoSQL_Project.Repositories
             _incidents = db.GetCollection<Incident>("INCIDENTS");
         }
 
-        public IQueryable<Incident> GetAll()
+        public async Task<List<Incident>> GetAll()
         {
             try
             {
-                IQueryable<Incident> incidents = _incidents.AsQueryable();
-                return incidents;
+               return await _incidents.Find(_ => true).ToListAsync();
             }
             catch (Exception ex)
             {
@@ -25,5 +25,22 @@ namespace NoSQL_Project.Repositories
                 throw new Exception($"Could not retrieve incidents: {ex.Message}");
             }
         }
+        //public async Task<List<Incident>> GetIncidentsByLocation(string locationId)
+        //{
+        //    try
+        //    {
+        //        if (!ObjectId.TryParse(locationId, out ObjectId locId))
+        //        {
+        //            throw new Exception("Invalid locationId format.");
+        //        }
+        //        var incidents = await _incidents.AsQueryableAsync().Where(i => i.Location.LocationId == locId);
+        //        return incidents;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Console.WriteLine(ex.Message);
+        //        throw new Exception($"Could not retrieve incidents for location {locationId}: {ex.Message}");
+        //    }
+        //}
     }
 }

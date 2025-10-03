@@ -11,9 +11,9 @@ namespace NoSQL_Project.Services
         {
             _incidentRepository = incidentRepository;
         }
-        public IQueryable<Incident> GetAll()
+        public List<Incident> GetAll()
         {
-            return _incidentRepository.GetAll();
+            return _incidentRepository.GetAll().Result;
         }
     }
 }

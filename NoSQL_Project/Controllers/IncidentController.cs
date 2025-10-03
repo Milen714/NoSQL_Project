@@ -29,7 +29,7 @@ namespace NoSQL_Project.Controllers
                     searchString = currentFilter;
                 }
 
-                var incidents = _incidentService.GetAll();
+                var incidents = _incidentService.GetAll().Where(i => i.Status == IncidentStatus.closed_without_resolve);
 
                 if (pageNumber < 1)
                 {
@@ -37,7 +37,7 @@ namespace NoSQL_Project.Controllers
                 }
 
                 int pageSize = 10;
-                return View(await PaginatedList<Incident>.CreateAsync(incidents, pageNumber, pageSize));
+                return View(PaginatedList<Incident>.CreateAsync(incidents, pageNumber, pageSize));
 
             }
             catch (Exception ex)

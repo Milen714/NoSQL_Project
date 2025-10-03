@@ -4,6 +4,6 @@ namespace NoSQL_Project.Repositories.Interfaces
 {
     public interface IIncidentRepository
     {
-        IQueryable<Incident> GetAll();
+        Task<List<Incident>> GetAll();
     }
 }
