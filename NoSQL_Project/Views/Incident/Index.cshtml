@@ -5,56 +5,56 @@
 }
 @if (TempData["Success"] != null)
 {
-    <p class="alert-success">@TempData["Success"]</p>
+<p class="alert-success">@TempData["Success"]</p>
 }
 @if (TempData["Error"] != null)
 {
-    <p class="alert-danger">@TempData["Error"]</p>
+<p class="alert-danger">@TempData["Error"]</p>
 }
 
-    <header class="main_container_header">
-        <div>
-            <h3>Incidents</h3>
-        </div>
-
-        <div>
-            <a class="btn btn-primary" href="/Incident/Create">Create New Incident</a>
-        </div>
-    </header>
-
-    <div class="charts_container">
-        <div id="chart_left_container">
-            <canvas id="chart1" width="150" height="150"></canvas>
-        </div>
-        <div id="chart_right_container">
-            <canvas id="chart2" width="150" height="150"></canvas>
-        </div>
+<header class="main_container_header">
+    <div>
+        <h3>Incidents</h3>
     </div>
 
-    <div class="search_container">
-        <div class="search_options_container">
-           <nav>
-			<ul class="search_options_ul">
-				<li class="search_options_li">
-					<a class="search_options_a" asp-action="Index" asp-route-statusFilter="All">All</a>
-				</li>
-				<li class="search_options_li">
-					<a class="search_options_a" asp-action="Index" asp-route-statusFilter="Open">Open</a>
-				</li>
-				<li class="search_options_li">
-					<a class="search_options_a" asp-action="Index" asp-route-statusFilter="InProgress">In Progress</a>
-				</li>
-				<li class="search_options_li">
-					<a class="search_options_a" asp-action="Index" asp-route-statusFilter="Closed">Closed</a>
-				</li>
-			</ul>
-           </nav>
-
-        </div>
-        <div class="search_filters_container">
-            <input class="search_form_input" type="search" name="name" value="" placeholder="Search" />
-        </div>
+    <div>
+        <a class="btn btn-primary" href="/Incident/Create">Create New Incident</a>
     </div>
+</header>
+
+<div class="charts_container">
+    <div id="chart_left_container">
+        <canvas id="chart1" width="150" height="150"></canvas>
+    </div>
+    <div id="chart_right_container">
+        <canvas id="chart2" width="150" height="150"></canvas>
+    </div>
+</div>
+
+<div class="search_container">
+    <div class="search_options_container">
+        <nav>
+            <ul class="search_options_ul">
+                <li class="search_options_li">
+                    <a class="search_options_a" asp-action="Index" asp-route-statusFilter="All">All</a>
+                </li>
+                <li class="search_options_li">
+                    <a class="search_options_a" asp-action="Index" asp-route-statusFilter="Open">Open</a>
+                </li>
+                <li class="search_options_li">
+                    <a class="search_options_a" asp-action="Index" asp-route-statusFilter="InProgress">In Progress</a>
+                </li>
+                <li class="search_options_li">
+                    <a class="search_options_a" asp-action="Index" asp-route-statusFilter="Closed">Closed</a>
+                </li>
+            </ul>
+        </nav>
+
+    </div>
+    <div class="search_filters_container">
+        <input class="search_form_input" type="search" name="name" value="" placeholder="Search" />
+    </div>
+</div>
 
 <div class="table_NICE_container">
     <table class="table_NICE">
@@ -64,6 +64,7 @@
                 <th>Title</th>
                 <th>Status</th>
                 <th>Assigned to</th>
+                <th>Branch</th>
                 <th>Reported At</th>
                 <th>SLA</th>
             </tr>
@@ -73,6 +74,7 @@
             {
             string incidentStatusStyle = "";
             string priorityLevelStyle = "";
+            // Determine priority style
             switch (incident.Priority)
             {
             case Priority.low:
@@ -88,6 +90,7 @@
             priorityLevelStyle = "priority_critical";
             break;
             }
+            // Determine status style
             switch (incident.Status)
             {
             case IncidentStatus.open:
@@ -100,21 +103,27 @@
             incidentStatusStyle = "status_in_progress";
             break;
             }
-
+                
             <tr>
-
+                
                 <td>
                     <div class="priority_label @priorityLevelStyle">@incident.Priority</div>
                 </td>
-                <td>@incident.Subject</td>
+                    <td>
+                        <a class="incident_href" asp-controller="Incident" asp-action="IncidentDetails" asp-route-id="@incident.Id">
+                            @incident.Subject
+                        </a>
+                    </td>
                 <td>
                     <div class="priority_label @incidentStatusStyle">@incident.Status</div>
                 </td>
                 <td>@(incident.AssignedTo != null ? $"{incident.AssignedTo.FirstName} {incident.AssignedTo.LastName}" : "Unassigned")</td>
-
+                <td>@incident.Location.Branch</td>
                 <td>@incident.ReportedAt.ToString("g")</td>
                 <td>@incident.Deadline.ToString("g")</td>
+            
             </tr>
+                
             }
         </tbody>
     </table>
@@ -143,11 +152,11 @@
 
                 @for (int i = 1; i <= Model.TotalPages; i++)
                 {
-                    <li class="page-item @(Model.PageIndex == i ? "active" : "")">
-                        <a class="page-link text-black" asp-route-pageNumber="@i"
-                           asp-route-sortOrder="@ViewData["CurrentSort"]"
-                           asp-route-currentFilter="@ViewData["CurrentFilter"]">@i</a>
-                    </li>
+                <li class="page-item @(Model.PageIndex == i ? "active" : "")">
+                    <a class="page-link text-black" asp-route-pageNumber="@i"
+                       asp-route-sortOrder="@ViewData["CurrentSort"]"
+                       asp-route-currentFilter="@ViewData["CurrentFilter"]">@i</a>
+                </li>
                 }
 
                 <li class="page-item @(Model.HasNextPage ? "" : "disabled")">
@@ -171,31 +180,31 @@
     </div>
 </div>
 @section Scripts{
-    <script>
-        function drawDonut(canvasId, value, total, color){
-            const canvas = document.getElementById(canvasId);
-            const context = canvas.getContext("2d");
-            const percent = value / total;
+<script>
+    function drawDonut(canvasId, value, total, color){
+        const canvas = document.getElementById(canvasId);
+        const context = canvas.getContext("2d");
+        const percent = value / total;
 
-            context.lineWidh = 30;
-            context.strokeStyle = "lightgrey";
-            context.beginPath();
-            context.arc(75, 75, 55, 0, 2 * Math.PI);
-            context.stroke();
+        context.lineWidh = 30;
+        context.strokeStyle = "lightgrey";
+        context.beginPath();
+        context.arc(75, 75, 55, 0, 2 * Math.PI);
+        context.stroke();
 
-            context.strokeStyle = color;
-            context.beginPath();
-            context.arc(75, 75, 55, -0.5 * Math.PI, (percent * 2 * Math.PI) - 0.5 * Math.PI);
-            context.stroke();
+        context.strokeStyle = color;
+        context.beginPath();
+        context.arc(75, 75, 55, -0.5 * Math.PI, (percent * 2 * Math.PI) - 0.5 * Math.PI);
+        context.stroke();
 
-            //Text
-            context.fillStyle = "#000";
-            context.font = "20px Arial";
-            context.textAlign = "center";
-            context.textBaseLine = "middle";
-            context.fillText(value + (total ? "/" + total : ""), 75, 75);
-        }
-        drawDonut("chart1", 14, 75, "orange");
-        drawDonut("chart2", 14, 75, "orange");
-    </script>
+        //Text
+        context.fillStyle = "#000";
+        context.font = "20px Arial";
+        context.textAlign = "center";
+        context.textBaseLine = "middle";
+        context.fillText(value + (total ? "/" + total : ""), 75, 75);
+    }
+    drawDonut("chart1", 14, 75, "orange");
+    drawDonut("chart2", 14, 75, "orange");
+</script>
 }
