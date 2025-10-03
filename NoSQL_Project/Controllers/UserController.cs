@@ -1,5 +1,6 @@
 ﻿using ChapeauPOS.Commons;
 using Microsoft.AspNetCore.Mvc;
+using NoSQL_Project.Commons;
 using NoSQL_Project.Models;
 using NoSQL_Project.Models.Enums;
 using NoSQL_Project.Repositories.Interfaces;
@@ -21,6 +22,7 @@ namespace NoSQL_Project.Controllers
         [SessionAuthorize(UserType.Service_employee)]
         public async Task<IActionResult> Index(string searchString, int pageNumber, string currentFilter)
         {
+            User loggedInUser = HttpContext.Session.GetObject<User>("LoggedInUser");
             try
             {
                 if (searchString != null)
