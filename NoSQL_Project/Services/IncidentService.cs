@@ -39,7 +39,7 @@ namespace NoSQL_Project.Services
 				Description = model.Description,
 				ReportedBy = model.Reporter,
 				Status = IncidentStatus.open,
-				ReportedAt = DateTime.Now
+				ReportedAt = DateTime.UtcNow
 			};
 
 			//create the incident

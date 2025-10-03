@@ -25,9 +25,12 @@ namespace NoSQL_Project.Services
 
 		public async Task<LocationSnapshot> GetLocationSnapshotAsync(string locationBranchName)
 		{
-			Location fullLocation = await GetLocationByName(locationBranchName);
+			string normalizedBranchName = System.Text.RegularExpressions.Regex.Replace(locationBranchName, "(\\B[A-Z])", " $1");
+			
 
-			LocationSnapshot locationSnapshot = new LocationSnapshot
+			Location fullLocation = await GetLocationByName(normalizedBranchName);
+
+				LocationSnapshot locationSnapshot = new LocationSnapshot
 			{
 				LocationId = ObjectId.Parse(fullLocation.Id),
 				Branch = fullLocation.Branch,
