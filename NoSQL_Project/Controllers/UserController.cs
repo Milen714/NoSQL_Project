@@ -22,7 +22,6 @@ namespace NoSQL_Project.Controllers
         [SessionAuthorize(UserType.Service_employee)]
         public async Task<IActionResult> Index(string searchString, int pageNumber, string currentFilter)
         {
-            User loggedInUser = HttpContext.Session.GetObject<User>("LoggedInUser");
             try
             {
                 if (searchString != null)

@@ -57,6 +57,10 @@ namespace NoSQL_Project.Repositories
                 throw new Exception($"Could not retrieve incidents: {ex.Message}");
             }
         }
+        public async Task CreateNewIncidentAsync(Incident newIncident)
+        {
+            await _incidents.InsertOneAsync(newIncident);
+        }
 
     }
 }
