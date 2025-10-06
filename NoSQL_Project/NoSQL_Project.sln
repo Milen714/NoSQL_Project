@@ -7,7 +7,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NoSQL_Project", "NoSQL_Proj
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8EC462FD-D22E-90A8-E5CE-7E832BA40C5D}"
 	ProjectSection(SolutionItems) = preProject
-		.env = .env
+		..\.env = ..\.env
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NoSQL_Project_Tests", "..\NoSQL_Project_Tests\NoSQL_Project_Tests.csproj", "{7DE7E8A7-CA5E-4226-B276-01C43BDB72F3}"
