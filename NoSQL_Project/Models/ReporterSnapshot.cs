@@ -18,5 +18,13 @@ namespace NoSQL_Project.Models
         [BsonElement("email_address")]
         [BsonIgnoreIfNull]
         public string? EmailAddress { get; set; }
+
+        public void MapReporter(User user)
+        {
+            UserId = ObjectId.Parse(user.Id!);
+            FirstName = user.FirstName;
+            LastName = user.LastName;
+            EmailAddress = user.EmailAddress;
+        }
     }
 }

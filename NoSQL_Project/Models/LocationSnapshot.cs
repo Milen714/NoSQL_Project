@@ -22,5 +22,16 @@ namespace NoSQL_Project.Models
         [BsonElement("branch_code")]
         [BsonIgnoreIfNull]
         public string? BranchCode { get; set; }
+
+
+        public void MapLocationSnapshot(Location location)
+        {
+            LocationId = ObjectId.Parse(location.Id);
+            Branch = location.Branch;
+            Region = location.Region;
+            PostCode = location.PostCode;
+            BranchCode = location.BranchCode;
+
+        }
     }
 }

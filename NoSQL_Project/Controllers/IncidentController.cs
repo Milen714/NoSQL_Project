@@ -1,7 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using NoSQL_Project.Models.Enums;
+using MongoDB.Bson;
+using NoSQL_Project.Commons;
 using NoSQL_Project.Models;
+using NoSQL_Project.Models.Enums;
 using NoSQL_Project.Services.Interfaces;
+using NoSQL_Project.ViewModels;
 
 namespace NoSQL_Project.Controllers
 {
@@ -74,6 +77,44 @@ namespace NoSQL_Project.Controllers
         public IActionResult ChangeStatus(string incidentId, IncidentStatus status)
         {
             return RedirectToAction("IncidentDetails", new { id = incidentId });
+        }
+        [HttpGet]
+        public async Task<IActionResult> CreateIncident()
+        {
+            var user = HttpContext.Session.GetObject<User>("LoggedInUser");
+            if (user == null)
+            {
+                return Unauthorized();
+            }
+
+            var reporterUser = new ReporterSnapshot();
+            reporterUser.MapReporter(user);
+
+            var viewModel = new NewIncidentViewModel
+            {
+                Reporter = reporterUser,
+
+                // Defaults
+                Priority = Priority.medium,
+                Deadline = 14,
+                IncidentType = IncidentType.software,
+            };
+            ViewBag.Locations = await _locationService.GetAllLocations();
+
+            return View(viewModel);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateIncident(NewIncidentViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            await _incidentService.CreateNewIncidentAsync(model);
+
+            return RedirectToAction("Index", "Home");
         }
     }
 }

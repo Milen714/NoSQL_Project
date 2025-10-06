@@ -1,5 +1,6 @@
 ﻿using NoSQL_Project.Models;
 using NoSQL_Project.Models.Enums;
+using NoSQL_Project.ViewModels;
 
 namespace NoSQL_Project.Services.Interfaces
 {
@@ -8,5 +9,6 @@ namespace NoSQL_Project.Services.Interfaces
         List<Incident> GetAll();
         Task<List<Incident>> GetAllIncidentsPerStatus(IncidentStatus status, string branch);
         Task<Incident> GetIncidentByIdAsync(string id);
+        Task CreateNewIncidentAsync(NewIncidentViewModel model);
     }
 }
