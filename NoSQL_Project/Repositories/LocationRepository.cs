@@ -1,4 +1,5 @@
-﻿using MongoDB.Driver;
+﻿using MongoDB.Bson;
+using MongoDB.Driver;
 using NoSQL_Project.Models;
 using NoSQL_Project.Repositories.Interfaces;
 
@@ -34,5 +35,11 @@ namespace NoSQL_Project.Repositories
                 throw new Exception(ex.Message);
             }
         }
+        public async Task<Location> GetLocationByName(string locationName)
+        {
+            Location location = _locations.Find(location => location.Branch == locationName).FirstOrDefault();
+            return location;
+        }
+
     }
 }

@@ -21,9 +21,9 @@ namespace NoSQL_Project.Controllers
             return View();
         }
         [HttpPost]
-        public IActionResult Login(LoginModel loginModel)
+        public async Task<IActionResult> Login(LoginModel loginModel)
         {
-            User user = _userService.AuthenticateUser(loginModel);
+            User user = await _userService.AuthenticateUserAsync(loginModel);
             if (user == null)
             {
                 // Failed login

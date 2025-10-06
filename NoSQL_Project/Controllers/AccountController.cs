@@ -27,7 +27,7 @@ namespace NoSQL_Project.Controllers
         {
             if (ModelState.IsValid)
             {
-                User user = _userService.GetUserByEmail(model.Email);
+                User user = await _userService.GetUserByEmailAsync(model.Email);
                 //generating unique token
                 var token = _userService.GeneratePasswordResetTokenAsync(user);
 
@@ -50,9 +50,9 @@ namespace NoSQL_Project.Controllers
         }
 
         [HttpGet]
-        public IActionResult ResetPassword(string userId, string token)
+        public async Task<IActionResult> ResetPassword(string userId, string token)
         {
-            User user = _userService.FindById(userId);
+            User user = await _userService.FindByIdAsync(userId);
             if (user == null || user.RessetToken != token || user.RessetTokenExpiry < DateTime.UtcNow)
             {
                 return BadRequest("Invalid or expired resset link");
@@ -62,7 +62,7 @@ namespace NoSQL_Project.Controllers
         [HttpPost]
         public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
         {
-            User user = _userService.FindById(model.UserId);
+            User user = await _userService.FindByIdAsync(model.UserId);
             if (user == null || user.RessetToken != model.Token || user.RessetTokenExpiry < DateTime.UtcNow)
             {
                 return BadRequest("Invalid or expired resset link");
@@ -71,7 +71,7 @@ namespace NoSQL_Project.Controllers
             user = _userService.HashUserPassword(user);
             user.RessetToken = null;
             user.RessetTokenExpiry = null;
-            await _userService.UpdateUser(user);
+            await _userService.UpdateUserAsync(user);
 
             TempData["Success"] = "Password has been reset successfully";
             return RedirectToAction("Login", "Home");

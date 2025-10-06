@@ -5,6 +5,9 @@
     --color-primary-blue-accent: #ebf5ff;
     --color-primary-link-active: #2979ff; /* Blue for the active 'Incidents' link/tab */
     --color-text-light: #fefefe; /* White/Light text on dark background */
+    --color-bgs-light: #e5e5e5;
+    --color-bgs-darker: #CACACA;
+    --color-accent-grey-darker: #999999;
     /* --- Background & Border Colors --- */
     --color-bg-light: #ffffff; /* Main content area background */
     --color-bg-subtle: #f9f9fb; /* Subtle light gray for hover/secondary elements (e.g., table row hover) */
@@ -32,6 +35,10 @@
     --colors-Grey-SideBar: #13263F;
     /*FONTS*/
     --font-primary: "Roboto Mono", monospace;
+    /*SHADOWS*/
+    --shadow-s: inset 0 1px 2px #ffffff30, 0 1px 2px #00000030, 0 2px 4px #00000015;
+    --shadow-m: inset 0 1px 2px #ffffff50, 0 2px 4px #00000030, 0 4px 8px #00000015;
+    --shadow-l: inset 0 1px 2px #ffffff30, 0 4px 6px #00000030, 0 6px 10px #00000015;
 }
 
 
@@ -109,7 +116,17 @@ body {
     -webkit-backdrop-filter: blur(7px);
     border: 1px solid rgba(255, 255, 255, 0.32);
 }
-
+.search_form_input {
+    height: 42px;
+    background: white;
+    margin: 5px auto;
+    padding: 12px;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    box-shadow: var(--shadow-s);
+    outline: none;
+    border-radius: 5px;
+    color: black;
+}
 .form_input {
     width: 95%;
     height: 42px;
@@ -162,9 +179,15 @@ body {
     width: 100%;
     color: black;
     background-color: white;
-    margin-top: 20px;
+    margin-top: 10px;
     padding: 16px;
-    border-top-left-radius: 20px;
+    border-top-left-radius: 30px;
+    background-color: var(--color-bgs-light);
+}
+.main_container_header{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
 }
 
 .nav_li {
@@ -192,21 +215,26 @@ body {
 }
 
 /*TABLESSS*/
+.table_NICE_container {
+    box-shadow: var(--shadow-l);
+    border-radius: 10px;
+    background-color: var(--color-bgs-darker);
+    border: 2px solid var(--color-accent-grey-darker);
+    margin: 20px 0;
+    width: fit-content;
+}
 .table_NICE {
-    border: 2px solid #dad9dc;
     border-radius: 10px;
     border-collapse: collapse;
     overflow: hidden;
-    margin: 25px 0;
-    font-size: 0.9em;
+    font-size: 0.8em;
     min-width: 400px;
-    
 }
-.table_NICE thead tr{
-    background-color: #f3f3f3;
-    text-align: left;
-
-}
+    .table_NICE thead tr {
+        background-color: #f3f3f3;
+        box-shadow: 0 3px 2px -2px rgba(0, 0, 0, 0.2);
+        text-align: left;
+    }
 .table_NICE th, .table_NICE td{
     padding: 12px 15px;
 }
@@ -216,12 +244,16 @@ body {
 .table_NICE_body tr:hover{
     background-color: var(--color-primary-blue-accent);
 }
+.incident_href{
+    text-decoration:none;
+    color: black;
+}
 .priority_label {
     padding: 5px 10px;
     border-radius: 5px;
     font-weight: 600;
-    font-size: 0.8em;
-    text-align:center;
+    font-size: 0.7em;
+    text-align: center;
 }
 .priority_low {
     background-color: var(--color-level-low);
@@ -250,4 +282,69 @@ body {
 .status_closed {
     background-color: var(--color-status-resolved);
     color: var(--color-status-resolved-text);
+}
+/*SEARCH OPTIONS*/
+.search_container{
+    display: flex;
+    flex-direction:column;
+}
+.search_options_ul {
+    display: flex;
+    flex-direction: row;
+    list-style-type: none;
+    margin: 0;
+}
+.search_options_li{
+    padding:5px;
+    margin: 0 5px 0 5px;
+}
+.search_options_li a{
+    text-align: center;
+    text-decoration: none;
+}
+/*  CHARTS*/
+.charts_container{
+    display: flex;
+}
+/*INCIDENT Screen*/
+.incident_details_title{
+    width: fit-content;
+    margin: 10px 10px 20px 10px;
+    border-bottom: 2px solid var(--color-accent-grey-darker);
+}
+.title{
+    margin: 0;
+}
+.incident_layout {
+    display: flex;
+    justify-content: space-around;
+}
+.other_information_row{
+    display: flex;
+    justify-content: space-around;
+}
+.other_information_row div{
+    text-align:center;
+    height: fit-content;
+    padding: 10px;
+}
+.incident_management_buttons{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+
+}
+.escalate_select, .status_select {
+    width: 90%;
+    padding: 8px 30px 8px 10px;
+    font-family: var(--font-primary);
+    font-size: 16px;
+    color: #b8860b;
+    background-color: #fafad2;
+    border: 1px solid #b8860b;
+    border-radius: 4px;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    cursor: pointer;
 }
