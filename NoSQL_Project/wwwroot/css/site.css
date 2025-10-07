@@ -123,6 +123,22 @@ body {
     border-radius: 5px;
     color: black;
 }
+#addUserFrom {
+    background-color: #fff;
+}
+
+#addUserFrom .form-label {
+    color: #333;
+}
+
+#addUserFrom .btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+#addUserFrom .btn-outline-secondary:hover {
+    background-color: #e9ecef;
+}
 .login_body{
     width: 55%;
 }
@@ -250,4 +266,19 @@ body {
 .status_closed {
     background-color: var(--color-status-resolved);
     color: var(--color-status-resolved-text);
+}
+
+#newUserBtn{
+    justify-content:end
+}
+
+#headImg {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+}
+
+.navie {
+    width: 405px;
+    border-right: solid 3px black;
 }
