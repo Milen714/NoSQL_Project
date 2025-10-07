@@ -20,14 +20,14 @@ namespace NoSQL_Project.Services
             _userRepository.Add(user);
         }
 
-        public User AuthenticateUser(LoginModel model)
+        public async Task<User> AuthenticateUserAsync(LoginModel model)
         {
-            return _userRepository.AuthenticateUser(model);
+            return await _userRepository.AuthenticateUserAsync(model);
         }
 
-        public User FindById(string id)
+        public async Task<User> FindByIdAsync(string id)
         {
-            return _userRepository.FindById(id);
+            return await _userRepository.FindByIdAsync(id);
         }
 
         public string GenerateSecureToken(int length = 32)
@@ -40,24 +40,24 @@ namespace NoSQL_Project.Services
             var token = GenerateSecureToken();
             user.RessetToken = token;
             user.RessetTokenExpiry = DateTime.UtcNow.AddHours(1); // Token valid for 1 hour
-            await UpdateUser(user);
+            await UpdateUserAsync(user);
             return token;
 
         }
 
-        public IQueryable<User> GetAll()
+        public List<User> GetAll()
         {
-            return _userRepository.GetAll(); 
+            return _userRepository.GetAll().Result;
         }
 
-        public User GetUserByEmail(string email)
+        public async Task<User> GetUserByEmailAsync(string email)
         {
-            return _userRepository.GetUserByEmail(email);
+            return await _userRepository.GetUserByEmailAsync(email);
         }
 
-        public async Task UpdateUser(User user)
+        public async Task UpdateUserAsync(User user)
         {
-            _userRepository.UpdateUser(user);
+            _userRepository.UpdateUserAsync(user);
         }
 
         public User HashUserPassword(User user)

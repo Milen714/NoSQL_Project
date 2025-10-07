@@ -4,14 +4,14 @@ namespace NoSQL_Project.Services.Interfaces
 {
     public interface IUserService
     {
-        IQueryable<User> GetAll();
+        List<User> GetAll();
         void Add(User user);
-        public User FindById(string id);
-        public User GetUserByEmail(string email);
+        public Task<User> FindByIdAsync(string id);
+        public Task<User> GetUserByEmailAsync(string email);
         public Task<string> GeneratePasswordResetTokenAsync(User user);
-        public User AuthenticateUser(LoginModel model);
+        public Task<User> AuthenticateUserAsync(LoginModel model);
         public User HashUserPassword(User user);
-        Task UpdateUser(User user);
+        Task UpdateUserAsync(User user);
 
 
 

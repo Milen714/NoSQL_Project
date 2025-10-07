@@ -36,6 +36,22 @@
     <tbody class="table_NICE_body">
         @foreach (var u in Model.Items)
         {
+
+<a class="btn btn-primary" href="/User/AddNewUser">Create New User</a>
+<div class="table_NICE_container">
+    <table class="table_NICE">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>User Type</th>
+                <th>Branch</th>
+                <th>BranchCode</th>
+            </tr>
+        </thead>
+        <tbody class="table_NICE_body">
+            @foreach (var u in Model.Items)
+            {
             <tr>
                 <td>@u.FirstName</td>
                 <td>@u.EmailAddress</td>
@@ -44,10 +60,10 @@
                 <td>@u.Location.BranchCode</td>
 
             </tr>
-        }
-    </tbody>
-</table>
-
+            }
+        </tbody>
+    </table>
+</div>
 <div class="row">
     <div class="col-md-6">
     </div>

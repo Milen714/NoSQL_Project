@@ -1,5 +1,6 @@
 ﻿using ChapeauPOS.Commons;
 using Microsoft.AspNetCore.Mvc;
+using NoSQL_Project.Commons;
 using NoSQL_Project.Models;
 using NoSQL_Project.Models.Enums;
 using NoSQL_Project.Repositories.Interfaces;
@@ -40,7 +41,7 @@ namespace NoSQL_Project.Controllers
                 }
 
                 int pageSize = 10;
-                return View(await PaginatedList<User>.CreateAsync(users, pageNumber, pageSize));
+                return View(PaginatedList<User>.CreateAsync(users, pageNumber, pageSize));
 
             }
             catch (Exception ex)
