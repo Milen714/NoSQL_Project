@@ -17,9 +17,6 @@
         <h3>Incidents</h3>
     </div>
 
-    <div>
-        <a class="btn btn-primary" href="/Incident/Create">Create New Incident</a>
-    </div>
 </header>
 
 <div class="charts_container">
@@ -33,26 +30,32 @@
 
 <div class="search_container">
     <div class="search_options_container">
-        <nav>
-            <ul class="search_options_ul">
-                <li class="search_options_li">
-                    <a class="search_options_a" asp-action="Index" asp-route-statusFilter="All">All</a>
-                </li>
-                <li class="search_options_li">
-                    <a class="search_options_a" asp-action="Index" asp-route-statusFilter="Open">Open</a>
-                </li>
-                <li class="search_options_li">
-                    <a class="search_options_a" asp-action="Index" asp-route-statusFilter="InProgress">In Progress</a>
-                </li>
-                <li class="search_options_li">
-                    <a class="search_options_a" asp-action="Index" asp-route-statusFilter="Closed">Closed</a>
-                </li>
-            </ul>
-        </nav>
-
+            <nav>
+                <ul class="search_options_ul">
+                    <li class="search_options_li">
+                        <a class="search_options_a btn btn-outline-info border-dark border-2 " asp-action="Index" asp-route-statusFilter="All">All</a>
+                    </li>
+                    <li class="search_options_li">
+                        <a class="search_options_a btn btn-outline-info border-dark border-2" asp-action="Index" asp-route-statusFilter="Open">Open</a>
+                    </li>
+                    <li class="search_options_li">
+                        <a class="search_options_a btn btn-outline-info border-dark border-2" asp-action="Index" asp-route-statusFilter="InProgress">In Progress</a>
+                    </li>
+                    <li class="search_options_li">
+                        <a class="search_options_a btn btn-outline-info border-dark border-2" asp-action="Index" asp-route-statusFilter="Closed">Closed</a>
+                    </li>
+                </ul>
+            </nav>
     </div>
-    <div class="search_filters_container">
-        <input class="search_form_input" type="search" name="name" value="" placeholder="Search" />
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <!-- Search bar (left) -->
+        <form class="d-flex" role="search">
+            <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+            <button class="btn btn-outline-success" type="submit">Search</button>
+        </form>
+
+        <!-- Button (right) -->
+        <a class="btn btn-primary" href="/Incident/Create">Create New Incident</a>
     </div>
 </div>
 

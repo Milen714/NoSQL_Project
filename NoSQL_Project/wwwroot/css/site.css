@@ -237,20 +237,22 @@ body {
     background-color: var(--color-bgs-darker);
     border: 2px solid var(--color-accent-grey-darker);
     margin: 20px 0;
-    width: fit-content;
+    width: 100%;
 }
 .table_NICE {
     border-radius: 10px;
     border-collapse: collapse;
     overflow: hidden;
     font-size: 0.8em;
-    min-width: 400px;
+    min-width: auto;
+    width: 100%;
+    
 }
-    .table_NICE thead tr {
-        background-color: #f3f3f3;
-        box-shadow: 0 3px 2px -2px rgba(0, 0, 0, 0.2);
-        text-align: left;
-    }
+.table_NICE thead tr {
+    background-color: #f3f3f3;
+    box-shadow: 0 3px 2px -2px rgba(0, 0, 0, 0.2);
+    text-align: left;
+}
 .table_NICE th, .table_NICE td{
     padding: 12px 15px;
 }
@@ -298,4 +300,15 @@ body {
 .status_closed {
     background-color: var(--color-status-resolved);
     color: var(--color-status-resolved-text);
+}
+
+.search_options_ul {
+    display: flex;
+    list-style: none; /* Removes the dots */
+    padding-left: 0; /* Removes default left padding */
+    gap: 10px; /* Optional: adds spacing between items */
+}
+
+.search_options_li {
+    margin: 0;
 }

@@ -5,13 +5,15 @@
 <h1>User Management</h1>
 
 
-@if (TempData["Success"] != null){
+@if (TempData["Success"] != null)
+{
     <p class="alert-success">@TempData["Success"]</p>
 }
-@if(TempData["Error"] != null)
+@if (TempData["Error"] != null)
 {
     <p class="alert-danger">@TempData["Error"]</p>
 }
+
 <div class="d-flex justify-content-between align-items-center mb-3">
     <!-- Search bar (left) -->
     <form class="d-flex" role="search">
@@ -23,21 +25,6 @@
     <a id="newUserBtn" class="btn btn-success" href="/User/AddNewUser">+Add New User</a>
 </div>
 
-<table class="table_NICE">
-    <thead>
-        <tr>
-            <th>Name</th>
-            <th>Email</th>
-            <th>User Type</th>
-            <th>Branch</th>
-            <th>BranchCode</th>
-        </tr>
-    </thead>
-    <tbody class="table_NICE_body">
-        @foreach (var u in Model.Items)
-        {
-
-<a class="btn btn-primary" href="/User/AddNewUser">Create New User</a>
 <div class="table_NICE_container">
     <table class="table_NICE">
         <thead>
@@ -52,14 +39,14 @@
         <tbody class="table_NICE_body">
             @foreach (var u in Model.Items)
             {
-            <tr>
-                <td>@u.FirstName</td>
-                <td>@u.EmailAddress</td>
-                <td>@u.UserType</td>
-                <td>@u.Location.Branch</td>
-                <td>@u.Location.BranchCode</td>
+                <tr>
+                    <td>@u.FirstName</td>
+                    <td>@u.EmailAddress</td>
+                    <td>@u.UserType</td>
+                    <td>@u.Location.Branch</td>
+                    <td>@u.Location.BranchCode</td>
 
-            </tr>
+                </tr>
             }
         </tbody>
     </table>
@@ -115,4 +102,3 @@
         </nav>
     </div>
 </div>
-
