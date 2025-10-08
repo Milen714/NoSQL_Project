@@ -14,4 +14,6 @@ namespace NoSQL_Project.Services.Interfaces
         Task UpdateIncidentAsync(Incident updatedIncident);
 
 	}
+        Task<List<Incident>> GetIncidentsByReporter(string reporterId);
+    }
 }

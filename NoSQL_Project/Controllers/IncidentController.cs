@@ -20,36 +20,88 @@ namespace NoSQL_Project.Controllers
 			_userService = userService;
 			_incidentService = incidentService;
 		}
-		public async Task<IActionResult> Index(string searchString, int pageNumber, string currentFilter)
-		{
-			try
-			{
-				if (searchString != null)
-				{
-					pageNumber = 1;
-				}
-				else
-				{
-					searchString = currentFilter;
-				}
+		public async Task<IActionResult> Index(string searchString, int pageNumber, string currentFilter="", string sortOrder ="")
+        {
+            try
+            {
+                if (searchString != null)
+                {
+                    pageNumber = 1;
+                }
+                else
+                {
+                    searchString = currentFilter;
+                }
 
-				var incidents = _incidentService.GetAllIncidentsPerStatus(IncidentStatus.open, "").Result;
+                var user = HttpContext.Session.GetObject<User>("LoggedInUser");
+                if (user == null)
+                {
+                    return RedirectToAction("Login", "Home");
+                }
 
-				if (pageNumber < 1)
-				{
-					pageNumber = 1;
-				}
+                List<Incident> incidents;
 
-				int pageSize = 10;
-				return View(PaginatedList<Incident>.CreateAsync(incidents, pageNumber, pageSize));
+                if (user.UserType == UserType.Service_employee)
+                {
+                    incidents = await _incidentService.GetAllIncidentsPerStatus(IncidentStatus.open, "");
+                }
+                else if (user.UserType == UserType.Reg_employee)
+                {
+                    incidents = await _incidentService.GetIncidentsByReporter(user.Id);
+                }
+                else
+                {
+                    TempData["Error"] = "You do not have permission to access this page.";
+                    return RedirectToAction("Login", "Home");
+                }
 
-			}
-			catch (Exception ex)
-			{
-				TempData["Error"] = $"Could not retrieve Incidents: {ex.Message}";
-				return View(new PaginatedList<User>(new List<User>(), 0, 1, 1));
-			}
-		}
+                // Searching
+                if (!string.IsNullOrEmpty(searchString))
+                {
+                    incidents = incidents
+                        .Where(i => i.Subject.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+                        .ToList();
+                }
+
+                // Sorting
+                switch (sortOrder?.ToLower())
+                {
+                    case "priority":
+                        incidents = incidents.OrderBy(i => i.Priority).ToList();
+                        break;
+                    case "priority_desc":
+                        incidents = incidents.OrderByDescending(i => i.Priority).ToList();
+                        break;
+                    case "date":
+                        incidents = incidents.OrderBy(i => i.ReportedAt).ToList();
+                        break;
+                    case "date_desc":
+                        incidents = incidents.OrderByDescending(i => i.ReportedAt).ToList();
+                        break;
+                    default:
+                        incidents = incidents.OrderByDescending(i => i.ReportedAt).ToList();
+                        break;
+                }
+
+                ViewData["CurrentFilter"] = searchString;
+                ViewData["CurrentSort"] = sortOrder;
+
+                if (pageNumber < 1)
+                {
+                    pageNumber = 1;
+                }
+
+                int pageSize = 10;
+
+
+                return View(PaginatedList<Incident>.CreateAsync(incidents, pageNumber, pageSize));
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"Could not retrieve Incidents: {ex.Message}";
+                return View(new PaginatedList<User>(new List<User>(), 0, 1, 1));
+            }
+        }
 
 		//Create Incident
 		[HttpGet]

@@ -81,6 +81,11 @@ namespace NoSQL_Project.Services
 			//await _incidentRepository.UpdateIncidentAsync(existingIncident);
 		}
 
-	}
+	
 
+        public Task<List<Incident>> GetIncidentsByReporter(string reporterId)
+        {
+            return _incidentRepository.GetIncidentsByReporter(reporterId);
+        }
+    }
 }

@@ -50,6 +50,7 @@ namespace NoSQL_Project
             });
             // Add services to the container.
             builder.Services.AddControllersWithViews();
+            builder.Services.AddHttpContextAccessor();
             builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<ILocationRepository, LocationRepository>();

@@ -1,15 +1,24 @@
 ﻿@using NoSQL_Project.Models.Enums
+@using NoSQL_Project.Commons
 @model PaginatedList<NoSQL_Project.Models.Incident>
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+
+@{
+    var user = HttpContextAccessor.HttpContext.Session.GetObject<NoSQL_Project.Models.User>("LoggedInUser");
+    bool canCreate = user != null &&
+        (user.UserType == NoSQL_Project.Models.Enums.UserType.Service_employee ||
+         user.UserType == NoSQL_Project.Models.Enums.UserType.Reg_employee);
+}
 @{
     ViewData["Title"] = "Incidents";
 }
 @if (TempData["Success"] != null)
 {
-<p class="alert-success">@TempData["Success"]</p>
+    <p class="alert-success">@TempData["Success"]</p>
 }
 @if (TempData["Error"] != null)
 {
-<p class="alert-danger">@TempData["Error"]</p>
+    <p class="alert-danger">@TempData["Error"]</p>
 }
 
 <header class="main_container_header">
@@ -17,9 +26,12 @@
         <h3>Incidents</h3>
     </div>
 
-    <div>
-        <a class="btn btn-primary" href="/Incident/Create">Create New Incident</a>
-    </div>
+    @if (canCreate)
+    {
+        <div>
+            <a class="btn btn-primary" href="/Incident/Create">Create New Incident</a>
+        </div>
+    }
 </header>
 
 <div class="charts_container">
@@ -52,7 +64,11 @@
 
     </div>
     <div class="search_filters_container">
-        <input class="search_form_input" type="search" name="name" value="" placeholder="Search" />
+        <form asp-action="Index" method="get" class="search_form">
+            <input class="search_form_input" type="search" name="searchString" value="@ViewData["CurrentFilter"]" placeholder="Search" />
+            <input type="hidden" name="sortOrder" value="@ViewData["CurrentSort"]" />
+            <button type="submit" class="btn btn-primary">Search</button>
+        </form>
     </div>
 </div>
 
@@ -72,62 +88,63 @@
         <tbody class="table_NICE_body">
             @foreach (Incident incident in Model.Items)
             {
-            string incidentStatusStyle = "";
-            string priorityLevelStyle = "";
-            // Determine priority style
-            switch (incident.Priority)
-            {
-            case Priority.low:
-            priorityLevelStyle = "priority_low";
-            break;
-            case Priority.medium:
-            priorityLevelStyle = "priority_medium";
-            break;
-            case Priority.high:
-            priorityLevelStyle = "priority_high";
-            break;
-            case Priority.critical:
-            priorityLevelStyle = "priority_critical";
-            break;
-            }
-            // Determine status style
-            switch (incident.Status)
-            {
-            case IncidentStatus.open:
-            incidentStatusStyle = "status_open";
-            break;
-            case IncidentStatus.resolved:
-            incidentStatusStyle = "status_closed";
-            break;
-            case IncidentStatus.closed_without_resolve:
-            incidentStatusStyle = "status_in_progress";
-            break;
-            }
-                
-            <tr>
-                
-                <td>
-                    <div class="priority_label @priorityLevelStyle">@incident.Priority</div>
-                </td>
+                string incidentStatusStyle = "";
+                string priorityLevelStyle = "";
+                // Determine priority style
+                switch (incident.Priority)
+                {
+                    case Priority.low:
+                        priorityLevelStyle = "priority_low";
+                        break;
+                    case Priority.medium:
+                        priorityLevelStyle = "priority_medium";
+                        break;
+                    case Priority.high:
+                        priorityLevelStyle = "priority_high";
+                        break;
+                    case Priority.critical:
+                        priorityLevelStyle = "priority_critical";
+                        break;
+                }
+                // Determine status style
+                switch (incident.Status)
+                {
+                    case IncidentStatus.open:
+                        incidentStatusStyle = "status_open";
+                        break;
+                    case IncidentStatus.resolved:
+                        incidentStatusStyle = "status_closed";
+                        break;
+                    case IncidentStatus.closed_without_resolve:
+                        incidentStatusStyle = "status_in_progress";
+                        break;
+                }
+
+                <tr>
+
+                    <td>
+                        <div class="priority_label @priorityLevelStyle">@incident.Priority</div>
+                    </td>
                     <td>
                         <a class="incident_href" asp-controller="Incident" asp-action="IncidentDetails" asp-route-id="@incident.Id">
                             @incident.Subject
                         </a>
                     </td>
-                <td>
-                    <div class="priority_label @incidentStatusStyle">@incident.Status</div>
-                </td>
-                <td>@(incident.AssignedTo != null ? $"{incident.AssignedTo.FirstName} {incident.AssignedTo.LastName}" : "Unassigned")</td>
-                <td>@incident.Location.Branch</td>
-                <td>@incident.ReportedAt.ToString("g")</td>
-                <td>@incident.Deadline.ToString("g")</td>
-            
-            </tr>
-                
+                    <td>
+                        <div class="priority_label @incidentStatusStyle">@incident.Status</div>
+                    </td>
+                    <td>@(incident.AssignedTo != null ? $"{incident.AssignedTo.FirstName} {incident.AssignedTo.LastName}" : "Unassigned")</td>
+                    <td>@incident.Location.Branch</td>
+                    <td>@incident.ReportedAt.ToString("g")</td>
+                    <td>@incident.Deadline.ToString("g")</td>
+
+                </tr>
+
             }
         </tbody>
     </table>
 </div>
+
 <div class="row">
     <div class="col-md-6">
     </div>
@@ -136,6 +153,7 @@
             <ul class="pagination justify-content-center">
                 <li class="page-item @(Model.PageIndex == 1 ? "disabled" : "")">
                     <a class="page-link text-black" asp-route-pageNumber="1"
+                       asp-route-searchString="@ViewData["CurrentFilter"]"
                        asp-route-sortOrder="@ViewData["CurrentSort"]"
                        asp-route-currentFilter="@ViewData["CurrentFilter"]">
                         <span>First</span>
@@ -144,6 +162,7 @@
 
                 <li class="page-item @(Model.HasPreviousPage ? "" : "disabled")">
                     <a class="page-link text-black" asp-route-pageNumber="@(Model.PageIndex - 1)"
+                       asp-route-searchString="@ViewData["CurrentFilter"]"
                        asp-route-sortOrder="@ViewData["CurrentSort"]"
                        asp-route-currentFilter="@ViewData["CurrentFilter"]">
                         <span>Previous</span>
@@ -152,15 +171,17 @@
 
                 @for (int i = 1; i <= Model.TotalPages; i++)
                 {
-                <li class="page-item @(Model.PageIndex == i ? "active" : "")">
-                    <a class="page-link text-black" asp-route-pageNumber="@i"
-                       asp-route-sortOrder="@ViewData["CurrentSort"]"
-                       asp-route-currentFilter="@ViewData["CurrentFilter"]">@i</a>
-                </li>
+                    <li class="page-item @(Model.PageIndex == i ? "active" : "")">
+                        <a class="page-link text-black" asp-route-pageNumber="@i"
+                           asp-route-searchString="@ViewData["CurrentFilter"]"
+                           asp-route-sortOrder="@ViewData["CurrentSort"]"
+                           asp-route-currentFilter="@ViewData["CurrentFilter"]">@i</a>
+                    </li>
                 }
 
                 <li class="page-item @(Model.HasNextPage ? "" : "disabled")">
                     <a class="page-link text-black" asp-route-pageNumber="@(Model.PageIndex + 1)"
+                       asp-route-searchString="@ViewData["CurrentFilter"]"
                        asp-route-sortOrder="@ViewData["CurrentSort"]"
                        asp-route-currentFilter="@ViewData["CurrentFilter"]">
                         <span>Next</span>
@@ -168,43 +189,43 @@
                 </li>
                 <li class="page-item @(Model.PageIndex == Model.TotalPages ? "disabled" : "")">
                     <a class="page-link text-black" asp-route-pageNumber="@Model.TotalPages"
+                       asp-route-searchString="@ViewData["CurrentFilter"]"
                        asp-route-sortOrder="@ViewData["CurrentSort"]"
                        asp-route-currentFilter="@ViewData["CurrentFilter"]">
                         <span>Last</span>
                     </a>
                 </li>
-
-
             </ul>
         </nav>
     </div>
 </div>
-@section Scripts{
-<script>
-    function drawDonut(canvasId, value, total, color){
-        const canvas = document.getElementById(canvasId);
-        const context = canvas.getContext("2d");
-        const percent = value / total;
 
-        context.lineWidh = 30;
-        context.strokeStyle = "lightgrey";
-        context.beginPath();
-        context.arc(75, 75, 55, 0, 2 * Math.PI);
-        context.stroke();
+@section Scripts {
+    <script>
+        function drawDonut(canvasId, value, total, color){
+            const canvas = document.getElementById(canvasId);
+            const context = canvas.getContext("2d");
+            const percent = value / total;
 
-        context.strokeStyle = color;
-        context.beginPath();
-        context.arc(75, 75, 55, -0.5 * Math.PI, (percent * 2 * Math.PI) - 0.5 * Math.PI);
-        context.stroke();
+            context.lineWidh = 30;
+            context.strokeStyle = "lightgrey";
+            context.beginPath();
+            context.arc(75, 75, 55, 0, 2 * Math.PI);
+            context.stroke();
 
-        //Text
-        context.fillStyle = "#000";
-        context.font = "20px Arial";
-        context.textAlign = "center";
-        context.textBaseLine = "middle";
-        context.fillText(value + (total ? "/" + total : ""), 75, 75);
-    }
-    drawDonut("chart1", 14, 75, "orange");
-    drawDonut("chart2", 14, 75, "orange");
-</script>
+            context.strokeStyle = color;
+            context.beginPath();
+            context.arc(75, 75, 55, -0.5 * Math.PI, (percent * 2 * Math.PI) - 0.5 * Math.PI);
+            context.stroke();
+
+            //Text
+            context.fillStyle = "#000";
+            context.font = "20px Arial";
+            context.textAlign = "center";
+            context.textBaseLine = "middle";
+            context.fillText(value + (total ? "/" + total : ""), 75, 75);
+        }
+        drawDonut("chart1", 14, 75, "orange");
+        drawDonut("chart2", 14, 75, "orange");
+    </script>
 }
