@@ -134,14 +134,12 @@ namespace NoSQL_Project.Controllers
 			catch (KeyNotFoundException ex)
 			{
 				TempData["Error"] = ex.Message;
-				Console.WriteLine(ex.Message);
 				return RedirectToAction("Index");
 			}
 			catch (InvalidOperationException ex)
 			{
 				ModelState.AddModelError("AssignedTo.FirstName", ex.Message);
 				ViewBag.IsEditing = true;
-				Console.WriteLine(ex.Message);
 				return View("IncidentDetails", updatedIncident);
 			}
 
