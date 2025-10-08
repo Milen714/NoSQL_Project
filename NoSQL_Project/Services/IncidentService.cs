@@ -28,6 +28,7 @@ namespace NoSQL_Project.Services
         {
             return _incidentRepository.GetIncidentByIdAsync(id).Result;
         }
+
         public async Task CreateNewIncidentAsync(NewIncidentViewModel model)
         {
             //get location branch name
@@ -52,6 +53,11 @@ namespace NoSQL_Project.Services
 
             //create the incident
             await _incidentRepository.CreateNewIncidentAsync(newIncident);
+
+        }
+
+        public async Task UpdateIncidentAsync(Incident existingIncident)
+        {
 
         }
     }
