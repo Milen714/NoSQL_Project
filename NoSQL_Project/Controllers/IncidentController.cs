@@ -113,40 +113,33 @@ namespace NoSQL_Project.Controllers
 		[HttpPost]
 		public async Task <IActionResult> UpdateIncident(Incident updatedIncident)
 		{
-			if (ModelState.IsValid)
+			if (!ModelState.IsValid)
 			{
-				var existingIncident = await _incidentService.GetIncidentByIdAsync(updatedIncident.Id);
+				ViewBag.IsEditing = true;
+				return View("IncidentDetails", updatedIncident);
+			}
 
-				if (existingIncident == null)
+				try
 				{
-					TempData["Error"] = "Incident not found.";
+					await _incidentService.UpdateIncidentAsync(updatedIncident);
+				}
+				catch (KeyNotFoundException ex)
+				{
+					TempData["Error"] = ex.Message;
 					return RedirectToAction("Index");
 				}
-				
-				//Update employee 
-				/*!!!still need to implement in service and repo
-				var employee = await _userService.FindUserByNameAsync(updatedIncident.AssignedTo.FirstName, updatedIncident.AssignedTo.LastName);
-
-				if (employee == null)
+				catch (InvalidOperationException ex)
 				{
-					ModelState.AddModelError("AssignedTo.FirstName", "No existe un empleado con ese nombre y apellido.");
+					ModelState.AddModelError("AssignedTo.FirstName", ex.Message);
 					ViewBag.IsEditing = true;
 					return View("IncidentDetails", updatedIncident);
 				}
-				existingIncident.AssignedTo = employee;*/
 
-				// Update other fields
-				existingIncident.IncidentType = updatedIncident.IncidentType;
-				existingIncident.Status = updatedIncident.Status;
-				existingIncident.Priority = updatedIncident.Priority;
-				existingIncident.Deadline = updatedIncident.Deadline;
+				return RedirectToAction("IncidentDetails", new { id = updatedIncident.Id });
 
-				await _incidentService.UpdateIncidentAsync(existingIncident);
-			}			
-
-			return RedirectToAction("IncidentDetails", new { id = updatedIncident.Id } );
 		}
-
+		
+			
 
 		[HttpPost]
 		public IActionResult ChangePriority(string incidentId, Priority newPriority)
