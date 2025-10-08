@@ -10,12 +10,13 @@ namespace NoSQL_Project.Services
     {
         private readonly IIncidentRepository _incidentRepository;
         private readonly ILocationService _locationService;
-        public IncidentService(IIncidentRepository incidentRepository, ILocationService locationService)
+        private readonly IUserService _userService;
+		public IncidentService(IIncidentRepository incidentRepository, ILocationService locationService, IUserService userService)
         {
             _incidentRepository = incidentRepository;
             _locationService = locationService;
-        }
-
+            _userService = userService;
+		}
         public List<Incident> GetAll()
         {
             return _incidentRepository.GetAll().Result;
@@ -29,6 +30,7 @@ namespace NoSQL_Project.Services
         {
             return _incidentRepository.GetIncidentByIdAsync(id).Result;
         }
+
         public async Task CreateNewIncidentAsync(NewIncidentViewModel model)
         {
             //get location branch name
@@ -55,6 +57,31 @@ namespace NoSQL_Project.Services
             await _incidentRepository.CreateNewIncidentAsync(newIncident);
 
         }
+
+        public async Task UpdateIncidentAsync(Incident updatedIncident)
+        {
+			var existingIncident = await _incidentRepository.GetIncidentByIdAsync(updatedIncident.Id);
+			if (existingIncident == null)
+				throw new KeyNotFoundException("Incident not found");
+
+			//Update employee 
+			/*!!!still need to implement in service and repo
+			var employee = await _userService.FindUserByNameAsync(updatedIncident.AssignedTo.FirstName, updatedIncident.AssignedTo.LastName);
+            if (employee == null)
+				throw new InvalidOperationException("Empleado no existe");            
+
+			existingIncident.AssignedTo = employee;*/
+
+			existingIncident.IncidentType = updatedIncident.IncidentType;
+			existingIncident.Status = updatedIncident.Status;
+			existingIncident.Priority = updatedIncident.Priority;
+			existingIncident.Deadline = updatedIncident.Deadline;
+
+
+			//await _incidentRepository.UpdateIncidentAsync(existingIncident);
+		}
+
+	
 
         public Task<List<Incident>> GetIncidentsByReporter(string reporterId)
         {
