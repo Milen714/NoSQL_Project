@@ -65,20 +65,21 @@ namespace NoSQL_Project.Services
 				throw new KeyNotFoundException("Incident not found");
 
 			//Update employee 
-			/*!!!still need to implement in service and repo
+			
 			var employee = await _userService.FindUserByNameAsync(updatedIncident.AssignedTo.FirstName, updatedIncident.AssignedTo.LastName);
-            if (employee == null)
-				throw new InvalidOperationException("Empleado no existe");            
+			if (employee == null)
+				throw new InvalidOperationException("Employee doesn't exists");
 
-			existingIncident.AssignedTo = employee;*/
+			var assigneeUser = new AssigneeSnapshot();
+			assigneeUser.MapAssignee(employee);	        
 
+			existingIncident.AssignedTo = assigneeUser;
 			existingIncident.IncidentType = updatedIncident.IncidentType;
 			existingIncident.Status = updatedIncident.Status;
 			existingIncident.Priority = updatedIncident.Priority;
 			existingIncident.Deadline = updatedIncident.Deadline;
 
-
-			//await _incidentRepository.UpdateIncidentAsync(existingIncident);
+			await _incidentRepository.UpdateIncidentAsync(existingIncident);
 		}
 
 	}

@@ -111,35 +111,42 @@ namespace NoSQL_Project.Controllers
 
 		//Update the edited incident
 		[HttpPost]
-		public async Task <IActionResult> UpdateIncident(Incident updatedIncident)
+		public async Task<IActionResult> UpdateIncident(Incident updatedIncident)
 		{
+			foreach (var kvp in ModelState)
+			{
+				foreach (var error in kvp.Value.Errors)
+				{
+					Console.WriteLine($"{kvp.Key}: {error.ErrorMessage}");
+				}
+			}
+
 			if (!ModelState.IsValid)
 			{
 				ViewBag.IsEditing = true;
 				return View("IncidentDetails", updatedIncident);
 			}
 
-				try
-				{
-					await _incidentService.UpdateIncidentAsync(updatedIncident);
-				}
-				catch (KeyNotFoundException ex)
-				{
-					TempData["Error"] = ex.Message;
-					return RedirectToAction("Index");
-				}
-				catch (InvalidOperationException ex)
-				{
-					ModelState.AddModelError("AssignedTo.FirstName", ex.Message);
-					ViewBag.IsEditing = true;
-					return View("IncidentDetails", updatedIncident);
-				}
+			try
+			{
+				await _incidentService.UpdateIncidentAsync(updatedIncident);
+			}
+			catch (KeyNotFoundException ex)
+			{
+				TempData["Error"] = ex.Message;
+				Console.WriteLine(ex.Message);
+				return RedirectToAction("Index");
+			}
+			catch (InvalidOperationException ex)
+			{
+				ModelState.AddModelError("AssignedTo.FirstName", ex.Message);
+				ViewBag.IsEditing = true;
+				Console.WriteLine(ex.Message);
+				return View("IncidentDetails", updatedIncident);
+			}
 
-				return RedirectToAction("IncidentDetails", new { id = updatedIncident.Id });
-
+			return RedirectToAction("IncidentDetails", new { id = updatedIncident.Id });
 		}
-		
-			
 
 		[HttpPost]
 		public IActionResult ChangePriority(string incidentId, Priority newPriority)
@@ -151,8 +158,5 @@ namespace NoSQL_Project.Controllers
 		{
 			return RedirectToAction("IncidentDetails", new { id = incidentId });
 		}
-
-
-
 	}
 }

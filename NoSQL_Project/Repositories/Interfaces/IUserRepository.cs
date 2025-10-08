@@ -13,8 +13,11 @@ namespace NoSQL_Project.Repositories.Interfaces
         public Task<User> AuthenticateUserAsync(LoginModel model);
         Task UpdateUserAsync(User user);
 
-        
-    }
+        Task<User> FindUserByNameAsync(string firstName, string lastName);
+
+
+
+	}
 }
 
 

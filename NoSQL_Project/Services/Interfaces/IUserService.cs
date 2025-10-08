@@ -13,11 +13,12 @@ namespace NoSQL_Project.Services.Interfaces
         public User HashUserPassword(User user);
         Task UpdateUserAsync(User user);
 
+		Task<User> FindUserByNameAsync(string firstName, string lastName);
 
 
-        // Future:
-        // User? GetById(string id);
-        // void Update(User user);
-        // void Delete(string id);
-    }
+		// Future:
+		// User? GetById(string id);
+		// void Update(User user);
+		// void Delete(string id);
+	}
 }

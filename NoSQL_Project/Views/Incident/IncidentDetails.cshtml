@@ -51,9 +51,13 @@
 
 <div class="incident_layout">
     <header class="incident_main_header">
-        <h4>@Model.Location.Branch > #ID @Model.Id</h4>
+        <h4>@Model.Location?.Branch > #ID @Model.Id</h4>
+            <input type="hidden" asp-for="Location.Branch" />
+            <input type="hidden" asp-for="Location.Region" />
         <h2>@Model.Subject</h2>
+            <input type="hidden" asp-for="Subject" />
         <p>@Model.Description</p>
+            <input type="hidden" asp-for="Description" />
     </header>
 
     <article class="incident_other_information">
@@ -146,14 +150,18 @@
             <div class="other_information_row">
                 <p>Created on:</p>
                 <h4>@Model.ReportedAt.ToString("g")</h4>
+                    <input type="hidden" asp-for="ReportedAt" />
             </div>
             <div class="other_information_row">
                 <p>Reported by:</p>
-                <h4>@Model.ReportedBy.FirstName @Model.ReportedBy.LastName</h4>
+                <h4>@Model.ReportedBy?.FirstName @Model.ReportedBy?.LastName</h4>
+                    <input type="hidden" asp-for="ReportedBy.FirstName" />
+                    <input type="hidden" asp-for="ReportedBy.LastName" />
             </div>
             <div class="other_information_row">
                 <p>Branch:</p>
-                <h4>@Model.Location.Branch</h4>
+                <h4>@Model.Location?.Branch</h4>
+                <input type="hidden" asp-for="Location.Branch" />
             </div>
         </div>     
     </article>
