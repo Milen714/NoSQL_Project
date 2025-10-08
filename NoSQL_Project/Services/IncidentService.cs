@@ -15,6 +15,7 @@ namespace NoSQL_Project.Services
             _incidentRepository = incidentRepository;
             _locationService = locationService;
         }
+
         public List<Incident> GetAll()
         {
             return _incidentRepository.GetAll().Result;
@@ -53,6 +54,11 @@ namespace NoSQL_Project.Services
             //create the incident
             await _incidentRepository.CreateNewIncidentAsync(newIncident);
 
+        }
+
+        public Task<List<Incident>> GetIncidentsByReporter(string reporterId)
+        {
+            return _incidentRepository.GetIncidentsByReporter(reporterId);
         }
     }
 }

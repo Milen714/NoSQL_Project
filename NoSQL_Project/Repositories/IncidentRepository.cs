@@ -18,7 +18,7 @@ namespace NoSQL_Project.Repositories
         {
             try
             {
-               return await _incidents.Find(_ => true).ToListAsync();
+                return await _incidents.Find(_ => true).ToListAsync();
             }
             catch (Exception ex)
             {
@@ -60,6 +60,20 @@ namespace NoSQL_Project.Repositories
         public async Task CreateNewIncidentAsync(Incident newIncident)
         {
             await _incidents.InsertOneAsync(newIncident);
+        }
+
+        public async Task<List<Incident>> GetIncidentsByReporter(string reporterId)
+        {
+            try
+            {
+                var filter = Builders<Incident>.Filter.Eq("ReportedBy.Id", reporterId);
+                return await _incidents.Find(filter).ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                throw new Exception($"Could not retrieve incidents for reporter {reporterId}: {ex.Message}");
+            }
         }
 
     }

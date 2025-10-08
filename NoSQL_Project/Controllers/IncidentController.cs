@@ -19,7 +19,7 @@ namespace NoSQL_Project.Controllers
             _userService = userService;
             _incidentService = incidentService;
         }
-        public async Task<IActionResult> Index(string searchString, int pageNumber, string currentFilter)
+        public async Task<IActionResult> Index(string searchString, int pageNumber, string currentFilter="", string sortOrder ="")
         {
             try
             {
@@ -32,7 +32,58 @@ namespace NoSQL_Project.Controllers
                     searchString = currentFilter;
                 }
 
-                var incidents = _incidentService.GetAllIncidentsPerStatus(IncidentStatus.open, "").Result;
+                var user = HttpContext.Session.GetObject<User>("LoggedInUser");
+                if (user == null)
+                {
+                    return RedirectToAction("Login", "Home");
+                }
+
+                List<Incident> incidents;
+
+                if (user.UserType == UserType.Service_employee)
+                {
+                    incidents = await _incidentService.GetAllIncidentsPerStatus(IncidentStatus.open, "");
+                }
+                else if (user.UserType == UserType.Reg_employee)
+                {
+                    incidents = await _incidentService.GetIncidentsByReporter(user.Id);
+                }
+                else
+                {
+                    TempData["Error"] = "You do not have permission to access this page.";
+                    return RedirectToAction("Login", "Home");
+                }
+
+                // Searching
+                if (!string.IsNullOrEmpty(searchString))
+                {
+                    incidents = incidents
+                        .Where(i => i.Subject.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+                        .ToList();
+                }
+
+                // Sorting
+                switch (sortOrder?.ToLower())
+                {
+                    case "priority":
+                        incidents = incidents.OrderBy(i => i.Priority).ToList();
+                        break;
+                    case "priority_desc":
+                        incidents = incidents.OrderByDescending(i => i.Priority).ToList();
+                        break;
+                    case "date":
+                        incidents = incidents.OrderBy(i => i.ReportedAt).ToList();
+                        break;
+                    case "date_desc":
+                        incidents = incidents.OrderByDescending(i => i.ReportedAt).ToList();
+                        break;
+                    default:
+                        incidents = incidents.OrderByDescending(i => i.ReportedAt).ToList();
+                        break;
+                }
+
+                ViewData["CurrentFilter"] = searchString;
+                ViewData["CurrentSort"] = sortOrder;
 
                 if (pageNumber < 1)
                 {
@@ -40,8 +91,9 @@ namespace NoSQL_Project.Controllers
                 }
 
                 int pageSize = 10;
-                return View(PaginatedList<Incident>.CreateAsync(incidents, pageNumber, pageSize));
 
+
+                return View(PaginatedList<Incident>.CreateAsync(incidents, pageNumber, pageSize));
             }
             catch (Exception ex)
             {
@@ -49,6 +101,7 @@ namespace NoSQL_Project.Controllers
                 return View(new PaginatedList<User>(new List<User>(), 0, 1, 1));
             }
         }
+
 
         public async Task<IActionResult> IncidentDetails(string id)
         {
@@ -116,5 +169,7 @@ namespace NoSQL_Project.Controllers
 
             return RedirectToAction("Index", "Home");
         }
+
+
     }
 }
