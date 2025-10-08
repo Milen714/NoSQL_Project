@@ -12,5 +12,8 @@ namespace NoSQL_Project.Repositories.Interfaces
 
         Task UpdateIncidentAsync(Incident updatedIncident);
 
+
+        Task CloseIncidentAsync(Incident incidentClosed);
+
 	}
 }

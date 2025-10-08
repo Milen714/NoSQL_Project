@@ -176,9 +176,25 @@
     }
     else
     {
-        <a asp-action="EditIncident" asp-route-id="@Model.Id" class="btn btn-primary">Edit</a>
+        <a asp-action="EditIncident" asp-route-id="@Model.Id" class="btn btn-primary">Edit</a>          
+        
     }
 </div>
 </form>
+
+
+<form asp-action="CloseIncident" method="post">
+    <input type="hidden" name="incidentId" value="@Model.Id" />
+    <input type="hidden" name="updatedStatus" value="resolved" />
+    <button type="submit">Resolve </button>
+</form>
+
+<form asp-action="CloseIncident" method="post">
+    <input type="hidden" name="incidentId" value="@Model.Id" />
+    <input type="hidden" name="updatedStatus" value="closed_without_resolve" />
+    <button type="submit">Close Incident</button>
+</form>
+
+
 
 

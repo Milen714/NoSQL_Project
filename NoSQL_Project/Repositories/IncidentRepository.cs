@@ -62,12 +62,16 @@ namespace NoSQL_Project.Repositories
 			await _incidents.InsertOneAsync(newIncident);
 		}
 
+		public async Task UpdateBuilderAsync(Incident incident, UpdateDefinition<Incident> update)
+		{
+			var filter = Builders<Incident>.Filter.Eq(i => i.Id, incident.Id);
+
+			var result = await _incidents.UpdateOneAsync(filter, update);
+		}
+
 		public async Task UpdateIncidentAsync(Incident updatedIncident)
 		{
-
-			var filter = Builders<Incident>.Filter.Eq(i => i.Id, updatedIncident.Id);
-
-			var updateBuilder = Builders<Incident>.Update
+			var update = Builders<Incident>.Update
 					.Set(i => i.IncidentType, updatedIncident.IncidentType)
 					.Set(i => i.Priority, updatedIncident.Priority)
 					.Set(i => i.Deadline, updatedIncident.Deadline)
@@ -75,17 +79,33 @@ namespace NoSQL_Project.Repositories
 
 			if (updatedIncident.AssignedTo != null)
 			{
-				updateBuilder = updateBuilder
+				update = update
 					.Set(i => i.AssignedTo.UserId, updatedIncident.AssignedTo.UserId)
 					.Set(i => i.AssignedTo.FirstName, updatedIncident.AssignedTo.FirstName)
 					.Set(i => i.AssignedTo.LastName, updatedIncident.AssignedTo.LastName);
 			}
 
-			var result = await _incidents.UpdateOneAsync(filter, updateBuilder);
-			Console.WriteLine($"Matched: {result.MatchedCount}, Modified: {result.ModifiedCount}");
-
-
-
+			await UpdateBuilderAsync(updatedIncident, update);
 		}
+
+
+		public async Task CloseIncidentAsync(Incident incidentClosed)
+		{
+			var update = Builders<Incident>.Update
+					.Set(i => i.Status, incidentClosed.Status);
+
+			await UpdateBuilderAsync(incidentClosed, update);
+		}
+
+		/*
+		public async Task CloseIncidentAsync(Incident incidentClosed)
+		{
+			var filter = Builders<Incident>.Filter.Eq(i => i.Id, incidentClosed.Id);
+			var update = Builders<Incident>.Update
+					.Set(i => i.Status, incidentClosed.Status);
+
+			var result = await _incidents.UpdateOneAsync(filter, update);
+			Console.WriteLine($"Matched: {result.MatchedCount}, Modified: {result.ModifiedCount}");
+		}*/
 	}
 }

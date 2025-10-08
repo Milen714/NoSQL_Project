@@ -113,13 +113,6 @@ namespace NoSQL_Project.Controllers
 		[HttpPost]
 		public async Task<IActionResult> UpdateIncident(Incident updatedIncident)
 		{
-			foreach (var kvp in ModelState)
-			{
-				foreach (var error in kvp.Value.Errors)
-				{
-					Console.WriteLine($"{kvp.Key}: {error.ErrorMessage}");
-				}
-			}
 
 			if (!ModelState.IsValid)
 			{
@@ -144,6 +137,29 @@ namespace NoSQL_Project.Controllers
 			}
 
 			return RedirectToAction("IncidentDetails", new { id = updatedIncident.Id });
+		}
+
+		[HttpPost]
+		public async Task<IActionResult> CloseIncident (string incidentId, string updatedStatus)
+		{
+			try
+			{
+				await _incidentService.CloseIncidentAsync(incidentId, updatedStatus);
+
+				return RedirectToAction("IncidentDetails", new { id = incidentId });
+			}
+			catch (KeyNotFoundException ex)
+			{
+				TempData["Error"] = ex.Message;
+				Console.WriteLine(ex);
+				return RedirectToAction("Index");
+			}
+			catch (Exception ex)
+			{
+				TempData["Error"] = $"Could not close incident: {ex.Message}";
+				Console.WriteLine(ex);
+				return RedirectToAction("Index");
+			}
 		}
 
 		[HttpPost]

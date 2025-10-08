@@ -12,6 +12,6 @@ namespace NoSQL_Project.Services.Interfaces
         Task CreateNewIncidentAsync(NewIncidentViewModel model);
 
         Task UpdateIncidentAsync(Incident updatedIncident);
-
+        Task CloseIncidentAsync(string closedIncidentId, string updatedStatus);
 	}
 }

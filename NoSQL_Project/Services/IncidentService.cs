@@ -87,6 +87,26 @@ namespace NoSQL_Project.Services
 			await _incidentRepository.UpdateIncidentAsync(existingIncident);
 		}
 
+		public async Task CloseIncidentAsync(string closedIncidentId, string updatedStatus)
+		{	
+			var existingIncident = await _incidentRepository.GetIncidentByIdAsync(closedIncidentId);
+			if (existingIncident == null)
+				throw new KeyNotFoundException("Incident not found");
+
+			if (IncidentStatus.resolved.ToString().Equals(updatedStatus, StringComparison.OrdinalIgnoreCase))
+			{
+				existingIncident.Status = IncidentStatus.resolved;
+			}
+			else if (IncidentStatus.closed_without_resolve.ToString().Equals(updatedStatus, StringComparison.OrdinalIgnoreCase))
+			{
+				existingIncident.Status = IncidentStatus.closed_without_resolve;
+			}
+			else
+			{
+				throw new ArgumentException("Invalid status value");
+			}
+			await _incidentRepository.CloseIncidentAsync(existingIncident);
+		}
 	}
 
 }
