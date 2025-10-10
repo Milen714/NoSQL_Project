@@ -15,5 +15,8 @@ namespace NoSQL_Project.Models
         [BsonElement("last_name")]
         [BsonIgnoreIfNull]
         public string? LastName { get; set; }
+
+        [BsonElement("is_active")]
+        public bool IsActive { get; set; }
     }
 }

@@ -1,4 +1,6 @@
-﻿using NoSQL_Project.Models;
+﻿using MongoDB.Bson;
+using MongoDB.Driver;
+using NoSQL_Project.Models;
 using NoSQL_Project.Models.Enums;
 using NoSQL_Project.Repositories.Interfaces;
 using NoSQL_Project.Services.Interfaces;
@@ -10,10 +12,14 @@ namespace NoSQL_Project.Services
     {
         private readonly IIncidentRepository _incidentRepository;
         private readonly ILocationService _locationService;
-        public IncidentService(IIncidentRepository incidentRepository, ILocationService locationService)
+
+        private readonly IMongoCollection<Incident> _incidents;
+
+        public IncidentService(IIncidentRepository incidentRepository, ILocationService locationService, IMongoDatabase database)
         {
             _incidentRepository = incidentRepository;
             _locationService = locationService;
+            _incidents = database.GetCollection<Incident>("Incidents");
         }
         public List<Incident> GetAll()
         {
@@ -28,6 +34,18 @@ namespace NoSQL_Project.Services
         {
             return _incidentRepository.GetIncidentByIdAsync(id).Result;
         }
+
+        public Task<List<Incident>> GetAllIncidentsByType(IncidentType type, string branch)
+        {
+            return _incidentRepository.GetAllIncidentsByType(type, branch);
+        }
+
+        public async Task<List<Incident>> GetIncidentsByStatusAndType(IncidentStatus status, IncidentType type, string branch)
+        {
+            return await _incidentRepository.GetIncidentsByStatusAndType(status, type, branch);
+        }
+
+
         public async Task CreateNewIncidentAsync(NewIncidentViewModel model)
         {
             //get location branch name
@@ -54,5 +72,7 @@ namespace NoSQL_Project.Services
             await _incidentRepository.CreateNewIncidentAsync(newIncident);
 
         }
+
+        
     }
 }
