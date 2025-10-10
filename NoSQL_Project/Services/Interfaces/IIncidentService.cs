@@ -8,6 +8,9 @@ namespace NoSQL_Project.Services.Interfaces
     {
         List<Incident> GetAll();
         Task<List<Incident>> GetAllIncidentsPerStatus(IncidentStatus status, string branch);
+
+        Task<List<Incident>> GetAllIncidentsByType(IncidentType type, string branch);
+        Task<List<Incident>> GetIncidentsByStatusAndType(IncidentStatus status, IncidentType type, string branch);
         Task<Incident> GetIncidentByIdAsync(string id);
         Task CreateNewIncidentAsync(NewIncidentViewModel model);
 
