@@ -1,5 +1,4 @@
-﻿using MongoDB.Driver;
-using NoSQL_Project.Models;
+﻿using NoSQL_Project.Models;
 using NoSQL_Project.Models.Enums;
 using NoSQL_Project.Repositories.Interfaces;
 using NoSQL_Project.Services.Interfaces;
@@ -7,32 +6,45 @@ using NoSQL_Project.ViewModels;
 
 namespace NoSQL_Project.Services
 {
-	public class IncidentService : IIncidentService
-	{
-		private readonly IIncidentRepository _incidentRepository;
-		private readonly ILocationService _locationService;
-		private readonly IUserService _userService;
-		public IncidentService(IIncidentRepository incidentRepository, ILocationService locationService, IUserService userService)
-		{
-			_incidentRepository = incidentRepository;
-			_locationService = locationService;
-			_userService = userService;
-		}
-		public List<Incident> GetAll()
-		{
-			return _incidentRepository.GetAll().Result;
-		}
+    public class IncidentService : IIncidentService
+    {
+        private readonly IIncidentRepository _incidentRepository;
+        private readonly ILocationService _locationService;
 
-		public Task<List<Incident>> GetAllIncidentsPerStatus(IncidentStatus status, string branch)
-		{
-			return _incidentRepository.GetAllIncidentsPerStatus(status, branch);
-		}
-		public async Task<Incident> GetIncidentByIdAsync(string id)
-		{
-			return _incidentRepository.GetIncidentByIdAsync(id).Result;
-		}
+        private readonly IMongoCollection<Incident> _incidents;
 
-		public async Task CreateNewIncidentAsync(NewIncidentViewModel model)
+        public IncidentService(IIncidentRepository incidentRepository, ILocationService locationService, IMongoDatabase database)
+        {
+            _incidentRepository = incidentRepository;
+            _locationService = locationService;
+            _incidents = database.GetCollection<Incident>("Incidents");
+        }
+        public List<Incident> GetAll()
+        {
+            return _incidentRepository.GetAll().Result;
+        }
+
+        public Task<List<Incident>> GetAllIncidentsPerStatus(IncidentStatus status, string branch)
+        {
+            return _incidentRepository.GetAllIncidentsPerStatus(status, branch);
+        }
+        public async Task<Incident> GetIncidentByIdAsync(string id)
+        {
+            return _incidentRepository.GetIncidentByIdAsync(id).Result;
+        }
+        
+        public Task<List<Incident>> GetAllIncidentsByType(IncidentType type, string branch)
+        {
+            return _incidentRepository.GetAllIncidentsByType(type, branch);
+        }
+
+        public async Task<List<Incident>> GetIncidentsByStatusAndType(IncidentStatus status, IncidentType type, string branch)
+        {
+            return await _incidentRepository.GetIncidentsByStatusAndType(status, type, branch);
+        }
+
+
+        public async Task CreateNewIncidentAsync(NewIncidentViewModel model)
 		{
 			//get location branch name
 			Location location = await _locationService.GetLocationByName(model.LocationBranchName);
@@ -58,8 +70,7 @@ namespace NoSQL_Project.Services
 			await _incidentRepository.CreateNewIncidentAsync(newIncident);
 
 		}
-
-		public async Task UpdateIncidentAsync(Incident updatedIncident)
+        public async Task UpdateIncidentAsync(Incident updatedIncident)
 		{
 			var existingIncident = await _incidentRepository.GetIncidentByIdAsync(updatedIncident.Id);
 			if (existingIncident == null)
@@ -147,8 +158,6 @@ namespace NoSQL_Project.Services
 				throw new ArgumentException("Invalid status value");
 			}
 
-			await UpdateIncidentAsync(existingIncident);
-		}
 	}
 
 }

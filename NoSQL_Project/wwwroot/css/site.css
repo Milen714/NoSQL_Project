@@ -140,6 +140,22 @@ body {
     border-radius: 5px;
     color: black;
 }
+#addUserFrom {
+    background-color: #fff;
+}
+
+#addUserFrom .form-label {
+    color: #333;
+}
+
+#addUserFrom .btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+#addUserFrom .btn-outline-secondary:hover {
+    background-color: #e9ecef;
+}
 .login_body{
     width: 55%;
 }
@@ -221,20 +237,22 @@ body {
     background-color: var(--color-bgs-darker);
     border: 2px solid var(--color-accent-grey-darker);
     margin: 20px 0;
-    width: fit-content;
+    width: 100%;
 }
 .table_NICE {
     border-radius: 10px;
     border-collapse: collapse;
     overflow: hidden;
     font-size: 0.8em;
-    min-width: 400px;
+    min-width: auto;
+    width: 100%;
+    
 }
-    .table_NICE thead tr {
-        background-color: #f3f3f3;
-        box-shadow: 0 3px 2px -2px rgba(0, 0, 0, 0.2);
-        text-align: left;
-    }
+.table_NICE thead tr {
+    background-color: #f3f3f3;
+    box-shadow: 0 3px 2px -2px rgba(0, 0, 0, 0.2);
+    text-align: left;
+}
 .table_NICE th, .table_NICE td{
     padding: 12px 15px;
 }
@@ -283,68 +301,14 @@ body {
     background-color: var(--color-status-resolved);
     color: var(--color-status-resolved-text);
 }
-/*SEARCH OPTIONS*/
-.search_container{
-    display: flex;
-    flex-direction:column;
-}
+
 .search_options_ul {
     display: flex;
-    flex-direction: row;
-    list-style-type: none;
-    margin: 0;
+    list-style: none; /* Removes the dots */
+    padding-left: 0; /* Removes default left padding */
+    gap: 10px; /* Optional: adds spacing between items */
 }
-.search_options_li{
-    padding:5px;
-    margin: 0 5px 0 5px;
-}
-.search_options_li a{
-    text-align: center;
-    text-decoration: none;
-}
-/*  CHARTS*/
-.charts_container{
-    display: flex;
-}
-/*INCIDENT Screen*/
-.incident_details_title{
-    width: fit-content;
-    margin: 10px 10px 20px 10px;
-    border-bottom: 2px solid var(--color-accent-grey-darker);
-}
-.title{
-    margin: 0;
-}
-.incident_layout {
-    display: flex;
-    justify-content: space-around;
-}
-.other_information_row{
-    display: flex;
-    justify-content: space-around;
-}
-.other_information_row div{
-    text-align:center;
-    height: fit-content;
-    padding: 10px;
-}
-.incident_management_buttons{
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
 
-}
-.escalate_select, .status_select {
-    width: 90%;
-    padding: 8px 30px 8px 10px;
-    font-family: var(--font-primary);
-    font-size: 16px;
-    color: #b8860b;
-    background-color: #fafad2;
-    border: 1px solid #b8860b;
-    border-radius: 4px;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    cursor: pointer;
+.search_options_li {
+    margin: 0;
 }

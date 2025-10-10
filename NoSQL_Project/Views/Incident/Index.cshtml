@@ -1,5 +1,6 @@
 ﻿@using NoSQL_Project.Models.Enums
 @model PaginatedList<NoSQL_Project.Models.Incident>
+
 @{
     ViewData["Title"] = "Incidents";
 }
@@ -17,9 +18,6 @@
         <h3>Incidents</h3>
     </div>
 
-    <div>
-        <a class="btn btn-primary" href="/Incident/Create">Create New Incident</a>
-    </div>
 </header>
 
 <div class="charts_container">
@@ -31,30 +29,62 @@
     </div>
 </div>
 
-<div class="search_container">
+    <div class="search_container">
     <div class="search_options_container">
-        <nav>
-            <ul class="search_options_ul">
-                <li class="search_options_li">
-                    <a class="search_options_a" asp-action="Index" asp-route-statusFilter="All">All</a>
-                </li>
-                <li class="search_options_li">
-                    <a class="search_options_a" asp-action="Index" asp-route-statusFilter="Open">Open</a>
-                </li>
-                <li class="search_options_li">
-                    <a class="search_options_a" asp-action="Index" asp-route-statusFilter="InProgress">In Progress</a>
-                </li>
-                <li class="search_options_li">
-                    <a class="search_options_a" asp-action="Index" asp-route-statusFilter="Closed">Closed</a>
-                </li>
-            </ul>
-        </nav>
-
+            <nav>
+                <ul class="search_options_ul">
+                    <li class="search_options_li">
+                    <a class="search_options_a btn btn-outline-info border-dark border-2 " asp-action="Index" asp-route-statusFilter="All" asp-route-typeFilter="@Context.Request.Query["typeFilter"]">All</a>
+                    </li>
+                    <li class="search_options_li">
+                    <a class="search_options_a btn btn-outline-info border-dark border-2" asp-action="Index" asp-route-statusFilter="open" asp-route-typeFilter="@Context.Request.Query["typeFilter"]">Open</a>
+                    </li>
+                    <li class="search_options_li">
+                    <a class="search_options_a btn btn-outline-info border-dark border-2" asp-action="Index" asp-route-statusFilter="resolved" asp-route-typeFilter="@Context.Request.Query["typeFilter"]">In Progress</a>
+                    </li>
+                    <li class="search_options_li">
+                    <a class="search_options_a btn btn-outline-info border-dark border-2" asp-action="Index" asp-route-statusFilter="closed_without_resolve" asp-route-typeFilter="@Context.Request.Query["typeFilter"]">Closed</a>
+                    </li>
+                </ul>
+            </nav>
     </div>
-    <div class="search_filters_container">
-        <input class="search_form_input" type="search" name="name" value="" placeholder="Search" />
+
+    <form method="get" asp-action="Index" class="d-flex gap-3 align-items-center">
+        <input type="hidden" name="statusFilter" value="@Context.Request.Query["statusFilter"]" />
+        <select name="typeFilter" class="form-select border-dark border-2" style="width: 200px;">
+            <option value="">Filter by Type --</option>
+            <option value="hardware">Hardware</option>
+            <option value="software">Software</option>
+            <option value="network">Network</option>
+            <option value="security">Security</option>
+            <option value="access">Access</option>
+            <option value="other">Other</option>
+        </select>
+
+        <button type="submit" class="btn btn-info border-dark border-2">Apply Filters</button>
+    </form>
+
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <!-- Search bar (left) -->
+        <form class="d-flex" role="search">
+            <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+            <button class="btn btn-outline-success" type="submit">Search</button>
+        </form>
+
+        <!-- Button (right) -->
+        <a class="btn btn-primary" href="/Incident/Create">Create New Incident</a>
     </div>
 </div>
+@if (!string.IsNullOrEmpty(ViewContext.HttpContext.Request.Query["statusFilter"]) ||
+    !string.IsNullOrEmpty(ViewContext.HttpContext.Request.Query["typeFilter"]))
+{
+    <div class="alert alert-info mt-3">
+        <strong>Filters applied:</strong>
+        @ViewContext.HttpContext.Request.Query["statusFilter"]
+        @ViewContext.HttpContext.Request.Query["typeFilter"]
+    </div>
+}
 
 <div class="table_NICE_container">
     <table class="table_NICE">

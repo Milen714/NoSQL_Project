@@ -1,11 +1,15 @@
 ﻿using ChapeauPOS.Commons;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
+using MongoDB.Driver;
 using NoSQL_Project.Commons;
 using NoSQL_Project.Models;
 using NoSQL_Project.Models.Enums;
 using NoSQL_Project.Services.Interfaces;
 using NoSQL_Project.ViewModels;
+using System.Reflection;
+
+
 
 namespace NoSQL_Project.Controllers
 {
@@ -14,14 +18,19 @@ namespace NoSQL_Project.Controllers
 		private readonly IUserService _userService;
 		private readonly ILocationService _locationService;
 		private readonly IIncidentService _incidentService;
-		public IncidentController(IUserService userService, ILocationService locationSrvice, IIncidentService incidentService)
-		{
-			_locationService = locationSrvice;
-			_userService = userService;
-			_incidentService = incidentService;
-		}
-		public async Task<IActionResult> Index(string searchString, int pageNumber, string currentFilter)
-		{
+    public IncidentController(IUserService userService, ILocationService locationSrvice, IIncidentService incidentService, IIncidentService incidents)
+        {
+            _locationService = locationSrvice;
+            _userService = userService;
+            _incidentService = incidentService;
+            _incidents = incidents;
+        }
+		public async Task<IActionResult> Index(string searchString, int pageNumber, string currentFilter, string statusFilter, string typeFilter, string branch)
+        {
+            List<Incident> incidents;
+
+            bool hasStatus = !string.IsNullOrEmpty(statusFilter) && statusFilter != "All";
+            bool hasType = !string.IsNullOrEmpty(typeFilter);
 			try
 			{
 				if (searchString != null)
@@ -33,8 +42,33 @@ namespace NoSQL_Project.Controllers
 					searchString = currentFilter;
 				}
 
-				var incidents = _incidentService.GetAllIncidentsPerStatus(IncidentStatus.open, "").Result;
-
+				//var incidents = _incidentService.GetAllIncidentsPerStatus(IncidentStatus.open, "").Result;
+        
+        // Filter by both status and type
+              if (hasStatus && hasType &&
+                  Enum.TryParse<IncidentStatus>(statusFilter, true, out var parsedStatus) &&
+                  Enum.TryParse<IncidentType>(typeFilter, true, out var parsedType))
+              {
+                  incidents = await _incidentService.GetIncidentsByStatusAndType(parsedStatus, parsedType, branch);
+              }
+              // Filter by status only
+              else if (hasStatus &&
+                  Enum.TryParse<IncidentStatus>(statusFilter, true, out parsedStatus))
+              {
+                  incidents = await _incidentService.GetAllIncidentsPerStatus(parsedStatus, branch);
+              }
+              // Filter by type only
+              else if (hasType &&
+                  Enum.TryParse<IncidentType>(typeFilter, true, out parsedType))
+              {
+                  incidents = await _incidentService.GetAllIncidentsByType(parsedType, branch);
+              }
+              // No filters — show all
+              else
+              {
+                  incidents = _incidentService.GetAllIncidentsPerStatus(IncidentStatus.open, "").Result;
+              }
+        
 				if (pageNumber < 1)
 				{
 					pageNumber = 1;
