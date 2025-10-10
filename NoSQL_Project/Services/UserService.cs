@@ -30,7 +30,12 @@ namespace NoSQL_Project.Services
             return await _userRepository.FindByIdAsync(id);
         }
 
-        public string GenerateSecureToken(int length = 32)
+		public async Task<User> FindUserByNameAsync(string firstName, string lastName)
+        {
+            return await _userRepository.FindUserByNameAsync(firstName, lastName);
+		}
+
+		public string GenerateSecureToken(int length = 32)
         {
             var bytes = RandomNumberGenerator.GetBytes(length);
             return Convert.ToBase64String(bytes);
