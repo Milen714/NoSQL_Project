@@ -1,4 +1,5 @@
-﻿using NoSQL_Project.Models;
+﻿using MongoDB.Driver;
+using NoSQL_Project.Models;
 using NoSQL_Project.Models.Enums;
 using NoSQL_Project.Repositories.Interfaces;
 using NoSQL_Project.Services.Interfaces;
@@ -64,28 +65,68 @@ namespace NoSQL_Project.Services
 			if (existingIncident == null)
 				throw new KeyNotFoundException("Incident not found");
 
-			//Update employee 
-			if (!string.IsNullOrWhiteSpace(updatedIncident.AssignedTo.FirstName) &&
-				!string.IsNullOrWhiteSpace(updatedIncident.AssignedTo.LastName)) 
-            {
-				var employee = await _userService.FindUserByNameAsync(updatedIncident.AssignedTo.FirstName, updatedIncident.AssignedTo.LastName);
+			//check what has changed
+			var updates = await CheckIncidentUpdates(updatedIncident, existingIncident);
+
+			//if there's anything changed, update it in the existing incident
+			if (updates.Any())
+			{
+				await _incidentRepository.UpdateIncidentAsync(updatedIncident, updates);				
+			}
+		}
+
+		private async Task <List<UpdateDefinition<Incident>>> CheckIncidentUpdates(Incident updated, Incident existing)
+		{
+			var update = Builders<Incident>.Update;
+			var updates = new List<UpdateDefinition<Incident>>();
+
+			if (updated.IncidentType != existing.IncidentType)
+				updates.Add(update.Set(i => i.IncidentType, updated.IncidentType));
+
+			if (updated.Priority != existing.Priority)
+				updates.Add(update.Set(i => i.Priority, updated.Priority));
+
+			if (updated.Deadline != existing.Deadline)
+				updates.Add(update.Set(i => i.Deadline, updated.Deadline));
+
+			if (updated.Status != existing.Status)
+				updates.Add(update.Set(i => i.Status, updated.Status));
+
+
+			updated.AssignedTo = await BuildAssigneeSnapshotAsync(updated);
+
+			if (existing.AssignedTo == null || updated.AssignedTo.UserId != existing.AssignedTo.UserId)
+					updates.Add(update.Set(i => i.AssignedTo.UserId, updated.AssignedTo.UserId));
+
+				if (existing.AssignedTo == null || updated.AssignedTo.FirstName != existing.AssignedTo.FirstName)
+					updates.Add(update.Set(i => i.AssignedTo.FirstName, updated.AssignedTo.FirstName));
+
+				if (existing.AssignedTo == null || updated.AssignedTo.LastName != existing.AssignedTo.LastName)
+					updates.Add(update.Set(i => i.AssignedTo.LastName, updated.AssignedTo.LastName));
+			
+
+			return updates;
+		}
+
+
+		public async Task<AssigneeSnapshot> BuildAssigneeSnapshotAsync(Incident incident)
+		{
+			if (incident.AssignedTo != null &&
+				(!string.IsNullOrWhiteSpace(incident.AssignedTo.FirstName) &&
+				!string.IsNullOrWhiteSpace(incident.AssignedTo.LastName)))
+			{
+				var employee = await _userService.FindUserByNameAsync(incident.AssignedTo.FirstName, incident.AssignedTo.LastName);
 				if (employee == null)
 					throw new InvalidOperationException("Employee doesn't exists");
 
 				var assigneeUser = new AssigneeSnapshot();
 				assigneeUser.MapAssignee(employee);
-
-				existingIncident.AssignedTo = assigneeUser;
+				incident.AssignedTo = assigneeUser;
 			}
 
-			existingIncident.AssignedTo = null;
-			existingIncident.IncidentType = updatedIncident.IncidentType;
-			existingIncident.Status = updatedIncident.Status;
-			existingIncident.Priority = updatedIncident.Priority;
-			existingIncident.Deadline = updatedIncident.Deadline;
-
-			await _incidentRepository.UpdateIncidentAsync(existingIncident);
+			return incident.AssignedTo;
 		}
+
 
 		public async Task CloseIncidentAsync(string closedIncidentId, string updatedStatus)
 		{	
@@ -105,7 +146,8 @@ namespace NoSQL_Project.Services
 			{
 				throw new ArgumentException("Invalid status value");
 			}
-			await _incidentRepository.CloseIncidentAsync(existingIncident);
+
+			await UpdateIncidentAsync(existingIncident);
 		}
 	}
 

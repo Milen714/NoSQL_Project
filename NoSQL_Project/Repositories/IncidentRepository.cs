@@ -62,50 +62,13 @@ namespace NoSQL_Project.Repositories
 			await _incidents.InsertOneAsync(newIncident);
 		}
 
-		public async Task UpdateBuilderAsync(Incident incident, UpdateDefinition<Incident> update)
+		public async Task UpdateIncidentAsync(Incident updatedIncident, List<UpdateDefinition<Incident>> updates)
 		{
-			var filter = Builders<Incident>.Filter.Eq(i => i.Id, incident.Id);
+			var filter = Builders<Incident>.Filter.Eq(i => i.Id, updatedIncident.Id);
+			var combinedUpdate = Builders<Incident>.Update.Combine(updates);
 
-			var result = await _incidents.UpdateOneAsync(filter, update);
+			await _incidents.UpdateOneAsync(filter, combinedUpdate);
 		}
 
-		public async Task UpdateIncidentAsync(Incident updatedIncident)
-		{
-			var update = Builders<Incident>.Update
-					.Set(i => i.IncidentType, updatedIncident.IncidentType)
-					.Set(i => i.Priority, updatedIncident.Priority)
-					.Set(i => i.Deadline, updatedIncident.Deadline)
-					.Set(i => i.Status, updatedIncident.Status);
-
-			if (updatedIncident.AssignedTo != null)
-			{
-				update = update
-					.Set(i => i.AssignedTo.UserId, updatedIncident.AssignedTo.UserId)
-					.Set(i => i.AssignedTo.FirstName, updatedIncident.AssignedTo.FirstName)
-					.Set(i => i.AssignedTo.LastName, updatedIncident.AssignedTo.LastName);
-			}
-
-			await UpdateBuilderAsync(updatedIncident, update);
-		}
-
-
-		public async Task CloseIncidentAsync(Incident incidentClosed)
-		{
-			var update = Builders<Incident>.Update
-					.Set(i => i.Status, incidentClosed.Status);
-
-			await UpdateBuilderAsync(incidentClosed, update);
-		}
-
-		/*
-		public async Task CloseIncidentAsync(Incident incidentClosed)
-		{
-			var filter = Builders<Incident>.Filter.Eq(i => i.Id, incidentClosed.Id);
-			var update = Builders<Incident>.Update
-					.Set(i => i.Status, incidentClosed.Status);
-
-			var result = await _incidents.UpdateOneAsync(filter, update);
-			Console.WriteLine($"Matched: {result.MatchedCount}, Modified: {result.ModifiedCount}");
-		}*/
 	}
 }

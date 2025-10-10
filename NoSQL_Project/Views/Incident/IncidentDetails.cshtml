@@ -195,6 +195,11 @@
     <button type="submit">Close Incident</button>
 </form>
 
+<form asp-action="TransferIncident" method="post">
+    <input type="hidden" name="incidentId" value="@Model.Id" />
+    <button type="submit">Transfer Incident</button>
+</form>
+
 
 
 

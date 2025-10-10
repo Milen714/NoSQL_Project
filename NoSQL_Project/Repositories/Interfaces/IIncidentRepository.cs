@@ -1,4 +1,5 @@
-﻿using NoSQL_Project.Models;
+﻿using MongoDB.Driver;
+using NoSQL_Project.Models;
 using NoSQL_Project.Models.Enums;
 
 namespace NoSQL_Project.Repositories.Interfaces
@@ -10,10 +11,10 @@ namespace NoSQL_Project.Repositories.Interfaces
         Task<Incident> GetIncidentByIdAsync(string id);
         Task CreateNewIncidentAsync(Incident newIncident);
 
-        Task UpdateIncidentAsync(Incident updatedIncident);
+        Task UpdateIncidentAsync(Incident updatedIncident, List<UpdateDefinition<Incident>> updates);
 
 
-        Task CloseIncidentAsync(Incident incidentClosed);
+
 
 	}
 }
