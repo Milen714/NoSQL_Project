@@ -23,7 +23,7 @@ namespace NoSQL_Project.Controllers
             _locationService = locationSrvice;
             _userService = userService;
             _incidentService = incidentService;
-            _incidents = incidents;
+			_incidentService = incidents;
         }
 		public async Task<IActionResult> Index(string searchString, int pageNumber, string currentFilter, string statusFilter, string typeFilter, string branch)
         {
@@ -196,6 +196,24 @@ namespace NoSQL_Project.Controllers
 				return RedirectToAction("Index");
 			}
 		}
+
+		[SessionAuthorize(UserType.Service_employee)]
+		[HttpGet] 
+		public async Task<IActionResult> TransferIncidentAsync(string incidentId)
+		{
+			ViewBag.IncidentId = incidentId;
+			var usersForTransfer = await _incidentService.GetUsersForTransferAsync();
+			return View(usersForTransfer); 
+		}
+
+		[HttpPost]
+		public async Task<IActionResult> TransferIncidentAsync(string incidentId, UserForTransferDto userForTransfer)
+		{
+			await _incidentService.TransferIncidentAsync(incidentId, userForTransfer);
+			return RedirectToAction("IncidentDetails", new { id = incidentId });
+		}
+
+
 
 		[SessionAuthorize(UserType.Service_employee)]
 		[HttpPost]

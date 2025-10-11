@@ -19,7 +19,7 @@ namespace NoSQL_Project.Models
 
         [BsonElement("is_active")]
         public bool IsActive { get; set; }
-    }
+    
 		public void MapAssignee(User user)
 		{
 			UserId = ObjectId.Parse(user.Id!);

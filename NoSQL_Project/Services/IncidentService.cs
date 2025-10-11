@@ -1,8 +1,10 @@
-﻿using NoSQL_Project.Models;
+﻿using MongoDB.Driver;
+using NoSQL_Project.Models;
 using NoSQL_Project.Models.Enums;
 using NoSQL_Project.Repositories.Interfaces;
 using NoSQL_Project.Services.Interfaces;
 using NoSQL_Project.ViewModels;
+using System.Collections.Generic;
 
 namespace NoSQL_Project.Services
 {
@@ -10,14 +12,16 @@ namespace NoSQL_Project.Services
     {
         private readonly IIncidentRepository _incidentRepository;
         private readonly ILocationService _locationService;
+		private readonly IUserService _userService;
 
-        private readonly IMongoCollection<Incident> _incidents;
+		private readonly IMongoCollection<Incident> _incidents;
 
-        public IncidentService(IIncidentRepository incidentRepository, ILocationService locationService, IMongoDatabase database)
+        public IncidentService(IIncidentRepository incidentRepository, ILocationService locationService, IMongoDatabase database, IUserService userService)
         {
             _incidentRepository = incidentRepository;
             _locationService = locationService;
             _incidents = database.GetCollection<Incident>("Incidents");
+			_userService = userService;
         }
         public List<Incident> GetAll()
         {
@@ -140,7 +144,7 @@ namespace NoSQL_Project.Services
 
 
 		public async Task CloseIncidentAsync(string closedIncidentId, string updatedStatus)
-		{	
+		{
 			var existingIncident = await _incidentRepository.GetIncidentByIdAsync(closedIncidentId);
 			if (existingIncident == null)
 				throw new KeyNotFoundException("Incident not found");
@@ -157,7 +161,23 @@ namespace NoSQL_Project.Services
 			{
 				throw new ArgumentException("Invalid status value");
 			}
+		}
 
+		public async Task TransferIncidentAsync(string incidentId, UserForTransferDto userForTransfer)
+		{
+			var existingIncident = await _incidentRepository.GetIncidentByIdAsync(incidentId);
+			if (existingIncident == null)
+				throw new KeyNotFoundException("Incident not found");
+
+			//pasar el objeto para que compare el id y el user al que se lo tiene que pasar
+			//_incidentRepository.TransferTicket(existingIncident, userForTransfer);
+			
+		}
+
+		public async Task <List<UserForTransferDto>> GetUsersForTransferAsync()
+		{
+			return await _incidentRepository.GetUsersForTransferAsync();			
+		}
 	}
 
 }

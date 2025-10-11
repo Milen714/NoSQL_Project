@@ -16,6 +16,7 @@ namespace NoSQL_Project.Repositories.Interfaces
 
         Task UpdateIncidentAsync(Incident updatedIncident, List<UpdateDefinition<Incident>> updates);
 
+        Task<List<UserForTransferDto>> GetUsersForTransferAsync();
 
 
 
