@@ -346,6 +346,10 @@ body {
     display: flex;
     justify-content: space-between;
 }
+.filter_button_class{
+    border: 1px solid black;
+    border-radius: 5px
+}
 /*CHARTS*/
 .charts_container {
     display: flex;
