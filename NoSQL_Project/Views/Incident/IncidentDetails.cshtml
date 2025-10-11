@@ -132,18 +132,23 @@
 
             <!-- Assigned To -->
             <div class="other_information_row">
-                <p>Assigned To:</p>
-                @if (isEditing)
-                {
-                    <input asp-for="AssignedTo.FirstName" class="form-control" placeholder="First name" />
-                    <input asp-for="AssignedTo.LastName" class="form-control" placeholder="Last name" />
-                    <span asp-validation-for="AssignedTo.FirstName" class="text-danger"></span>
-                    <span asp-validation-for="AssignedTo.LastName" class="text-danger"></span>
-                }
-                else
-                {
-                    <h4>@Model.AssignedTo?.FirstName @Model.AssignedTo?.LastName</h4>
-                }
+                    <p>Assigned To:</p>
+                    @{
+                        var activeUserIndex = Model.AssignedTo?.FindIndex(u => u.IsActive) ?? -1;
+                    }
+
+                    @if (activeUserIndex >= 0)
+                    {
+                        var activeUser = Model.AssignedTo[activeUserIndex];
+                        <h4>@activeUser.FirstName @activeUser.LastName</h4>
+                        <input type="hidden" name="AssignedTo[@activeUserIndex].FirstName" value="@activeUser.FirstName" />
+                        <input type="hidden" name="AssignedTo[@activeUserIndex].LastName" value="@activeUser.LastName" />
+                        <input type="hidden" name="AssignedTo[@activeUserIndex].IsActive" value="@activeUser.IsActive" />
+                    }
+                    else
+                    {
+                        <h4>Incident not yet assigned</h4>
+                    }
             </div>
 
 

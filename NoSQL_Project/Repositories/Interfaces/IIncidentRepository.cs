@@ -22,7 +22,8 @@ namespace NoSQL_Project.Repositories.Interfaces
 
         Task<List<UserForTransferDto>> GetUsersForTransferAsync();
 
+        Task TransferIncidentAsync(string incidentId, UserForTransferDto userForTransfer);
 
 
-    }
+	}
 }

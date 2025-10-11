@@ -119,19 +119,6 @@ namespace NoSQL_Project.Services
 			if (updated.Status != existing.Status)
 				updates.Add(update.Set(i => i.Status, updated.Status));
 
-
-			updated.AssignedTo = await BuildAssigneeSnapshotAsync(updated);
-
-			if (existing.AssignedTo == null || updated.AssignedTo.UserId != existing.AssignedTo.UserId)
-					updates.Add(update.Set(i => i.AssignedTo.UserId, updated.AssignedTo.UserId));
-
-				if (existing.AssignedTo == null || updated.AssignedTo.FirstName != existing.AssignedTo.FirstName)
-					updates.Add(update.Set(i => i.AssignedTo.FirstName, updated.AssignedTo.FirstName));
-
-				if (existing.AssignedTo == null || updated.AssignedTo.LastName != existing.AssignedTo.LastName)
-					updates.Add(update.Set(i => i.AssignedTo.LastName, updated.AssignedTo.LastName));
-			
-
 			return updates;
 		}
 
@@ -182,7 +169,7 @@ namespace NoSQL_Project.Services
 				throw new KeyNotFoundException("Incident not found");
 
 			//pasar el objeto para que compare el id y el user al que se lo tiene que pasar
-			//_incidentRepository.TransferTicket(existingIncident, userForTransfer);
+			_incidentRepository.TransferIncidentAsync(incidentId, userForTransfer);
 			
 		}
 

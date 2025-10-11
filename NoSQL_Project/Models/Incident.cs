@@ -42,11 +42,11 @@ namespace NoSQL_Project.Models
         [BsonElement("location")]
         public LocationSnapshot Location { get; set; } = default!;
 
-        [BsonElement("assigned_to")]
-        [BsonIgnoreIfNull]
-        public AssigneeSnapshot? AssignedTo { get; set; }
+		[BsonElement("assigned_to")]
+		[BsonIgnoreIfNull]
+		public List<AssigneeSnapshot> AssignedTo { get; set; } = new List<AssigneeSnapshot>();
 
-        [BsonElement("tags")]
+		[BsonElement("tags")]
         [BsonIgnoreIfNull]
         public List<string>? Tags { get; set; }
 
