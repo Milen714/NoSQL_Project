@@ -3,7 +3,7 @@
     --color-primary-dark: #121828; /* Dark sidebar background (Navigation) */
     --color-primary-blue: #3f6cf2; /* Primary interactive blue (Active buttons, selected links, 'Add new incident') */
     --color-primary-blue-accent: #ebf5ff;
-    --color-primary-link-active: #2979ff; /* Blue for the active 'Incidents' link/tab */
+    --color-primary-link-active: #2757C2; /* Blue for the active 'Incidents' link/tab */
     --color-text-light: #fefefe; /* White/Light text on dark background */
     --color-bgs-light: #e5e5e5;
     --color-bgs-darker: #CACACA;
@@ -207,9 +207,20 @@ body {
 }
 
 .nav_li {
+    padding: 5px;
+    border-radius: 5px;
+    
 }
+.nav_li:hover, active{
+    background-color: var(--color-primary-link-active);
+    color: white;
+}
+.nav_li:hover a{
+    color: white;
+} 
 .nav_li_a {
     text-decoration: none;
+
     color: var(--color-text-secondary);
 }
 .container-fluid{
@@ -270,7 +281,7 @@ body {
     padding: 5px 10px;
     border-radius: 5px;
     font-weight: 600;
-    font-size: 0.7em;
+    font-size: 12px;
     text-align: center;
 }
 .priority_low {
@@ -307,8 +318,59 @@ body {
     list-style: none; /* Removes the dots */
     padding-left: 0; /* Removes default left padding */
     gap: 10px; /* Optional: adds spacing between items */
+    align-items: center;
 }
+
 
 .search_options_li {
     margin: 0;
+    justify-content: center;
+}
+.search_options_a {
+    padding: 15px;
+    text-decoration: none;
+    text-align: center;
+    color: black;
+    font-weight: 600;
+}
+.activeFilter {
+    border-bottom: 2px solid var(--color-primary-link-active);
+    color: var(--color-primary-link-active);
+}
+
+.search_sub_container {
+    display: flex;
+    gap: 10px;
+}
+.search_and_fileter_container {
+    display: flex;
+    justify-content: space-between;
+}
+/*CHARTS*/
+.charts_container {
+    display: flex;
+    justify-content: space-around;
+}
+/*POPUP OVERLAY*/
+.popupOverlay {
+    display: none;
+    position: fixed;
+    z-index: 5;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(3px);
+    justify-content: center;
+    align-items: center;
+}
+
+.popupContainer {
+    position: absolute;
+    top: 40%;
+    left: 42%;
+    width: 300px;
+    height: 300px;
 }

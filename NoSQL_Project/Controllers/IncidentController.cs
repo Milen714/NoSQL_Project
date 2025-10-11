@@ -23,12 +23,13 @@ namespace NoSQL_Project.Controllers
             _locationService = locationSrvice;
             _userService = userService;
             _incidentService = incidentService;
-            _incidents = incidents;
         }
-		public async Task<IActionResult> Index(string searchString, int pageNumber, string currentFilter, string statusFilter, string typeFilter, string branch)
+		public async Task<IActionResult> Index(string searchString, int pageNumber
+			, string currentFilter, string statusFilter, string typeFilter, string branch)
         {
             List<Incident> incidents;
-
+			int openIncidents = await _incidentService.GetTheNumberOfAllOpenIncidents();
+			int numNonClosedIncidents = await _incidentService.GetTheNumberOfAllIncidents();
             bool hasStatus = !string.IsNullOrEmpty(statusFilter) && statusFilter != "All";
             bool hasType = !string.IsNullOrEmpty(typeFilter);
 			try
@@ -66,10 +67,15 @@ namespace NoSQL_Project.Controllers
               // No filters — show all
               else
               {
-                  incidents = _incidentService.GetAllIncidentsPerStatus(IncidentStatus.open, "").Result;
+                  incidents = await _incidentService.GetAllWitoutclosed("");
               }
-        
-				if (pageNumber < 1)
+				ViewData["TypeFilter"] = typeFilter;
+				ViewData["CurrentStatus"] = statusFilter;
+				ViewData["NumberOfOpenIncidents"] = openIncidents;
+				ViewData["NumberOfNonClosedIncidents"] = numNonClosedIncidents;
+
+
+                if (pageNumber < 1)
 				{
 					pageNumber = 1;
 				}

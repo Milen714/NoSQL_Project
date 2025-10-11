@@ -26,6 +26,30 @@ namespace NoSQL_Project.Repositories
                 throw new Exception($"Could not retrieve incidents: {ex.Message}");
             }
         }
+        public async Task<List<Incident>> GetAllWitoutclosed(string branch)
+        {
+            FilterDefinition<Incident> branchFilter = FilterDefinition<Incident>.Empty;
+            try
+            {
+                if (!string.IsNullOrWhiteSpace(branch))
+                {
+                    branchFilter = Builders<Incident>.Filter.Regex("location.branch", new BsonRegularExpression(branch, "i"));
+                }
+                var excludedStatuses = new[] { IncidentStatus.closed, IncidentStatus.closed_without_resolve };
+                var filter = Builders<Incident>.Filter.And(
+                    Builders<Incident>.Filter.Nin(i => i.Status, excludedStatuses),
+                    branchFilter
+                );
+
+                var result = await _incidents.Find(filter).SortBy(p => p.Priority).ToListAsync();
+                return result;
+            }
+            catch (Exception ex)
+            {
+
+                throw new Exception($"Could not retrieve incidents: {ex.Message}");
+            }
+        }
         public async Task<Incident> GetIncidentByIdAsync(string id)
         {
             try
@@ -48,11 +72,13 @@ namespace NoSQL_Project.Repositories
                 {
                     branchFilter = Builders<Incident>.Filter.Regex("location.branch", new BsonRegularExpression(branch, "i"));
                 }
+                var excludedStatuses = new[] { IncidentStatus.closed, IncidentStatus.closed_without_resolve };
                 var filter = Builders<Incident>.Filter.And(
-                    Builders<Incident>.Filter.Eq(i => i.Status, status),
-                branchFilter
+                    Builders<Incident>.Filter.Eq(i => i.Status, IncidentStatus.resolved),
+                    Builders<Incident>.Filter.Nin(i => i.Status, excludedStatuses),
+                    branchFilter
                 );
-                    
+
                 var result = await _incidents.Find(filter).SortBy(p => p.Priority).ToListAsync();
                 return result;
             }
@@ -94,7 +120,8 @@ namespace NoSQL_Project.Repositories
                     
                 var filter = Builders<Incident>.Filter.And(
                     Builders<Incident>.Filter.Eq(i => i.Status, status),
-                    Builders<Incident>.Filter.Eq(i => i.IncidentType, type), branchFilter);
+                    Builders<Incident>.Filter.Eq(i => i.IncidentType, type), 
+                    branchFilter);
                    
                 return await _incidents.Find(filter).SortBy(p => p.Priority).ToListAsync();
             }
@@ -132,5 +159,49 @@ namespace NoSQL_Project.Repositories
 			Console.WriteLine($"Matched: {result.MatchedCount}, Modified: {result.ModifiedCount}");
 
 		}
-	}
+        public async Task<int> GetTheNumberOfAllOpenIncidents()
+        {
+            try
+            {
+                BsonDocument stageOne = new BsonDocument
+            {
+                {
+                    "$match", new BsonDocument{
+                        {"status", "open" }
+                    }
+                }
+            };
+
+                BsonDocument stageTwo = new BsonDocument
+            {
+                {
+                    "$count" , "open_incident_count"
+                }
+            };
+
+
+                BsonDocument[] pipeline = new BsonDocument[] { stageOne, stageTwo };
+                var result = await _incidents.Aggregate<BsonDocument>(pipeline).FirstOrDefaultAsync();
+                if (result != null && result.Contains("open_incident_count"))
+                {
+                    return result["open_incident_count"].AsInt32;
+                }
+                return 0;
+            }
+            catch (Exception ex)
+            {
+
+                throw new Exception($"Could not retrieve Number of Open Incidents: {ex.Message}");
+            }
+        }
+        public async Task<int> GetTheNumberOfAllIncidents()
+        {
+            var filter = Builders<Incident>.Filter.And(
+                Builders<Incident>.Filter.Ne(i => i.Status, IncidentStatus.closed),
+                Builders<Incident>.Filter.Ne(i => i.Status, IncidentStatus.closed_without_resolve)
+                );
+            var count = await _incidents.CountDocumentsAsync(filter);
+            return (int)count;
+        }
+    }
 }
