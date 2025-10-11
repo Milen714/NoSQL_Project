@@ -29,52 +29,47 @@
     </div>
 </div>
 
+   
+
+    
+
+<div class="search_and_fileter_container">
+       
+        <div class="search_sub_container">
+            <form class="d-flex" role="search">
+                <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+                <button class="btn btn-outline-success" type="submit">Search</button>
+            </form>
+        <button class="filter_button_class" id="filter_button"><img src="/assets/FiltersIcon.svg" alt="Alternate Text" /> Filters</button>
+        </div>
+
     <div class="search_container">
-    <div class="search_options_container">
+        <div class="search_options_container">
             <nav>
                 <ul class="search_options_ul">
                     <li class="search_options_li">
-                    <a class="search_options_a btn btn-outline-info border-dark border-2 " asp-action="Index" asp-route-statusFilter="All" asp-route-typeFilter="@Context.Request.Query["typeFilter"]">All</a>
+                        <a class="search_options_a @(ViewContext.HttpContext.Request.Query["statusFilter"] == "All" ? "activeFilter" : "")"
+                            asp-action="Index" asp-route-statusFilter="All" asp-route-typeFilter="@Context.Request.Query["typeFilter"]">All</a>
                     </li>
                     <li class="search_options_li">
-                    <a class="search_options_a btn btn-outline-info border-dark border-2" asp-action="Index" asp-route-statusFilter="open" asp-route-typeFilter="@Context.Request.Query["typeFilter"]">Open</a>
+                        <a class="search_options_a @(ViewContext.HttpContext.Request.Query["statusFilter"] == "open" ? "activeFilter" : "")" 
+                        asp-action="Index" asp-route-statusFilter="open" asp-route-typeFilter="@Context.Request.Query["typeFilter"]">Open</a>
                     </li>
                     <li class="search_options_li">
-                    <a class="search_options_a btn btn-outline-info border-dark border-2" asp-action="Index" asp-route-statusFilter="resolved" asp-route-typeFilter="@Context.Request.Query["typeFilter"]">In Progress</a>
+                        <a class="search_options_a @(ViewContext.HttpContext.Request.Query["statusFilter"] == "resolved" ? "activeFilter" : "")"
+                        asp-action="Index" asp-route-statusFilter="resolved" asp-route-typeFilter="@Context.Request.Query["typeFilter"]">In Progress</a>
                     </li>
                     <li class="search_options_li">
-                    <a class="search_options_a btn btn-outline-info border-dark border-2" asp-action="Index" asp-route-statusFilter="closed_without_resolve" asp-route-typeFilter="@Context.Request.Query["typeFilter"]">Closed</a>
+                        <a class="search_options_a @(ViewContext.HttpContext.Request.Query["statusFilter"] == "closed_without_resolve" ? "activeFilter" : "")"
+                        asp-action="Index" asp-route-statusFilter="closed_without_resolve" asp-route-typeFilter="@Context.Request.Query["typeFilter"]">Closed</a>
                     </li>
                 </ul>
             </nav>
+        </div>
     </div>
-
-    <form method="get" asp-action="Index" class="d-flex gap-3 align-items-center">
-        <input type="hidden" name="statusFilter" value="@Context.Request.Query["statusFilter"]" />
-        <select name="typeFilter" class="form-select border-dark border-2" style="width: 200px;">
-            <option value="">Filter by Type --</option>
-            <option value="hardware">Hardware</option>
-            <option value="software">Software</option>
-            <option value="network">Network</option>
-            <option value="security">Security</option>
-            <option value="access">Access</option>
-            <option value="other">Other</option>
-        </select>
-
-        <button type="submit" class="btn btn-info border-dark border-2">Apply Filters</button>
-    </form>
-
-
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <!-- Search bar (left) -->
-        <form class="d-flex" role="search">
-            <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-            <button class="btn btn-outline-success" type="submit">Search</button>
-        </form>
-
-        <!-- Button (right) -->
+        
         <a class="btn btn-primary" href="/Incident/Create">Create New Incident</a>
-    </div>
+    
 </div>
 @if (!string.IsNullOrEmpty(ViewContext.HttpContext.Request.Query["statusFilter"]) ||
     !string.IsNullOrEmpty(ViewContext.HttpContext.Request.Query["typeFilter"]))
@@ -85,7 +80,26 @@
         @ViewContext.HttpContext.Request.Query["typeFilter"]
     </div>
 }
+<div class="popupOverlay" >
+    <div class="popupContainer">
+        <div>
+            <form method="get" asp-action="Index" class="d-flex gap-3 align-items-center">
+                <input type="hidden" name="statusFilter" value="@Context.Request.Query["statusFilter"]" />
+                <select name="typeFilter" class="form-select border-dark border-2" style="width: 200px;">
+                    <option value="">Filter by Type --</option>
+                    <option value="hardware">Hardware</option>
+                    <option value="software">Software</option>
+                    <option value="network">Network</option>
+                    <option value="security">Security</option>
+                    <option value="access">Access</option>
+                    <option value="other">Other</option>
+                </select>
 
+                <button type="submit" class="btn btn-info border-dark border-2">Apply Filters</button>
+            </form>
+        </div>
+    </div>
+</div>
 <div class="table_NICE_container">
     <table class="table_NICE">
         <thead>
@@ -166,16 +180,16 @@
             <ul class="pagination justify-content-center">
                 <li class="page-item @(Model.PageIndex == 1 ? "disabled" : "")">
                     <a class="page-link text-black" asp-route-pageNumber="1"
-                       asp-route-sortOrder="@ViewData["CurrentSort"]"
-                       asp-route-currentFilter="@ViewData["CurrentFilter"]">
+                       asp-route-statusFilter="@ViewData["CurrentStatus"]"
+                       asp-route-typeFilter="@ViewData["TypeFilter"]">
                         <span>First</span>
                     </a>
                 </li>
 
                 <li class="page-item @(Model.HasPreviousPage ? "" : "disabled")">
                     <a class="page-link text-black" asp-route-pageNumber="@(Model.PageIndex - 1)"
-                       asp-route-sortOrder="@ViewData["CurrentSort"]"
-                       asp-route-currentFilter="@ViewData["CurrentFilter"]">
+                       asp-route-statusFilter="@ViewData["CurrentStatus"]"
+                       asp-route-typeFilter="@ViewData["TypeFilter"]">
                         <span>Previous</span>
                     </a>
                 </li>
@@ -184,22 +198,22 @@
                 {
                 <li class="page-item @(Model.PageIndex == i ? "active" : "")">
                     <a class="page-link text-black" asp-route-pageNumber="@i"
-                       asp-route-sortOrder="@ViewData["CurrentSort"]"
-                       asp-route-currentFilter="@ViewData["CurrentFilter"]">@i</a>
+                       asp-route-statusFilter="@ViewData["CurrentStatus"]"
+                       asp-route-typeFilter="@ViewData["TypeFilter"]">@i</a>
                 </li>
                 }
 
                 <li class="page-item @(Model.HasNextPage ? "" : "disabled")">
                     <a class="page-link text-black" asp-route-pageNumber="@(Model.PageIndex + 1)"
-                       asp-route-sortOrder="@ViewData["CurrentSort"]"
-                       asp-route-currentFilter="@ViewData["CurrentFilter"]">
+                       asp-route-statusFilter="@ViewData["CurrentStatus"]"
+                       asp-route-typeFilter="@ViewData["TypeFilter"]">
                         <span>Next</span>
                     </a>
                 </li>
                 <li class="page-item @(Model.PageIndex == Model.TotalPages ? "disabled" : "")">
                     <a class="page-link text-black" asp-route-pageNumber="@Model.TotalPages"
-                       asp-route-sortOrder="@ViewData["CurrentSort"]"
-                       asp-route-currentFilter="@ViewData["CurrentFilter"]">
+                       asp-route-statusFilter="@ViewData["CurrentStatus"]"
+                       asp-route-typeFilter="@ViewData["TypeFilter"]">
                         <span>Last</span>
                     </a>
                 </li>
@@ -216,7 +230,7 @@
         const context = canvas.getContext("2d");
         const percent = value / total;
 
-        context.lineWidh = 30;
+        context.lineWidth = 25;
         context.strokeStyle = "lightgrey";
         context.beginPath();
         context.arc(75, 75, 55, 0, 2 * Math.PI);
@@ -234,7 +248,23 @@
         context.textBaseLine = "middle";
         context.fillText(value + (total ? "/" + total : ""), 75, 75);
     }
-    drawDonut("chart1", 14, 75, "orange");
-    drawDonut("chart2", 14, 75, "orange");
+        drawDonut("chart1", @ViewData["NumberOfOpenIncidents"], @ViewData["NumberOfNonClosedIncidents"], "orange");
+        drawDonut("chart2", 14, 75, "orange");
+
+
+                var filter_button = document.getElementById("filter_button");
+        filter_button.addEventListener('click', function(){
+            var overlays = document.getElementsByClassName('popupOverlay');
+            for (var i = 0; i < overlays.length; i++) {
+                overlays[i].style.display = "block";
+                overlays[i].addEventListener('click', function (e) {
+                    if (e.target === this) {
+                        this.style.display = 'none';
+                    }
+                });
+            }
+        });
+            
+        
 </script>
 }

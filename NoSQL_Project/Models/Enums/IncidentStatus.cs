@@ -9,6 +9,10 @@ namespace NoSQL_Project.Models.Enums
         [BsonRepresentation(BsonType.String)]
         open,
         [BsonRepresentation(BsonType.String)]
+        inProgress,
+        [BsonRepresentation(BsonType.String)]
+        closed,
+        [BsonRepresentation(BsonType.String)]
         resolved,
         [BsonRepresentation(BsonType.String)]
         closed_without_resolve

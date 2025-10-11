@@ -12,7 +12,7 @@ namespace NoSQL_Project.Services
     {
         private readonly IIncidentRepository _incidentRepository;
         private readonly ILocationService _locationService;
-		private readonly IUserService _userService;
+        private readonly IUserService _userService;
 
 		private readonly IMongoCollection<Incident> _incidents;
 
@@ -21,12 +21,16 @@ namespace NoSQL_Project.Services
             _incidentRepository = incidentRepository;
             _locationService = locationService;
             _incidents = database.GetCollection<Incident>("Incidents");
-			_userService = userService;
+            _userService = userService;
         }
         public List<Incident> GetAll()
         {
             return _incidentRepository.GetAll().Result;
         }
+		public async Task<List<Incident>> GetAllWitoutclosed(string branch)
+		{
+			return await _incidentRepository.GetAllWitoutclosed(branch);
+		}
 
         public Task<List<Incident>> GetAllIncidentsPerStatus(IncidentStatus status, string branch)
         {
@@ -73,6 +77,14 @@ namespace NoSQL_Project.Services
 			//create the incident
 			await _incidentRepository.CreateNewIncidentAsync(newIncident);
 
+		}
+        public async Task<int> GetTheNumberOfAllOpenIncidents()
+		{
+			return await _incidentRepository.GetTheNumberOfAllOpenIncidents();
+		}
+		public async Task<int> GetTheNumberOfAllIncidents()
+		{
+			return await _incidentRepository.GetTheNumberOfAllIncidents();
 		}
         public async Task UpdateIncidentAsync(Incident updatedIncident)
 		{
