@@ -153,6 +153,8 @@ namespace NoSQL_Project.Services
 			{
 				throw new ArgumentException("Invalid status value");
 			}
+
+			await UpdateIncidentAsync(existingIncident);
 		}
 
 		public async Task TransferIncidentAsync(string incidentId, string userForTransferId)
