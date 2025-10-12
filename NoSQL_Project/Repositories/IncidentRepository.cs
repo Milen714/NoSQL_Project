@@ -6,13 +6,13 @@ using NoSQL_Project.Repositories.Interfaces;
 
 namespace NoSQL_Project.Repositories
 {
-    public class IncidentRepository : IIncidentRepository
-    {
-        private readonly IMongoCollection<Incident> _incidents;
-        public IncidentRepository(IMongoDatabase db)
-        {
-            _incidents = db.GetCollection<Incident>("INCIDENTS");
-        }
+	public class IncidentRepository : IIncidentRepository
+	{
+		private readonly IMongoCollection<Incident> _incidents;
+		public IncidentRepository(IMongoDatabase db)
+		{
+			_incidents = db.GetCollection<Incident>("INCIDENTS");
+		}
 
         public async Task<List<Incident>> GetAll()
         {
@@ -109,5 +109,28 @@ namespace NoSQL_Project.Repositories
             await _incidents.InsertOneAsync(newIncident);
         }
 
-    }
+		public async Task UpdateIncidentAsync(Incident updatedIncident)
+		{
+
+			var filter = Builders<Incident>.Filter.Eq(i => i.Id, updatedIncident.Id);
+
+			var updateBuilder = Builders<Incident>.Update
+					.Set(i => i.IncidentType, updatedIncident.IncidentType)
+					.Set(i => i.Priority, updatedIncident.Priority)
+					.Set(i => i.Deadline, updatedIncident.Deadline)
+					.Set(i => i.Status, updatedIncident.Status);
+
+			if (updatedIncident.AssignedTo != null)
+			{
+				updateBuilder = updateBuilder
+					.Set(i => i.AssignedTo.UserId, updatedIncident.AssignedTo.UserId)
+					.Set(i => i.AssignedTo.FirstName, updatedIncident.AssignedTo.FirstName)
+					.Set(i => i.AssignedTo.LastName, updatedIncident.AssignedTo.LastName);
+			}
+
+			var result = await _incidents.UpdateOneAsync(filter, updateBuilder);
+			Console.WriteLine($"Matched: {result.MatchedCount}, Modified: {result.ModifiedCount}");
+
+		}
+	}
 }

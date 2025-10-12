@@ -82,11 +82,17 @@ namespace NoSQL_Project.Repositories
             await _users.ReplaceOneAsync(filter, user);
         }
 
-        //public void DeleteEmployee(string id)
-        //{
-        //    FilterDefinition<User> filter = Builders<Users>.Filter.Eq(u => u.Id, user.id);
-        //    _users.DeleteOne(filter);
-        //}
-    }
+		public async Task <User> FindUserByNameAsync(string firstName, string lastName) 
+        {        
+            User user = await _users.Find(user => user.FirstName == firstName && user.LastName == lastName).FirstOrDefaultAsync();
+			return user;
+		}
+
+		//public void DeleteEmployee(string id)
+		//{
+		//    FilterDefinition<User> filter = Builders<Users>.Filter.Eq(u => u.Id, user.id);
+		//    _users.DeleteOne(filter);
+		//}
+	}
 }
 

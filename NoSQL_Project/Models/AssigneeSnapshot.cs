@@ -1,5 +1,6 @@
-﻿using MongoDB.Bson.Serialization.Attributes;
-using MongoDB.Bson;
+﻿using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
+using System.Net.Mail;
 
 namespace NoSQL_Project.Models
 {
@@ -19,4 +20,11 @@ namespace NoSQL_Project.Models
         [BsonElement("is_active")]
         public bool IsActive { get; set; }
     }
+		public void MapAssignee(User user)
+		{
+			UserId = ObjectId.Parse(user.Id!);
+			FirstName = user.FirstName;
+			LastName = user.LastName;
+		}
+	}
 }
