@@ -14,38 +14,38 @@ namespace NoSQL_Project.Repositories
 			_incidents = db.GetCollection<Incident>("INCIDENTS");
 		}
 
-        public async Task<List<Incident>> GetAll()
-        {
-            try
-            {
-               return await _incidents.Find(_ => true).ToListAsync();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                throw new Exception($"Could not retrieve incidents: {ex.Message}");
-            }
-        }
-        public async Task<List<Incident>> GetAllWitoutclosed(string branch)
-        {
-            FilterDefinition<Incident> branchFilter = FilterDefinition<Incident>.Empty;
-            try
-            {
-                if (!string.IsNullOrWhiteSpace(branch))
-                {
-                    branchFilter = Builders<Incident>.Filter.Regex("location.branch", new BsonRegularExpression(branch, "i"));
-                }
-                var excludedStatuses = new[] { IncidentStatus.closed, IncidentStatus.closed_without_resolve };
-                var filter = Builders<Incident>.Filter.And(
-                    Builders<Incident>.Filter.Nin(i => i.Status, excludedStatuses),
-                    branchFilter
-                );
+		public async Task<List<Incident>> GetAll()
+		{
+			try
+			{
+				return await _incidents.Find(_ => true).ToListAsync();
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine(ex.Message);
+				throw new Exception($"Could not retrieve incidents: {ex.Message}");
+			}
+		}
+		public async Task<List<Incident>> GetAllWitoutclosed(string branch)
+		{
+			FilterDefinition<Incident> branchFilter = FilterDefinition<Incident>.Empty;
+			try
+			{
+				if (!string.IsNullOrWhiteSpace(branch))
+				{
+					branchFilter = Builders<Incident>.Filter.Regex("location.branch", new BsonRegularExpression(branch, "i"));
+				}
+				var excludedStatuses = new[] { IncidentStatus.closed, IncidentStatus.closed_without_resolve };
+				var filter = Builders<Incident>.Filter.And(
+					Builders<Incident>.Filter.Nin(i => i.Status, excludedStatuses),
+					branchFilter
+				);
 
-                var result = await _incidents.Find(filter).SortBy(p => p.Priority).ToListAsync();
-                return result;
-            }
-            catch (Exception ex)
-            {
+				var result = await _incidents.Find(filter).SortBy(p => p.Priority).ToListAsync();
+				return result;
+			}
+			catch (Exception ex)
+			{
 
                 throw new Exception($"Could not retrieve incidents: {ex.Message}");
             }
@@ -88,15 +88,15 @@ namespace NoSQL_Project.Repositories
                     branchFilter
                 );
 
-                var result = await _incidents.Find(filter).SortBy(p => p.Priority).ToListAsync();
-                return result;
-            }
-            catch (Exception ex)
-            {
+				var result = await _incidents.Find(filter).SortBy(p => p.Priority).ToListAsync();
+				return result;
+			}
+			catch (Exception ex)
+			{
 
-                throw new Exception($"Could not retrieve incidents: {ex.Message}");
-            }
-        }
+				throw new Exception($"Could not retrieve incidents: {ex.Message}");
+			}
+		}
 
         public async Task<List<Incident>> GetAllIncidentsByType(IncidentType type, string branch)
         {
@@ -108,107 +108,198 @@ namespace NoSQL_Project.Repositories
                     Builders<Incident>.Filter.Eq(i => i.IncidentType, type), branchFilter);
                 
 
-                var result = await _incidents.Find(filter).SortBy(p => p.Priority).ToListAsync();
-                return result;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Could not retrieve incidents: {ex.Message}");
-            }
-        }
-
-        public async Task<List<Incident>> GetIncidentsByStatusAndType(IncidentStatus status, IncidentType type, string branch)
-        {
-            FilterDefinition < Incident > branchFilter = FilterDefinition<Incident>.Empty;
-            try
-            {
-                if (!string.IsNullOrWhiteSpace(branch))
-                    branchFilter = Builders<Incident>.Filter.Regex("location.branch", new BsonRegularExpression(branch, "i"));
-                    
-                var filter = Builders<Incident>.Filter.And(
-                    Builders<Incident>.Filter.Eq(i => i.Status, status),
-                    Builders<Incident>.Filter.Eq(i => i.IncidentType, type), 
-                    branchFilter);
-                   
-                return await _incidents.Find(filter).SortBy(p => p.Priority).ToListAsync();
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Could not retrieve incidents: {ex.Message}");
-            }
-        }
-
-        public async Task CreateNewIncidentAsync(Incident newIncident)
-        {
-            await _incidents.InsertOneAsync(newIncident);
-        }
-
-		public async Task UpdateIncidentAsync(Incident updatedIncident)
-		{
-
-			var filter = Builders<Incident>.Filter.Eq(i => i.Id, updatedIncident.Id);
-
-			var updateBuilder = Builders<Incident>.Update
-					.Set(i => i.IncidentType, updatedIncident.IncidentType)
-					.Set(i => i.Priority, updatedIncident.Priority)
-					.Set(i => i.Deadline, updatedIncident.Deadline)
-					.Set(i => i.Status, updatedIncident.Status);
-
-			if (updatedIncident.AssignedTo != null)
-			{
-				updateBuilder = updateBuilder
-					.Set(i => i.AssignedTo.UserId, updatedIncident.AssignedTo.UserId)
-					.Set(i => i.AssignedTo.FirstName, updatedIncident.AssignedTo.FirstName)
-					.Set(i => i.AssignedTo.LastName, updatedIncident.AssignedTo.LastName);
+				var result = await _incidents.Find(filter).SortBy(p => p.Priority).ToListAsync();
+				return result;
 			}
+			catch (Exception ex)
+			{
+				throw new Exception($"Could not retrieve incidents: {ex.Message}");
+			}
+		}
 
-			var result = await _incidents.UpdateOneAsync(filter, updateBuilder);
-			Console.WriteLine($"Matched: {result.MatchedCount}, Modified: {result.ModifiedCount}");
+		public async Task<List<Incident>> GetIncidentsByStatusAndType(IncidentStatus status, IncidentType type, string branch)
+		{
+			FilterDefinition<Incident> branchFilter = FilterDefinition<Incident>.Empty;
+			try
+			{
+				if (!string.IsNullOrWhiteSpace(branch))
+					branchFilter = Builders<Incident>.Filter.Regex("location.branch", new BsonRegularExpression(branch, "i"));
+
+				var filter = Builders<Incident>.Filter.And(
+					Builders<Incident>.Filter.Eq(i => i.Status, status),
+					Builders<Incident>.Filter.Eq(i => i.IncidentType, type),
+					branchFilter);
+
+				return await _incidents.Find(filter).SortBy(p => p.Priority).ToListAsync();
+			}
+			catch (Exception ex)
+			{
+				throw new Exception($"Could not retrieve incidents: {ex.Message}");
+			}
+		}
+
+		public async Task CreateNewIncidentAsync(Incident newIncident)
+		{
+			await _incidents.InsertOneAsync(newIncident);
+		}
+
+		public async Task UpdateIncidentAsync(Incident updatedIncident, List<UpdateDefinition<Incident>> updates)
+		{
+			var filter = Builders<Incident>.Filter.Eq(i => i.Id, updatedIncident.Id);
+			var combinedUpdate = Builders<Incident>.Update.Combine(updates);
+
+			await _incidents.UpdateOneAsync(filter, combinedUpdate);
+		}
+
+		public async Task<List<UserForTransferDto>> GetUsersForTransferAsync()
+		{
+			
+			try
+			{
+				BsonDocument stageOne = new BsonDocument
+{
+	{ "$unwind", "$assigned_to" }
+};
+
+
+				//filter users with active incidents
+				BsonDocument stageTwo = new BsonDocument
+{
+	{ "$match", new BsonDocument { { "assigned_to.is_active", true } } }
+};
+
+				//group by user and count incidents
+				BsonDocument stageThree = new BsonDocument
+{
+	{ "$group", new BsonDocument
+		{
+			{ "_id", "$assigned_to.userId" },
+			{ "TotalIncidents", new BsonDocument("$sum", 1) },
+			{ "FirstName", new BsonDocument("$first", "$assigned_to.first_name") },
+			{ "LastName", new BsonDocument("$first", "$assigned_to.last_name") }
+		}
+	}
+};
+
+				//filter users with less than 6 incidents
+				BsonDocument stageFour = new BsonDocument
+{
+	{ "$match", new BsonDocument { { "TotalIncidents", new BsonDocument("$lt", 6) } } }
+};
+
+
+				BsonDocument[] pipeline = new BsonDocument[] { stageOne, stageTwo, stageThree, stageFour };
+
+
+				var result = await _incidents.Aggregate<BsonDocument>(pipeline).ToListAsync();
+
+				
+				return result.Select(r => new UserForTransferDto
+				{
+					UserId = r.Contains("_id") && r["_id"].IsObjectId ? r["_id"].AsObjectId : ObjectId.Empty,
+					TotalIncidents = r.Contains("TotalIncidents") && r["TotalIncidents"].IsInt32 ? r["TotalIncidents"].AsInt32 : 0,
+					FirstName = r.Contains("FirstName") && r["FirstName"].IsString ? r["FirstName"].AsString : "(Unknown)",
+					LastName = r.Contains("LastName") && r["LastName"].IsString ? r["LastName"].AsString : ""
+				}).ToList();
+			
+			}
+			catch (Exception ex)
+			{
+				throw new Exception($"Could not retrieve users for transfer: {ex.Message}");
+			}
+		
 
 		}
-        public async Task<int> GetTheNumberOfAllOpenIncidents()
-        {
-            try
-            {
-                BsonDocument stageOne = new BsonDocument
-            {
-                {
-                    "$match", new BsonDocument{
-                        {"status", "open" }
-                    }
-                }
-            };
-
-                BsonDocument stageTwo = new BsonDocument
-            {
-                {
-                    "$count" , "open_incident_count"
-                }
-            };
 
 
-                BsonDocument[] pipeline = new BsonDocument[] { stageOne, stageTwo };
-                var result = await _incidents.Aggregate<BsonDocument>(pipeline).FirstOrDefaultAsync();
-                if (result != null && result.Contains("open_incident_count"))
-                {
-                    return result["open_incident_count"].AsInt32;
-                }
-                return 0;
-            }
-            catch (Exception ex)
-            {
+		public async Task TransferIncidentAsync(string incidentId, User userForTransfer)
+		{
 
-                throw new Exception($"Could not retrieve Number of Open Incidents: {ex.Message}");
-            }
-        }
-        public async Task<int> GetTheNumberOfAllIncidents()
-        {
-            var filter = Builders<Incident>.Filter.And(
-                Builders<Incident>.Filter.Ne(i => i.Status, IncidentStatus.closed),
-                Builders<Incident>.Filter.Ne(i => i.Status, IncidentStatus.closed_without_resolve)
-                );
-            var count = await _incidents.CountDocumentsAsync(filter);
-            return (int)count;
-        }
-    }
+			try
+			{
+				var filter = Builders<Incident>.Filter.Eq(i => i.Id, incidentId);
+
+				
+				var deactivate = Builders<Incident>.Update
+					.Set("assigned_to.$[elem].is_active", false);
+
+				var arrayFilters = new List<ArrayFilterDefinition>
+				{
+					new JsonArrayFilterDefinition<BsonDocument>("{ 'elem.is_active': true }")
+				};
+
+				var updateOptions = new UpdateOptions { ArrayFilters = arrayFilters };
+
+				await _incidents.UpdateOneAsync(filter, deactivate, updateOptions);
+
+				
+				var newAssignee = new AssigneeSnapshot
+				{
+					UserId = new ObjectId(userForTransfer.Id),
+					FirstName = userForTransfer.FirstName,
+					LastName = userForTransfer.LastName,
+					IsActive = true
+				};
+
+				var addNew = Builders<Incident>.Update.Push(i => i.AssignedTo, newAssignee);
+
+				await _incidents.UpdateOneAsync(filter, addNew);
+
+				Console.WriteLine("Transfer complete");
+			}
+			catch (Exception ex)
+			{
+				throw new Exception($"Error in transfer {ex.Message}");
+			}
+
+
+
+		}
+
+		public async Task<int> GetTheNumberOfAllOpenIncidents()
+		{
+			try
+			{
+				BsonDocument stageOne = new BsonDocument
+			{
+				{
+					"$match", new BsonDocument{
+						{"status", "open" }
+					}
+				}
+			};
+
+				BsonDocument stageTwo = new BsonDocument
+			{
+				{
+					"$count" , "open_incident_count"
+				}
+			};
+
+
+				BsonDocument[] pipeline = new BsonDocument[] { stageOne, stageTwo };
+				var result = await _incidents.Aggregate<BsonDocument>(pipeline).FirstOrDefaultAsync();
+				if (result != null && result.Contains("open_incident_count"))
+				{
+					return result["open_incident_count"].AsInt32;
+				}
+				return 0;
+			}
+			catch (Exception ex)
+			{
+
+				throw new Exception($"Could not retrieve Number of Open Incidents: {ex.Message}");
+			}
+		}
+
+		public async Task<int> GetTheNumberOfAllIncidents()
+		{
+			var filter = Builders<Incident>.Filter.And(
+				Builders<Incident>.Filter.Ne(i => i.Status, IncidentStatus.closed),
+				Builders<Incident>.Filter.Ne(i => i.Status, IncidentStatus.closed_without_resolve)
+				);
+			var count = await _incidents.CountDocumentsAsync(filter);
+			return (int)count;
+		}
+	}
 }

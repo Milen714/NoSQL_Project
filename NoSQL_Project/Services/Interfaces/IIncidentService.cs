@@ -17,6 +17,8 @@ namespace NoSQL_Project.Services.Interfaces
         Task<int> GetTheNumberOfAllOpenIncidents();
         Task<int> GetTheNumberOfAllIncidents();
 
-
-    }
+        Task CloseIncidentAsync(string closedIncidentId, string updatedStatus);
+        Task<List<UserForTransferDto>> GetUsersForTransferAsync();
+        Task TransferIncidentAsync(string incidentId, string userForTransferId);
+	}
 }

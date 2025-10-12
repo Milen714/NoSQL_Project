@@ -107,29 +107,26 @@
                             </select>
                         </div>
 
-                        <div class="form-group">
-                            <label>Assigned To</label>
-                            <input asp-for="AssignedTo.FirstName" class="form-control" placeholder="First name" />
-                            <input asp-for="AssignedTo.LastName" class="form-control" placeholder="Last name" />
-                            <span asp-validation-for="AssignedTo.FirstName" class="text-danger"></span>
-                            <span asp-validation-for="AssignedTo.LastName" class="text-danger"></span>
-                        </div>
+            <!-- Assigned To -->
+            <div class="other_information_row">
+                    <p>Assigned To:</p>
+                    @{
+                        var activeUserIndex = Model.AssignedTo?.FindIndex(u => u.IsActive) ?? -1;
+                    }
 
-                        <div class="incident_management_buttons">
-                            <button type="submit" class="btn btn-success">Save</button>
-                            <a asp-action="IncidentDetails" asp-route-id="@Model.Id" class="btn btn-secondary">Cancel</a>
-                        </div>
-                    </form>
-                </div>
-            }
-            else
-            {
-                <div class="incident_management_buttons">
-                    <a asp-action="EditIncident" asp-route-id="@Model.Id" class="btn btn-primary">Edit</a>
-                </div>
-            }
-        </div>
-    </div>
+                    @if (activeUserIndex >= 0)
+                    {
+                        var activeUser = Model.AssignedTo[activeUserIndex];
+                        <h4>@activeUser.FirstName @activeUser.LastName</h4>
+                        <input type="hidden" name="AssignedTo[@activeUserIndex].FirstName" value="@activeUser.FirstName" />
+                        <input type="hidden" name="AssignedTo[@activeUserIndex].LastName" value="@activeUser.LastName" />
+                    }
+                    else
+                    {
+                        <h4>Incident not yet assigned</h4>
+                    }
+                    
+            </div>
 
     <article class="incident_other_information">
         <div class="other_information_container">
@@ -194,8 +191,39 @@
                 </div>
             </div>
 
-        </div>
-    </article>
 
+<div class="incident_management_buttons">
+    @if (isEditing) //Service Desk employees can edit de form 
+    {        
+            <button type="submit" class="btn btn-success">Save</button>
+            <a asp-action="IncidentDetails" asp-route-id="@Model.Id" class="btn btn-secondary">Cancel</a>      
+    }
+    else
+    {
+        <a asp-action="EditIncident" asp-route-id="@Model.Id" class="btn btn-primary">Edit</a>          
+        
+    }
 </div>
+</form>
+
+
+<form asp-action="CloseIncident" method="post">
+    <input type="hidden" name="incidentId" value="@Model.Id" />
+    <input type="hidden" name="updatedStatus" value="resolved" />
+    <button type="submit">Resolve </button>
+</form>
+
+<form asp-action="CloseIncident" method="post">
+    <input type="hidden" name="incidentId" value="@Model.Id" />
+    <input type="hidden" name="updatedStatus" value="closed_without_resolve" />
+    <button type="submit">Close Incident</button>
+</form>
+
+<form asp-action="TransferIncident" method="get">
+    <input type="hidden" name="incidentId" value="@Model.Id" />
+    <button type="submit">Transfer Incident</button>
+</form>
+
+
+
 

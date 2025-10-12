@@ -199,7 +199,10 @@
                 <td>
                     <div class="priority_label @incidentStatusStyle">@incident.Status</div>
                 </td>
-                <td>@(incident.AssignedTo != null ? $"{incident.AssignedTo.FirstName} {incident.AssignedTo.LastName}" : "Unassigned")</td>
+                @{
+                    var activeUser = incident.AssignedTo?.FirstOrDefault(a => a.IsActive);
+                }
+                <td>@(activeUser != null ? $"{activeUser.FirstName} {activeUser.LastName}" : "Unassigned")</td>
                 <td>@incident.Location.Branch</td>
                 <td>@incident.ReportedAt.ToString("g")</td>
                 <td>@incident.Deadline.ToString("g")</td>

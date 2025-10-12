@@ -1,10 +1,10 @@
-﻿using MongoDB.Bson;
-using MongoDB.Driver;
+﻿using MongoDB.Driver;
 using NoSQL_Project.Models;
 using NoSQL_Project.Models.Enums;
 using NoSQL_Project.Repositories.Interfaces;
 using NoSQL_Project.Services.Interfaces;
 using NoSQL_Project.ViewModels;
+using System.Collections.Generic;
 
 namespace NoSQL_Project.Services
 {
@@ -14,7 +14,7 @@ namespace NoSQL_Project.Services
         private readonly ILocationService _locationService;
         private readonly IUserService _userService;
 
-        private readonly IMongoCollection<Incident> _incidents;
+		private readonly IMongoCollection<Incident> _incidents;
 
         public IncidentService(IIncidentRepository incidentRepository, ILocationService locationService, IMongoDatabase database, IUserService userService)
         {
@@ -86,36 +86,98 @@ namespace NoSQL_Project.Services
 		{
 			return await _incidentRepository.GetTheNumberOfAllIncidents();
 		}
-        public async Task UpdateIncidentAsync(Incident updatedIncident)
+
+		public async Task UpdateIncidentAsync(Incident updatedIncident)
 		{
 			var existingIncident = await _incidentRepository.GetIncidentByIdAsync(updatedIncident.Id);
 			if (existingIncident == null)
 				throw new KeyNotFoundException("Incident not found");
 
-			//Update employee 
-			if (!string.IsNullOrWhiteSpace(updatedIncident.AssignedTo.FirstName) &&
-				!string.IsNullOrWhiteSpace(updatedIncident.AssignedTo.LastName)) 
-            {
-				var employee = await _userService.FindUserByNameAsync(updatedIncident.AssignedTo.FirstName, updatedIncident.AssignedTo.LastName);
+			var update = Builders<Incident>.Update;
+			var updates = new List<UpdateDefinition<Incident>>();
+
+			// Comprobar cambios y agregar a la lista de updates
+			if (updatedIncident.IncidentType != existingIncident.IncidentType)
+				updates.Add(update.Set(i => i.IncidentType, updatedIncident.IncidentType));
+
+			if (updatedIncident.Priority != existingIncident.Priority)
+				updates.Add(update.Set(i => i.Priority, updatedIncident.Priority));
+
+			if (updatedIncident.Deadline != existingIncident.Deadline)
+				updates.Add(update.Set(i => i.Deadline, updatedIncident.Deadline));
+
+			if (updatedIncident.Status != existingIncident.Status)
+				updates.Add(update.Set(i => i.Status, updatedIncident.Status));
+
+			// Si hay cambios, actualizar
+			if (updates.Any())
+			{
+				await _incidentRepository.UpdateIncidentAsync(updatedIncident, updates);
+			}
+		}
+
+
+		/*public async Task<AssigneeSnapshot> BuildAssigneeSnapshotAsync(Incident incident)
+		{
+			if (incident.AssignedTo != null &&
+				(!string.IsNullOrWhiteSpace(incident.AssignedTo.FirstName) &&
+				!string.IsNullOrWhiteSpace(incident.AssignedTo.LastName)))
+			{
+				var employee = await _userService.FindUserByNameAsync(incident.AssignedTo.FirstName, incident.AssignedTo.LastName);
 				if (employee == null)
 					throw new InvalidOperationException("Employee doesn't exists");
 
 				var assigneeUser = new AssigneeSnapshot();
 				assigneeUser.MapAssignee(employee);
-
-				existingIncident.AssignedTo = assigneeUser;
+				incident.AssignedTo = assigneeUser;
 			}
 
-			existingIncident.AssignedTo = null;
-			existingIncident.IncidentType = updatedIncident.IncidentType;
-			existingIncident.Status = updatedIncident.Status;
-			existingIncident.Priority = updatedIncident.Priority;
-			existingIncident.Deadline = updatedIncident.Deadline;
+			return incident.AssignedTo;
+		}*/
 
-			await _incidentRepository.UpdateIncidentAsync(existingIncident);
+		public async Task CloseIncidentAsync(string closedIncidentId, string updatedStatus)
+		{
+			var existingIncident = await _incidentRepository.GetIncidentByIdAsync(closedIncidentId);
+			if (existingIncident == null)
+				throw new KeyNotFoundException("Incident not found");
+
+			if (IncidentStatus.resolved.ToString().Equals(updatedStatus, StringComparison.OrdinalIgnoreCase))
+			{
+				existingIncident.Status = IncidentStatus.resolved;
+			}
+			else if (IncidentStatus.closed_without_resolve.ToString().Equals(updatedStatus, StringComparison.OrdinalIgnoreCase))
+			{
+				existingIncident.Status = IncidentStatus.closed_without_resolve;
+			}
+			else
+			{
+				throw new ArgumentException("Invalid status value");
+			}
+
+			await UpdateIncidentAsync(existingIncident);
 		}
 
+		public async Task TransferIncidentAsync(string incidentId, string userForTransferId)
+		{
+			var existingIncident = await _incidentRepository.GetIncidentByIdAsync(incidentId);
+			if (existingIncident == null)
+				throw new KeyNotFoundException("Incident not found");
 
-        
-    }
+			Console.WriteLine($" {userForTransferId} in service");
+
+			var existingUser = await _userService.FindByIdAsync(userForTransferId);
+			if (existingUser == null)
+				throw new KeyNotFoundException("User not found");
+
+			//pasar el objeto para que compare el id y el user al que se lo tiene que pasar
+			await _incidentRepository.TransferIncidentAsync(incidentId, existingUser);
+			
+		}
+
+		public async Task <List<UserForTransferDto>> GetUsersForTransferAsync()
+		{
+			return await _incidentRepository.GetUsersForTransferAsync();			
+		}
+	}
+
 }

@@ -189,6 +189,78 @@ namespace NoSQL_Project.Controllers
 			return RedirectToAction("IncidentDetails", new { id = updatedIncident.Id });
 		}
 
+		[SessionAuthorize(UserType.Service_employee)]
+		[HttpPost]
+		public async Task<IActionResult> CloseIncident (string incidentId, string updatedStatus)
+		{
+			try
+			{
+				await _incidentService.CloseIncidentAsync(incidentId, updatedStatus);
+
+				return RedirectToAction("IncidentDetails", new { id = incidentId });
+			}
+			catch (KeyNotFoundException ex)
+			{
+				TempData["Error"] = ex.Message;
+				Console.WriteLine(ex);
+				return RedirectToAction("Index");
+			}
+			catch (Exception ex)
+			{
+				TempData["Error"] = $"Could not close incident: {ex.Message}";
+				Console.WriteLine(ex);
+				return RedirectToAction("Index");
+			}
+		}
+
+		[SessionAuthorize(UserType.Service_employee)]
+		[HttpGet] 
+		public async Task<IActionResult> TransferIncident(string incidentId)
+		{
+			ViewBag.IncidentId = incidentId;
+
+			var usersForTransfer = await _incidentService.GetUsersForTransferAsync();
+
+
+			return View("TransferIncident", usersForTransfer);
+		}
+
+		[HttpPost]
+		public async Task<IActionResult> TransferIncident(string incidentId, string userForTransferId)
+		{
+			Console.WriteLine($" {userForTransferId} in controller");
+
+			await _incidentService.TransferIncidentAsync(incidentId, userForTransferId);
+			return RedirectToAction("IncidentDetails", new { id = incidentId });
+		}
+
+
+
+		[SessionAuthorize(UserType.Service_employee)]
+		[HttpPost]
+		/*
+		public async Task<IActionResult> TransferIncident(string incidentId)
+		{
+			try
+			{
+				await _incidentService.TransferIncidentAsync(incidentId, newLocationBranchName);
+				return RedirectToAction("IncidentDetails", new { id = incidentId });
+			}
+			catch (KeyNotFoundException ex)
+			{
+				TempData["Error"] = ex.Message;
+				Console.WriteLine(ex);
+				return RedirectToAction("Index");
+			}
+			catch (Exception ex)
+			{
+				TempData["Error"] = $"Could not transfer incident: {ex.Message}";
+				Console.WriteLine(ex);
+				return RedirectToAction("Index");
+			}
+		}*/
+
+
 		[HttpPost]
 		public IActionResult ChangePriority(string incidentId, Priority newPriority)
 		{
@@ -199,5 +271,7 @@ namespace NoSQL_Project.Controllers
 		{
 			return RedirectToAction("IncidentDetails", new { id = incidentId });
 		}
+
+
 	}
 }
