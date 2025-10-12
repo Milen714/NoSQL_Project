@@ -234,44 +234,5 @@ namespace NoSQL_Project.Controllers
 			return RedirectToAction("IncidentDetails", new { id = incidentId });
 		}
 
-
-
-		[SessionAuthorize(UserType.Service_employee)]
-		[HttpPost]
-		/*
-		public async Task<IActionResult> TransferIncident(string incidentId)
-		{
-			try
-			{
-				await _incidentService.TransferIncidentAsync(incidentId, newLocationBranchName);
-				return RedirectToAction("IncidentDetails", new { id = incidentId });
-			}
-			catch (KeyNotFoundException ex)
-			{
-				TempData["Error"] = ex.Message;
-				Console.WriteLine(ex);
-				return RedirectToAction("Index");
-			}
-			catch (Exception ex)
-			{
-				TempData["Error"] = $"Could not transfer incident: {ex.Message}";
-				Console.WriteLine(ex);
-				return RedirectToAction("Index");
-			}
-		}*/
-
-
-		[HttpPost]
-		public IActionResult ChangePriority(string incidentId, Priority newPriority)
-		{
-			return RedirectToAction("IncidentDetails", new { id = incidentId });
-		}
-		[HttpPost]
-		public IActionResult ChangeStatus(string incidentId, IncidentStatus status)
-		{
-			return RedirectToAction("IncidentDetails", new { id = incidentId });
-		}
-
-
 	}
 }

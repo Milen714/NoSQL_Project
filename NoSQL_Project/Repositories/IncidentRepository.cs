@@ -157,35 +157,35 @@ namespace NoSQL_Project.Repositories
 			try
 			{
 				BsonDocument stageOne = new BsonDocument
-{
-	{ "$unwind", "$assigned_to" }
-};
+				{
+						{ "$unwind", "$assigned_to" }
+				};
 
 
 				//filter users with active incidents
 				BsonDocument stageTwo = new BsonDocument
-{
-	{ "$match", new BsonDocument { { "assigned_to.is_active", true } } }
-};
+				{
+					{ "$match", new BsonDocument { { "assigned_to.is_active", true } } }
+				};
 
 				//group by user and count incidents
 				BsonDocument stageThree = new BsonDocument
-{
-	{ "$group", new BsonDocument
-		{
-			{ "_id", "$assigned_to.userId" },
-			{ "TotalIncidents", new BsonDocument("$sum", 1) },
-			{ "FirstName", new BsonDocument("$first", "$assigned_to.first_name") },
-			{ "LastName", new BsonDocument("$first", "$assigned_to.last_name") }
-		}
-	}
-};
+				{
+					{ "$group", new BsonDocument
+						{
+							{ "_id", "$assigned_to.userId" },
+							{ "TotalIncidents", new BsonDocument("$sum", 1) },
+							{ "FirstName", new BsonDocument("$first", "$assigned_to.first_name") },
+							{ "LastName", new BsonDocument("$first", "$assigned_to.last_name") }
+						}
+					}					
+				};
 
 				//filter users with less than 6 incidents
 				BsonDocument stageFour = new BsonDocument
-{
-	{ "$match", new BsonDocument { { "TotalIncidents", new BsonDocument("$lt", 6) } } }
-};
+				{
+					{ "$match", new BsonDocument { { "TotalIncidents", new BsonDocument("$lt", 6) } } }
+				};
 
 
 				BsonDocument[] pipeline = new BsonDocument[] { stageOne, stageTwo, stageThree, stageFour };
