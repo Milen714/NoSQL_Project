@@ -2,209 +2,222 @@
 @model NoSQL_Project.Models.Incident
 
 @{
-    ViewData["Title"] = "Incident Details";
-    bool isEditing = ViewBag.IsEditing ?? false;
+	ViewData["Title"] = "Incident Details";
+	bool isEditing = ViewBag.IsEditing ?? false;
 }
-<h1 class="incident_details_title">Incident Details</h1>
+
 @if (TempData["Error"] != null)
 {
-    <div class="alert alert-danger">
-        @TempData["Error"]
-    </div>
+	<div class="alert alert-danger">
+		@TempData["Error"]
+	</div>
 }
+
 @{
-    string incidentStatusStyle = "";
-    string priorityLevelStyle = "";
-    // Determine priority style
-    switch (Model.Priority)
-    {
-        case Priority.low:
-            priorityLevelStyle = "priority_low";
-            break;
-        case Priority.medium:
-            priorityLevelStyle = "priority_medium";
-            break;
-        case Priority.high:
-            priorityLevelStyle = "priority_high";
-            break;
-        case Priority.critical:
-            priorityLevelStyle = "priority_critical";
-            break;
-    }
-    // Determine status style
-    switch (Model.Status)
-    {
-        case IncidentStatus.open:
-            incidentStatusStyle = "status_open";
-            break;
-        case IncidentStatus.resolved:
-            incidentStatusStyle = "status_closed";
-            break;
-        case IncidentStatus.closed_without_resolve:
-            incidentStatusStyle = "status_in_progress";
-            break;
-    }
+	string incidentStatusStyle = "";
+	string priorityLevelStyle = "";
+
+	switch (Model.Priority)
+	{
+		case Priority.low:
+			priorityLevelStyle = "priority_low";
+			break;
+		case Priority.medium:
+			priorityLevelStyle = "priority_medium";
+			break;
+		case Priority.high:
+			priorityLevelStyle = "priority_high";
+			break;
+		case Priority.critical:
+			priorityLevelStyle = "priority_critical";
+			break;
+	}
+
+	switch (Model.Status)
+	{
+		case IncidentStatus.open:
+			incidentStatusStyle = "status_open";
+			break;
+		case IncidentStatus.resolved:
+			incidentStatusStyle = "status_resolved";
+			break;
+		case IncidentStatus.closed_without_resolve:
+			incidentStatusStyle = "status_closed_without_resolve";
+			break;
+		case IncidentStatus.inProgress:
+			incidentStatusStyle = "status_in_progress";
+			break;
+		case IncidentStatus.closed:
+			incidentStatusStyle = "status_closed";
+			break;
+	}
 }
-
-<form asp-action="UpdateIncident" method="post"> <input type="hidden" asp-for="Id" />
-
 
 <div class="incident_layout">
-    <header class="incident_main_header">
-        <h4>@Model.Location?.Branch > #ID @Model.Id</h4>
-            <input type="hidden" asp-for="Location.Branch" />
-            <input type="hidden" asp-for="Location.Region" />
-        <h2>@Model.Subject</h2>
-            <input type="hidden" asp-for="Subject" />
-        <p>@Model.Description</p>
-            <input type="hidden" asp-for="Description" />
-    </header>
 
-    <article class="incident_other_information">
-        <div class="other_information_container">
-            <h3 class="incident_details_title title">Other Information</h3>
+	<div>
+		<header class="incident_main_header">
+			<h5>@Model.Location?.Branch > #ID @Model.Id</h5>
+			<h2>@Model.Subject</h2>
+			<p>@Model.Description</p>
+		</header>
 
-            <!-- Incident Type -->
-            <div class="other_information_row">
-                <p>Type:</p>
-                @if (isEditing)
-                {
-                    <select asp-for="IncidentType" asp-items="Html.GetEnumSelectList<IncidentType>()" class="form-control"></select>
-                }
-                else
-                {
-                    <h4>@Model.IncidentType</h4>
-                }
-            </div>
+		<div>
+			@if (isEditing)
+			{
+				<div class="other_info_header_container">
+					<h5 class="incident_details_title title">Edit Incident:</h5>
+				</div>
 
-            <!-- Priority -->
-            <div class="other_information_row">
-                <p>Priority:</p>
-                @if (isEditing)
-                {
-                    <select asp-for="Priority" asp-items="Html.GetEnumSelectList<Priority>()" class="form-control"></select>
-                }
-                else
-                {
-                    <h4>@Model.Priority</h4>
-                }
-            </div>
+				<div class="update-incident-form">
+					<form asp-action="UpdateIncident" method="post">
+						<input type="hidden" asp-for="Id" />
+						<input type="hidden" asp-for="Location.Branch" />
+						<input type="hidden" asp-for="Location.Region" />
+						<input type="hidden" asp-for="Subject" />
+						<input type="hidden" asp-for="Description" />
+						<input type="hidden" asp-for="ReportedAt" />
+						<input type="hidden" asp-for="ReportedBy.FirstName" />
+						<input type="hidden" asp-for="ReportedBy.LastName" />
 
-            <!-- Status -->
-            <div class="other_information_row">
-                <p>Status:</p>
-                @if (isEditing)
-                {
-                    <select asp-for="Status" asp-items="Html.GetEnumSelectList<IncidentStatus>()" class="form-control"></select>
-                }
-                else
-                {
-                    <h4>@Model.Status</h4>
-                }
-            </div>
+						<div class="form-group">
+							<label>Type</label>
+							<select asp-for="IncidentType" asp-items="Html.GetEnumSelectList<IncidentType>()" class="form-control"></select>
+						</div>
 
-            <!-- Deadline -->
-            <div class="other_information_row">
-                <p>Deadline:</p>
-                @if (isEditing)
-                {
-                    <select asp-for="Deadline" class="form-control">
-                        <option value="@DateTime.UtcNow.AddDays(7).ToString("o")"
-                                selected="@(Model.Deadline.Date == DateTime.UtcNow.AddDays(7).Date)">
-                            7 days
-                        </option>
-                        <option value="@DateTime.UtcNow.AddDays(14).ToString("o")"
-                                selected="@(Model.Deadline.Date == DateTime.UtcNow.AddDays(14).Date)">
-                            14 days
-                        </option>
-                        <option value="@DateTime.UtcNow.AddDays(28).ToString("o")"
-                                selected="@(Model.Deadline.Date == DateTime.UtcNow.AddDays(28).Date)">
-                            28 days
-                        </option>
+						<div class="form-group">
+							<label>Priority</label>
+							<select asp-for="Priority" asp-items="Html.GetEnumSelectList<Priority>()" class="form-control"></select>
+						</div>
 
-                    </select>
-                }
-                else
-                {
-                    <h4>@Model.Deadline.ToString("g")</h4>
-                }
-            </div>
+						<div class="form-group">
+							<label>Status</label>
+							<select asp-for="Status" asp-items="Html.GetEnumSelectList<IncidentStatus>()" class="form-control"></select>
+						</div>
 
-            <!-- Assigned To -->
-            <div class="other_information_row">
-                    <p>Assigned To:</p>
-                    @{
-                        var activeUserIndex = Model.AssignedTo?.FindIndex(u => u.IsActive) ?? -1;
-                    }
+						<div class="form-group">
+							<label>Deadline</label>
+							<select asp-for="Deadline" class="form-control">
+								<option value="@DateTime.UtcNow.AddDays(7).ToString("o")"
+										selected="@(Model.Deadline.Date == DateTime.UtcNow.AddDays(7).Date)">7 days</option>
+								<option value="@DateTime.UtcNow.AddDays(14).ToString("o")"
+										selected="@(Model.Deadline.Date == DateTime.UtcNow.AddDays(14).Date)">14 days</option>
+								<option value="@DateTime.UtcNow.AddDays(28).ToString("o")"
+										selected="@(Model.Deadline.Date == DateTime.UtcNow.AddDays(28).Date)">28 days</option>
+							</select>
+						</div>
 
-                    @if (activeUserIndex >= 0)
-                    {
-                        var activeUser = Model.AssignedTo[activeUserIndex];
-                        <h4>@activeUser.FirstName @activeUser.LastName</h4>
-                        <input type="hidden" name="AssignedTo[@activeUserIndex].FirstName" value="@activeUser.FirstName" />
-                        <input type="hidden" name="AssignedTo[@activeUserIndex].LastName" value="@activeUser.LastName" />
-                    }
-                    else
-                    {
-                        <h4>Incident not yet assigned</h4>
-                    }
-                    
-            </div>
+						<div class="incident_management_buttons">
+							<button type="submit" class="btn btn-success">Save</button>
+							<a asp-action="IncidentDetails" asp-route-id="@Model.Id" class="btn btn-secondary">Cancel</a>
+						</div>
+					</form>
+				</div>
+			}
+			else
+			{
+				<div class="incident_management_buttons">
+					<a asp-action="EditIncident" asp-route-id="@Model.Id" class="btn btn-primary">Edit</a>
+				</div>
+			}
+		</div>
+	</div>
 
+	<article class="incident_other_information">
+		<div class="other_information_container">
 
-            <div class="other_information_row">
-                <p>Created on:</p>
-                <h4>@Model.ReportedAt.ToString("g")</h4>
-                    <input type="hidden" asp-for="ReportedAt" />
-            </div>
-            <div class="other_information_row">
-                <p>Reported by:</p>
-                <h4>@Model.ReportedBy?.FirstName @Model.ReportedBy?.LastName</h4>
-                    <input type="hidden" asp-for="ReportedBy.FirstName" />
-                    <input type="hidden" asp-for="ReportedBy.LastName" />
-            </div>
-            <div class="other_information_row">
-                <p>Branch:</p>
-                <h4>@Model.Location?.Branch</h4>
-                <input type="hidden" asp-for="Location.Branch" />
-            </div>
-        </div>     
-    </article>
-    </div>
+			<div class="other_information_group_container">
+				<div class="other_info_header_container">
+					<h5 class="incident_details_title title">Assignee Information</h5>
+				</div>
 
+				<div class="other_information_row">
+					<p>Assigned To:</p>
 
-<div class="incident_management_buttons">
-    @if (isEditing) //Service Desk employees can edit de form 
-    {        
-            <button type="submit" class="btn btn-success">Save</button>
-            <a asp-action="IncidentDetails" asp-route-id="@Model.Id" class="btn btn-secondary">Cancel</a>      
-    }
-    else
-    {
-        <a asp-action="EditIncident" asp-route-id="@Model.Id" class="btn btn-primary">Edit</a>          
-        
-    }
+					@{
+						var activeUserIndex = Model.AssignedTo?.FindIndex(u => u.IsActive) ?? -1;
+					}
+
+					@if (activeUserIndex >= 0)
+					{
+						var activeUser = Model.AssignedTo[activeUserIndex];
+						<h5>@activeUser.FirstName @activeUser.LastName</h5>
+						<input type="hidden" name="AssignedTo[@activeUserIndex].FirstName" value="@activeUser.FirstName" />
+						<input type="hidden" name="AssignedTo[@activeUserIndex].LastName" value="@activeUser.LastName" />
+					}
+					else
+					{
+						<h4>Incident not yet assigned</h4>
+					}
+
+				</div>
+			</div>
+
+			<div class="other_information_group_container">
+				<div class="other_info_header_container">
+					<h5 class="incident_details_title title">Incident Details</h5>
+				</div>
+				<div class="other_information_row">
+					<p>Incident ID:</p>
+					<h5>@Model.Id</h5>
+				</div>
+				<div class="other_information_row">
+					<p>Incident Type:</p>
+					<h5>@Model.IncidentType</h5>
+				</div>
+				<div class="other_information_row">
+					<p>Incident Origin:</p>
+					<h5>@Model.Location.Branch</h5>
+				</div>
+			</div>
+
+			@* Other Information *@
+			<div class="other_information_group_container">
+				<div class="other_info_header_container">
+					<h5 class="incident_details_title title">Other Information</h5>
+				</div>
+				<div class="other_information_row_withLable">
+					<p>Priority:</p>
+					<div class="priority_label  @priorityLevelStyle">@Model.Priority</div>
+				</div>
+				<div class="other_information_row_withLable">
+					<p>Status:</p>
+					<div class="priority_label @incidentStatusStyle">@Model.Status</div>
+				</div>
+				<div class="other_information_row_withLable">
+					<p>SLA:</p>
+					<div>
+						<img src="~/assets/Stopwatch.svg" alt="Alternate Text" />  @((Model.Deadline - DateTime.Now).Days) Days
+					</div>
+				</div>
+				<div class="other_information_row_withLable">
+					<p>Created on:</p>
+					<div>@Model.ReportedAt.ToString("g")</div>
+				</div>
+				<div class="other_information_row_withLable">
+					<p>Reported by:</p>
+					<div>@Model.ReportedBy?.FirstName @Model.ReportedBy?.LastName</div>
+				</div>
+			</div>
+
+		</div>
+	</article>
+
+	<form asp-action="CloseIncident" method="post" class="incident_management_buttons">
+		<input type="hidden" name="incidentId" value="@Model.Id" />
+		<input type="hidden" name="updatedStatus" value="resolved" />
+		<button type="submit">Resolve </button>
+	</form>
+
+	<form asp-action="CloseIncident" method="post" class="incident_management_buttons">
+		<input type="hidden" name="incidentId" value="@Model.Id" />
+		<input type="hidden" name="updatedStatus" value="closed_without_resolve" />
+		<button type="submit">Close Incident</button>
+	</form>
+
+	<form asp-action="TransferIncident" method="get" class="incident_management_buttons">
+		<input type="hidden" name="incidentId" value="@Model.Id" />
+		<button type="submit">Transfer Incident</button>
+	</form>
+
 </div>
-</form>
-
-
-<form asp-action="CloseIncident" method="post">
-    <input type="hidden" name="incidentId" value="@Model.Id" />
-    <input type="hidden" name="updatedStatus" value="resolved" />
-    <button type="submit">Resolve </button>
-</form>
-
-<form asp-action="CloseIncident" method="post">
-    <input type="hidden" name="incidentId" value="@Model.Id" />
-    <input type="hidden" name="updatedStatus" value="closed_without_resolve" />
-    <button type="submit">Close Incident</button>
-</form>
-
-<form asp-action="TransferIncident" method="get">
-    <input type="hidden" name="incidentId" value="@Model.Id" />
-    <button type="submit">Transfer Incident</button>
-</form>
-
-
-
-
