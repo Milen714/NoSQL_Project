@@ -146,89 +146,107 @@ namespace NoSQL_Project.Repositories
 
 		public async Task<List<UserForTransferDto>> GetUsersForTransferAsync()
 		{
+			
 			try
 			{
-				//filter users with active incidents
 				BsonDocument stageOne = new BsonDocument
-		{
-			{ "$match", new BsonDocument { { "assigned_to.is_active", true } } }
-		};
+{
+	{ "$unwind", "$assigned_to" }
+};
+
+
+				//filter users with active incidents
+				BsonDocument stageTwo = new BsonDocument
+{
+	{ "$match", new BsonDocument { { "assigned_to.is_active", true } } }
+};
 
 				//group by user and count incidents
-				BsonDocument stageTwo = new BsonDocument
+				BsonDocument stageThree = new BsonDocument
+{
+	{ "$group", new BsonDocument
 		{
-			{ "$group", new BsonDocument
-				{
-					{ "_id", "$assigned_to.userId" },
-					{ "TotalIncidents", new BsonDocument("$sum", 1) },
-					{ "FirstName", new BsonDocument("$first", "$assigned_to.first_name") },
-					{ "LastName", new BsonDocument("$first", "$assigned_to.last_name") }
-				}
-			}
-		};
+			{ "_id", "$assigned_to.userId" },
+			{ "TotalIncidents", new BsonDocument("$sum", 1) },
+			{ "FirstName", new BsonDocument("$first", "$assigned_to.first_name") },
+			{ "LastName", new BsonDocument("$first", "$assigned_to.last_name") }
+		}
+	}
+};
 
 				//filter users with less than 6 incidents
-				BsonDocument stageThree = new BsonDocument
-		{
-			{ "$match", new BsonDocument { { "TotalIncidents", new BsonDocument("$lt", 6) } } }
-		};
+				BsonDocument stageFour = new BsonDocument
+{
+	{ "$match", new BsonDocument { { "TotalIncidents", new BsonDocument("$lt", 6) } } }
+};
 
-				
-				BsonDocument[] pipeline = new BsonDocument[] { stageOne, stageTwo, stageThree };
 
-				
+				BsonDocument[] pipeline = new BsonDocument[] { stageOne, stageTwo, stageThree, stageFour };
+
+
 				var result = await _incidents.Aggregate<BsonDocument>(pipeline).ToListAsync();
 
-				//map to dto
+				// ✅ Map con validaciones seguras
 				return result.Select(r => new UserForTransferDto
 				{
-					UserId = r["_id"].AsObjectId,
-					TotalIncidents = r["TotalIncidents"].AsInt32,
-					FirstName = r["FirstName"].AsString,
-					LastName = r["LastName"].AsString
+					UserId = r.Contains("_id") && r["_id"].IsObjectId ? r["_id"].AsObjectId : ObjectId.Empty,
+					TotalIncidents = r.Contains("TotalIncidents") && r["TotalIncidents"].IsInt32 ? r["TotalIncidents"].AsInt32 : 0,
+					FirstName = r.Contains("FirstName") && r["FirstName"].IsString ? r["FirstName"].AsString : "(Unknown)",
+					LastName = r.Contains("LastName") && r["LastName"].IsString ? r["LastName"].AsString : ""
 				}).ToList();
+			
 			}
 			catch (Exception ex)
 			{
 				throw new Exception($"Could not retrieve users for transfer: {ex.Message}");
 			}
+		
+
 		}
 
 
-		public async Task TransferIncidentAsync(string incidentId, UserForTransferDto userForTransfer)
+		public async Task TransferIncidentAsync(string incidentId, User userForTransfer)
 		{
+
 			try
 			{
 				var filter = Builders<Incident>.Filter.Eq(i => i.Id, incidentId);
 
-				var newAssigned = new AssigneeSnapshot
+				// 🔹 1. Desactivar usuarios activos
+				var deactivate = Builders<Incident>.Update
+					.Set("assigned_to.$[elem].is_active", false);
+
+				var arrayFilters = new List<ArrayFilterDefinition>
 				{
-					UserId = userForTransfer.UserId,
+					new JsonArrayFilterDefinition<BsonDocument>("{ 'elem.is_active': true }")
+				};
+
+				var updateOptions = new UpdateOptions { ArrayFilters = arrayFilters };
+
+				await _incidents.UpdateOneAsync(filter, deactivate, updateOptions);
+
+				// 🔹 2. Agregar nuevo usuario activo
+				var newAssignee = new AssigneeSnapshot
+				{
+					UserId = new ObjectId(userForTransfer.Id),
 					FirstName = userForTransfer.FirstName,
 					LastName = userForTransfer.LastName,
 					IsActive = true
 				};
 
-				//deactivate current active assignee
-				var arrayFilters = new List<ArrayFilterDefinition<Incident>>
-		{
-			new JsonArrayFilterDefinition<Incident>("{ 'elem.is_active': true }")
-		};
+				var addNew = Builders<Incident>.Update.Push(i => i.AssignedTo, newAssignee);
 
-				var updateOptions = new UpdateOptions { ArrayFilters = arrayFilters };
-								
-				var update = Builders<Incident>.Update.Combine(
-					Builders<Incident>.Update.Set("assigned_to.$[elem].is_active", false),
-					Builders<Incident>.Update.Push(i => i.AssignedTo, newAssigned)
-				);
+				await _incidents.UpdateOneAsync(filter, addNew);
 
-				await _incidents.UpdateOneAsync(filter, update, updateOptions);
-
+				Console.WriteLine("Transferencia completada correctamente.");
 			}
 			catch (Exception ex)
 			{
 				throw new Exception($"Error in transfer {ex.Message}");
 			}
+
+
+
 		}
 
 		public async Task<int> GetTheNumberOfAllOpenIncidents()

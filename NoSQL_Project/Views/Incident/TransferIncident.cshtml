@@ -7,7 +7,7 @@
 
 <h2>Transfer Incident</h2>
 
-<form asp-action="TransferIncidentAsync" method="post">
+<form asp-action="TransferIncident" method="post">
     <input type="hidden" name="incidentId" value="@incidentId" />
 
     <table class="table">
@@ -23,7 +23,7 @@
             {
                 <tr>
                     <td>
-                        <input type="radio" name="userForTransfer.UserId" value="@user.UserId" required />
+                        <input type="radio" name="userForTransferId" value="@user.UserId.ToString()" required />
                     </td>
                     <td>@user.FirstName @user.LastName</td>
                     <td>@user.TotalIncidents</td>

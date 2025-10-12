@@ -212,17 +212,22 @@ namespace NoSQL_Project.Controllers
 
 		[SessionAuthorize(UserType.Service_employee)]
 		[HttpGet] 
-		public async Task<IActionResult> TransferIncidentAsync(string incidentId)
+		public async Task<IActionResult> TransferIncident(string incidentId)
 		{
 			ViewBag.IncidentId = incidentId;
+
 			var usersForTransfer = await _incidentService.GetUsersForTransferAsync();
-			return View(usersForTransfer); 
+
+
+			return View("TransferIncident", usersForTransfer);
 		}
 
 		[HttpPost]
-		public async Task<IActionResult> TransferIncidentAsync(string incidentId, UserForTransferDto userForTransfer)
+		public async Task<IActionResult> TransferIncident(string incidentId, string userForTransferId)
 		{
-			await _incidentService.TransferIncidentAsync(incidentId, userForTransfer);
+			Console.WriteLine($" {userForTransferId} in controller");
+
+			await _incidentService.TransferIncidentAsync(incidentId, userForTransferId);
 			return RedirectToAction("IncidentDetails", new { id = incidentId });
 		}
 

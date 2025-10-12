@@ -14,15 +14,15 @@ namespace NoSQL_Project.Repositories.Interfaces
         Task<List<Incident>> GetIncidentsByStatusAndType(IncidentStatus status, IncidentType type, string branch);
         Task<Incident> GetIncidentByIdAsync(string id);
         Task CreateNewIncidentAsync(Incident newIncident);
-        Task UpdateIncidentAsync(Incident updatedIncident);
         Task<int> GetTheNumberOfAllOpenIncidents();
         Task<int> GetTheNumberOfAllIncidents();
 
         Task UpdateIncidentAsync(Incident updatedIncident, List<UpdateDefinition<Incident>> updates);
 
-        Task<List<UserForTransferDto>> GetUsersForTransferAsync();
 
-        Task TransferIncidentAsync(string incidentId, UserForTransferDto userForTransfer);
+		Task<List<UserForTransferDto>> GetUsersForTransferAsync();
+
+        Task TransferIncidentAsync(string incidentId, User userForTransfer);
 
 
 	}

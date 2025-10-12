@@ -123,7 +123,7 @@ namespace NoSQL_Project.Services
 		}
 
 
-		public async Task<AssigneeSnapshot> BuildAssigneeSnapshotAsync(Incident incident)
+		/*public async Task<AssigneeSnapshot> BuildAssigneeSnapshotAsync(Incident incident)
 		{
 			if (incident.AssignedTo != null &&
 				(!string.IsNullOrWhiteSpace(incident.AssignedTo.FirstName) &&
@@ -139,8 +139,7 @@ namespace NoSQL_Project.Services
 			}
 
 			return incident.AssignedTo;
-		}
-
+		}*/
 
 		public async Task CloseIncidentAsync(string closedIncidentId, string updatedStatus)
 		{
@@ -162,14 +161,20 @@ namespace NoSQL_Project.Services
 			}
 		}
 
-		public async Task TransferIncidentAsync(string incidentId, UserForTransferDto userForTransfer)
+		public async Task TransferIncidentAsync(string incidentId, string userForTransferId)
 		{
 			var existingIncident = await _incidentRepository.GetIncidentByIdAsync(incidentId);
 			if (existingIncident == null)
 				throw new KeyNotFoundException("Incident not found");
 
+			Console.WriteLine($" {userForTransferId} in service");
+
+			var existingUser = await _userService.FindByIdAsync(userForTransferId);
+			if (existingUser == null)
+				throw new KeyNotFoundException("User not found");
+
 			//pasar el objeto para que compare el id y el user al que se lo tiene que pasar
-			_incidentRepository.TransferIncidentAsync(incidentId, userForTransfer);
+			await _incidentRepository.TransferIncidentAsync(incidentId, existingUser);
 			
 		}
 
