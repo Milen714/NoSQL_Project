@@ -86,40 +86,34 @@ namespace NoSQL_Project.Services
 		{
 			return await _incidentRepository.GetTheNumberOfAllIncidents();
 		}
-        public async Task UpdateIncidentAsync(Incident updatedIncident)
+
+		public async Task UpdateIncidentAsync(Incident updatedIncident)
 		{
 			var existingIncident = await _incidentRepository.GetIncidentByIdAsync(updatedIncident.Id);
 			if (existingIncident == null)
 				throw new KeyNotFoundException("Incident not found");
 
-			//check what has changed
-			var updates = await CheckIncidentUpdates(updatedIncident, existingIncident);
-
-			//if there's anything changed, update it in the existing incident
-			if (updates.Any())
-			{
-				await _incidentRepository.UpdateIncidentAsync(updatedIncident, updates);				
-			}
-		}
-
-		private async Task <List<UpdateDefinition<Incident>>> CheckIncidentUpdates(Incident updated, Incident existing)
-		{
 			var update = Builders<Incident>.Update;
 			var updates = new List<UpdateDefinition<Incident>>();
 
-			if (updated.IncidentType != existing.IncidentType)
-				updates.Add(update.Set(i => i.IncidentType, updated.IncidentType));
+			// Comprobar cambios y agregar a la lista de updates
+			if (updatedIncident.IncidentType != existingIncident.IncidentType)
+				updates.Add(update.Set(i => i.IncidentType, updatedIncident.IncidentType));
 
-			if (updated.Priority != existing.Priority)
-				updates.Add(update.Set(i => i.Priority, updated.Priority));
+			if (updatedIncident.Priority != existingIncident.Priority)
+				updates.Add(update.Set(i => i.Priority, updatedIncident.Priority));
 
-			if (updated.Deadline != existing.Deadline)
-				updates.Add(update.Set(i => i.Deadline, updated.Deadline));
+			if (updatedIncident.Deadline != existingIncident.Deadline)
+				updates.Add(update.Set(i => i.Deadline, updatedIncident.Deadline));
 
-			if (updated.Status != existing.Status)
-				updates.Add(update.Set(i => i.Status, updated.Status));
+			if (updatedIncident.Status != existingIncident.Status)
+				updates.Add(update.Set(i => i.Status, updatedIncident.Status));
 
-			return updates;
+			// Si hay cambios, actualizar
+			if (updates.Any())
+			{
+				await _incidentRepository.UpdateIncidentAsync(updatedIncident, updates);
+			}
 		}
 
 
