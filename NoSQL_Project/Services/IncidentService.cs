@@ -52,10 +52,10 @@ namespace NoSQL_Project.Services
         }
 
 
-        public async Task CreateNewIncidentAsync(NewIncidentViewModel model)
+        public async Task<Incident> CreateNewIncidentAsync(NewIncidentViewModel inicentModel)
 		{
 			//get location branch name
-			Location location = await _locationService.GetLocationByName(model.LocationBranchName);
+			Location location = await _locationService.GetLocationByName(inicentModel.LocationBranchName);
 
 			//get location snapshot
 			LocationSnapshot locationSnapshot = new LocationSnapshot();
@@ -63,21 +63,22 @@ namespace NoSQL_Project.Services
 
 			var newIncident = new Incident
 			{
-				Subject = model.Subject,
-				IncidentType = model.IncidentType,
-				Priority = model.Priority,
-				Deadline = DateTime.Now.AddDays(model.Deadline),
+				Subject = inicentModel.Subject,
+				IncidentType = inicentModel.IncidentType,
+				Priority = inicentModel.Priority,
+				Deadline = DateTime.Now.AddDays(inicentModel.Deadline),
 				Location = locationSnapshot,
-				Description = model.Description,
-				ReportedBy = model.Reporter,
+				Description = inicentModel.Description,
+				ReportedBy = inicentModel.Reporter,
 				Status = IncidentStatus.open,
 				ReportedAt = DateTime.UtcNow
 			};
 
 			//create the incident
-			await _incidentRepository.CreateNewIncidentAsync(newIncident);
+			return await _incidentRepository.CreateNewIncidentAsync(newIncident);
 
 		}
+
         public async Task<int> GetTheNumberOfAllOpenIncidents()
 		{
 			return await _incidentRepository.GetTheNumberOfAllOpenIncidents();
@@ -116,25 +117,6 @@ namespace NoSQL_Project.Services
 			}
 		}
 
-
-		/*public async Task<AssigneeSnapshot> BuildAssigneeSnapshotAsync(Incident incident)
-		{
-			if (incident.AssignedTo != null &&
-				(!string.IsNullOrWhiteSpace(incident.AssignedTo.FirstName) &&
-				!string.IsNullOrWhiteSpace(incident.AssignedTo.LastName)))
-			{
-				var employee = await _userService.FindUserByNameAsync(incident.AssignedTo.FirstName, incident.AssignedTo.LastName);
-				if (employee == null)
-					throw new InvalidOperationException("Employee doesn't exists");
-
-				var assigneeUser = new AssigneeSnapshot();
-				assigneeUser.MapAssignee(employee);
-				incident.AssignedTo = assigneeUser;
-			}
-
-			return incident.AssignedTo;
-		}*/
-
 		public async Task CloseIncidentAsync(string closedIncidentId, string updatedStatus)
 		{
 			var existingIncident = await _incidentRepository.GetIncidentByIdAsync(closedIncidentId);
@@ -163,14 +145,12 @@ namespace NoSQL_Project.Services
 			if (existingIncident == null)
 				throw new KeyNotFoundException("Incident not found");
 
-			Console.WriteLine($" {userForTransferId} in service");
-
 			var existingUser = await _userService.FindByIdAsync(userForTransferId);
 			if (existingUser == null)
 				throw new KeyNotFoundException("User not found");
 
 			//pasar el objeto para que compare el id y el user al que se lo tiene que pasar
-			await _incidentRepository.TransferIncidentAsync(incidentId, existingUser);
+			await _incidentRepository.TransferIncidentAsync(existingIncident, existingUser);
 			
 		}
 

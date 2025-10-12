@@ -117,9 +117,7 @@
 			else
 			{
 				<div class="incident_management_buttons">					
-					<a asp-action="EditIncident" asp-route-id="@Model.Id" class="btn btn-primary">
-						Edit
-					</a>
+					<a asp-action="EditIncident" asp-route-id="@Model.Id" class="btn btn-primary"> Edit	</a>
 
 					<form asp-action="CloseIncident" method="post" style="display:inline;">
 						<input type="hidden" name="incidentId" value="@Model.Id" />
@@ -135,8 +133,17 @@
 
 					<form asp-action="TransferIncident" method="get" style="display:inline;">
 						<input type="hidden" name="incidentId" value="@Model.Id" />
-						<button type="submit" class="btn btn-primary">Transfer Incident</button>
+						@if (Model.AssignedTo == null || !Model.AssignedTo.Any())
+						{
+							<button type="submit" class="btn btn-primary">Assign Incident</button>
+						}
+						else
+						{
+							<button type="submit" class="btn btn-primary">Transfer Incident</button>
+						}
 					</form>
+
+					<a asp-controller="Incident" asp-action="Index" class="btn btn-secondary">Return</a>
 				</div>
 			}
 		</div>
@@ -168,7 +175,7 @@
 					}
 					else
 					{
-						<h4>Incident not yet assigned</h4>
+						<h5>Incident not yet assigned</h5>
 					}
 
 				</div>

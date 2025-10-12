@@ -138,9 +138,10 @@ namespace NoSQL_Project.Repositories
 			}
 		}
 
-		public async Task CreateNewIncidentAsync(Incident newIncident)
+		public async Task<Incident> CreateNewIncidentAsync(Incident newIncident)
 		{
 			await _incidents.InsertOneAsync(newIncident);
+			return newIncident;
 		}
 
 		public async Task UpdateIncidentAsync(Incident updatedIncident, List<UpdateDefinition<Incident>> updates)
@@ -193,46 +194,49 @@ namespace NoSQL_Project.Repositories
 
 				var result = await _incidents.Aggregate<BsonDocument>(pipeline).ToListAsync();
 
-				
+
 				return result.Select(r => new UserForTransferDto
 				{
-					UserId = r.Contains("_id") && r["_id"].IsObjectId ? r["_id"].AsObjectId : ObjectId.Empty,
-					TotalIncidents = r.Contains("TotalIncidents") && r["TotalIncidents"].IsInt32 ? r["TotalIncidents"].AsInt32 : 0,
-					FirstName = r.Contains("FirstName") && r["FirstName"].IsString ? r["FirstName"].AsString : "(Unknown)",
-					LastName = r.Contains("LastName") && r["LastName"].IsString ? r["LastName"].AsString : ""
+					UserId = r.GetValue("_id", ObjectId.Empty).AsObjectId,
+					TotalIncidents = r.GetValue("TotalIncidents", 0).AsInt32,
+					FirstName = r.GetValue("FirstName", "(Unknown)").AsString,
+					LastName = r.GetValue("LastName", "").AsString
 				}).ToList();
-			
+
 			}
 			catch (Exception ex)
 			{
-				throw new Exception($"Could not retrieve users for transfer: {ex.Message}");
+				throw new Exception($"Could not retrieve users for transfer: ", ex);
 			}
 		
 
 		}
 
 
-		public async Task TransferIncidentAsync(string incidentId, User userForTransfer)
+		public async Task TransferIncidentAsync(Incident existingIncident, User userForTransfer)
 		{
 
 			try
 			{
-				var filter = Builders<Incident>.Filter.Eq(i => i.Id, incidentId);
+				var filter = Builders<Incident>.Filter.Eq(i => i.Id, existingIncident.Id);
 
-				
-				var deactivate = Builders<Incident>.Update
+				if (existingIncident.AssignedTo != null && existingIncident.AssignedTo.Any()) 
+					//only deactivate if the array is not empty
+				{
+					var deactivate = Builders<Incident>.Update
 					.Set("assigned_to.$[elem].is_active", false);
 
-				var arrayFilters = new List<ArrayFilterDefinition>
-				{
-					new JsonArrayFilterDefinition<BsonDocument>("{ 'elem.is_active': true }")
-				};
+					var arrayFilters = new List<ArrayFilterDefinition>
+					{
+						new JsonArrayFilterDefinition<BsonDocument>("{ 'elem.is_active': true }")
+					};
 
-				var updateOptions = new UpdateOptions { ArrayFilters = arrayFilters };
+					var updateOptions = new UpdateOptions { ArrayFilters = arrayFilters };
 
-				await _incidents.UpdateOneAsync(filter, deactivate, updateOptions);
+					await _incidents.UpdateOneAsync(filter, deactivate, updateOptions);
 
-				
+				}
+
 				var newAssignee = new AssigneeSnapshot
 				{
 					UserId = new ObjectId(userForTransfer.Id),
@@ -249,11 +253,8 @@ namespace NoSQL_Project.Repositories
 			}
 			catch (Exception ex)
 			{
-				throw new Exception($"Error in transfer {ex.Message}");
+				throw new Exception($"Error in transfer: ", ex);
 			}
-
-
-
 		}
 
 		public async Task<int> GetTheNumberOfAllOpenIncidents()

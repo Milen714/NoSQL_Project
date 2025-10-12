@@ -110,17 +110,31 @@ namespace NoSQL_Project.Controllers
 			var viewModel = new NewIncidentViewModel
 			{
 				Reporter = reporterUser,
-
-				// Defaults
 				Priority = Priority.medium,
 				Deadline = 14,
 				IncidentType = IncidentType.software,
 			};
-			ViewBag.Locations = await _locationService.GetAllLocations();
+
+			var locations = await _locationService.GetAllLocations();
+			ViewBag.Locations = locations.OrderBy(l => l.Branch).ToList();
 
 			return View(viewModel);
 		}
 
+		[HttpPost]
+		public async Task<IActionResult> CreateIncident(NewIncidentViewModel newIncident)
+		{
+			try
+			{
+				Incident createdIncident = await _incidentService.CreateNewIncidentAsync(newIncident);
+				return RedirectToAction("IncidentDetails", new { createdIncident.Id, isEditing = false });
+			}
+			catch (Exception ex)
+			{
+				TempData["Error"] = $"Could not create incident: {ex.Message}";
+				return RedirectToAction("Index");
+			}
+		}
 
 		//Details 
 		public async Task<IActionResult> IncidentDetails(string id, bool isEditing = false)
@@ -155,23 +169,15 @@ namespace NoSQL_Project.Controllers
 		//Update the edited incident
 		[HttpPost]
 		public async Task<IActionResult> UpdateIncident(Incident updatedIncident)
-		{
-			foreach (var kvp in ModelState)
-			{
-				foreach (var error in kvp.Value.Errors)
-				{
-					Console.WriteLine($"{kvp.Key}: {error.ErrorMessage}");
-				}
-			}
-
-			if (!ModelState.IsValid)
-			{
-				ViewBag.IsEditing = true;
-				return View("IncidentDetails", updatedIncident);
-			}
-
+		{			
 			try
 			{
+				if (!ModelState.IsValid)
+				{
+					ViewBag.IsEditing = true;
+					return View("IncidentDetails", updatedIncident);
+				}
+
 				await _incidentService.UpdateIncidentAsync(updatedIncident);
 			}
 			catch (KeyNotFoundException ex)
@@ -220,18 +226,22 @@ namespace NoSQL_Project.Controllers
 			ViewBag.IncidentId = incidentId;
 
 			var usersForTransfer = await _incidentService.GetUsersForTransferAsync();
-
-
 			return View("TransferIncident", usersForTransfer);
 		}
 
 		[HttpPost]
 		public async Task<IActionResult> TransferIncident(string incidentId, string userForTransferId)
 		{
-			Console.WriteLine($" {userForTransferId} in controller");
-
-			await _incidentService.TransferIncidentAsync(incidentId, userForTransferId);
-			return RedirectToAction("IncidentDetails", new { id = incidentId });
+			try
+			{
+				await _incidentService.TransferIncidentAsync(incidentId, userForTransferId);
+				return RedirectToAction("IncidentDetails", new { id = incidentId });
+			}
+			catch (Exception ex)
+			{
+				TempData["Error"] = ex.Message;
+				return RedirectToAction("Index");
+			}
 		}
 
 	}
