@@ -116,12 +116,33 @@
 			}
 			else
 			{
-				<div class="incident_management_buttons">
-					<a asp-action="EditIncident" asp-route-id="@Model.Id" class="btn btn-primary">Edit</a>
+				<div class="incident_management_buttons">					
+					<a asp-action="EditIncident" asp-route-id="@Model.Id" class="btn btn-primary">
+						Edit
+					</a>
+
+					<form asp-action="CloseIncident" method="post" style="display:inline;">
+						<input type="hidden" name="incidentId" value="@Model.Id" />
+						<input type="hidden" name="updatedStatus" value="resolved" />
+						<button type="submit" class="btn btn-primary">Resolve</button>
+					</form>
+
+					<form asp-action="CloseIncident" method="post" style="display:inline;">
+						<input type="hidden" name="incidentId" value="@Model.Id" />
+						<input type="hidden" name="updatedStatus" value="closed_without_resolve" />
+						<button type="submit" class="btn btn-primary">Close Incident</button>
+					</form>
+
+					<form asp-action="TransferIncident" method="get" style="display:inline;">
+						<input type="hidden" name="incidentId" value="@Model.Id" />
+						<button type="submit" class="btn btn-primary">Transfer Incident</button>
+					</form>
 				</div>
 			}
 		</div>
 	</div>
+
+	
 
 	<article class="incident_other_information">
 		<div class="other_information_container">
@@ -203,21 +224,6 @@
 		</div>
 	</article>
 
-	<form asp-action="CloseIncident" method="post" class="incident_management_buttons">
-		<input type="hidden" name="incidentId" value="@Model.Id" />
-		<input type="hidden" name="updatedStatus" value="resolved" />
-		<button type="submit">Resolve </button>
-	</form>
-
-	<form asp-action="CloseIncident" method="post" class="incident_management_buttons">
-		<input type="hidden" name="incidentId" value="@Model.Id" />
-		<input type="hidden" name="updatedStatus" value="closed_without_resolve" />
-		<button type="submit">Close Incident</button>
-	</form>
-
-	<form asp-action="TransferIncident" method="get" class="incident_management_buttons">
-		<input type="hidden" name="incidentId" value="@Model.Id" />
-		<button type="submit">Transfer Incident</button>
-	</form>
+	
 
 </div>
