@@ -32,7 +32,9 @@ namespace NoSQL_Project.Controllers
 			int numNonClosedIncidents = await _incidentService.GetTheNumberOfAllIncidents();
             bool hasStatus = !string.IsNullOrEmpty(statusFilter) && statusFilter != "All";
             bool hasType = !string.IsNullOrEmpty(typeFilter);
-			try
+			string branchValue = !string.IsNullOrEmpty(branch) ? branch : "";
+
+            try
 			{
 				if (searchString != null)
 				{
@@ -50,29 +52,30 @@ namespace NoSQL_Project.Controllers
                   Enum.TryParse<IncidentStatus>(statusFilter, true, out var parsedStatus) &&
                   Enum.TryParse<IncidentType>(typeFilter, true, out var parsedType))
               {
-                  incidents = await _incidentService.GetIncidentsByStatusAndType(parsedStatus, parsedType, branch);
+                  incidents = await _incidentService.GetIncidentsByStatusAndType(parsedStatus, parsedType, branchValue);
               }
               // Filter by status only
               else if (hasStatus &&
                   Enum.TryParse<IncidentStatus>(statusFilter, true, out parsedStatus))
               {
-                  incidents = await _incidentService.GetAllIncidentsPerStatus(parsedStatus, branch);
+                  incidents = await _incidentService.GetAllIncidentsPerStatus(parsedStatus, branchValue);
               }
               // Filter by type only
               else if (hasType &&
                   Enum.TryParse<IncidentType>(typeFilter, true, out parsedType))
               {
-                  incidents = await _incidentService.GetAllIncidentsByType(parsedType, branch);
+                  incidents = await _incidentService.GetAllIncidentsByType(parsedType, branchValue);
               }
               // No filters — show all
               else
               {
-                  incidents = await _incidentService.GetAllWitoutclosed("");
+                  incidents = await _incidentService.GetAllWitoutclosed(branchValue);
               }
 				ViewData["TypeFilter"] = typeFilter;
 				ViewData["CurrentStatus"] = statusFilter;
 				ViewData["NumberOfOpenIncidents"] = openIncidents;
 				ViewData["NumberOfNonClosedIncidents"] = numNonClosedIncidents;
+				ViewBag.Branches = _locationService.GetAllLocations().Result;
 
 
                 if (pageNumber < 1)
@@ -87,7 +90,7 @@ namespace NoSQL_Project.Controllers
 			catch (Exception ex)
 			{
 				TempData["Error"] = $"Could not retrieve Incidents: {ex.Message}";
-				return View(new PaginatedList<User>(new List<User>(), 0, 1, 1));
+				return View(new PaginatedList<Incident>(new List<Incident>(), 0, 1, 1));
 			}
 		}
 

@@ -72,9 +72,18 @@ namespace NoSQL_Project.Repositories
                 {
                     branchFilter = Builders<Incident>.Filter.Regex("location.branch", new BsonRegularExpression(branch, "i"));
                 }
+                if (status == IncidentStatus.closed || status == IncidentStatus.closed_without_resolve)
+                {
+                    var withClosedFilter = Builders<Incident>.Filter.And(
+                    Builders<Incident>.Filter.Eq(i => i.Status, status),
+                    branchFilter
+                    );
+                    var withClosedResilt = await _incidents.Find(withClosedFilter).SortBy(p => p.Priority).ToListAsync();
+                    return withClosedResilt;
+                }
                 var excludedStatuses = new[] { IncidentStatus.closed, IncidentStatus.closed_without_resolve };
                 var filter = Builders<Incident>.Filter.And(
-                    Builders<Incident>.Filter.Eq(i => i.Status, IncidentStatus.resolved),
+                    Builders<Incident>.Filter.Eq(i => i.Status, status),
                     Builders<Incident>.Filter.Nin(i => i.Status, excludedStatuses),
                     branchFilter
                 );
@@ -91,14 +100,12 @@ namespace NoSQL_Project.Repositories
 
         public async Task<List<Incident>> GetAllIncidentsByType(IncidentType type, string branch)
         {
-            FilterDefinition < Incident > branchFilter = FilterDefinition<Incident>.Empty;
+             var branchFilter = Builders<Incident>.Filter.Regex("location.branch", new BsonRegularExpression(branch, "i"));
 
             try
             {
                 var filter = Builders<Incident>.Filter.And(
                     Builders<Incident>.Filter.Eq(i => i.IncidentType, type), branchFilter);
-                if (!string.IsNullOrWhiteSpace(branch))
-                    branchFilter = Builders<Incident>.Filter.Regex("location.branch", new BsonRegularExpression(branch, "i"));
                 
 
                 var result = await _incidents.Find(filter).SortBy(p => p.Priority).ToListAsync();

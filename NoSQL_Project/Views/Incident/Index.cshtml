@@ -6,12 +6,13 @@
 }
 @if (TempData["Success"] != null)
 {
-<p class="alert-success">@TempData["Success"]</p>
+    <p class="alert-success">@TempData["Success"]</p>
 }
 @if (TempData["Error"] != null)
 {
-<p class="alert-danger">@TempData["Error"]</p>
+    <p class="alert-danger">@TempData["Error"]</p>
 }
+
 
 <header class="main_container_header">
     <div>
@@ -21,27 +22,31 @@
 </header>
 
 <div class="charts_container">
-    <div id="chart_left_container">
+    <div id="chart_left_container" class="canvas_container">
+        <h4>Unresolved Incidents</h4>
+        <p>All tickets curently Open</p>
         <canvas id="chart1" width="150" height="150"></canvas>
     </div>
-    <div id="chart_right_container">
+    <div id="chart_right_container" class="canvas_container">
+        <h4>Incidents past deadline</h4>
+        <p>Tickets needing immediate attention</p>
         <canvas id="chart2" width="150" height="150"></canvas>
     </div>
 </div>
 
-   
 
-    
+
+
 
 <div class="search_and_fileter_container">
-       
-        <div class="search_sub_container">
-            <form class="d-flex" role="search">
-                <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-                <button class="btn btn-outline-success" type="submit">Search</button>
-            </form>
+
+    <div class="search_sub_container">
+        <form class="d-flex" role="search">
+            <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+            <button class="btn btn-outline-success" type="submit">Search</button>
+        </form>
         <button class="filter_button_class" id="filter_button"><img src="/assets/FiltersIcon.svg" alt="Alternate Text" /> Filters</button>
-        </div>
+    </div>
 
     <div class="search_container">
         <div class="search_options_container">
@@ -49,35 +54,44 @@
                 <ul class="search_options_ul">
                     <li class="search_options_li">
                         <a class="search_options_a @(ViewContext.HttpContext.Request.Query["statusFilter"] == "All" ? "activeFilter" : "")"
-                            asp-action="Index" asp-route-statusFilter="All" asp-route-typeFilter="@Context.Request.Query["typeFilter"]">All</a>
+                        asp-action="Index" asp-route-statusFilter="All" asp-route-typeFilter="@Context.Request.Query["typeFilter"]">All</a>
                     </li>
                     <li class="search_options_li">
                         <a class="search_options_a @(ViewContext.HttpContext.Request.Query["statusFilter"] == "open" ? "activeFilter" : "")" 
                         asp-action="Index" asp-route-statusFilter="open" asp-route-typeFilter="@Context.Request.Query["typeFilter"]">Open</a>
                     </li>
                     <li class="search_options_li">
+                        <a class="search_options_a @(ViewContext.HttpContext.Request.Query["statusFilter"] == "inProgress" ? "activeFilter" : "")"
+                        asp-action="Index" asp-route-statusFilter="inProgress" asp-route-typeFilter="@Context.Request.Query["typeFilter"]">In Progress</a>
+                    </li>
+                    <li class="search_options_li">
                         <a class="search_options_a @(ViewContext.HttpContext.Request.Query["statusFilter"] == "resolved" ? "activeFilter" : "")"
-                        asp-action="Index" asp-route-statusFilter="resolved" asp-route-typeFilter="@Context.Request.Query["typeFilter"]">In Progress</a>
+                        asp-action="Index" asp-route-statusFilter="resolved" asp-route-typeFilter="@Context.Request.Query["typeFilter"]">Resolved</a>
                     </li>
                     <li class="search_options_li">
                         <a class="search_options_a @(ViewContext.HttpContext.Request.Query["statusFilter"] == "closed_without_resolve" ? "activeFilter" : "")"
-                        asp-action="Index" asp-route-statusFilter="closed_without_resolve" asp-route-typeFilter="@Context.Request.Query["typeFilter"]">Closed</a>
+                        asp-action="Index" asp-route-statusFilter="closed_without_resolve" asp-route-typeFilter="@Context.Request.Query["typeFilter"]">Closed W/O Resolve</a>
+                    </li>
+                    <li class="search_options_li">
+                        <a class="search_options_a @(ViewContext.HttpContext.Request.Query["statusFilter"] == "closed" ? "activeFilter" : "")"
+                        asp-action="Index" asp-route-statusFilter="closed" asp-route-typeFilter="@Context.Request.Query["typeFilter"]">Closed</a>
                     </li>
                 </ul>
             </nav>
         </div>
     </div>
-        
-        <a class="btn btn-primary" href="/Incident/Create">Create New Incident</a>
-    
+
+    <a class="btn btn-primary" href="/Incident/Create">Create New Incident</a>
+
 </div>
 @if (!string.IsNullOrEmpty(ViewContext.HttpContext.Request.Query["statusFilter"]) ||
-    !string.IsNullOrEmpty(ViewContext.HttpContext.Request.Query["typeFilter"]))
+   !string.IsNullOrEmpty(ViewContext.HttpContext.Request.Query["typeFilter"]))
 {
     <div class="alert alert-info mt-3">
         <strong>Filters applied:</strong>
         @ViewContext.HttpContext.Request.Query["statusFilter"]
         @ViewContext.HttpContext.Request.Query["typeFilter"]
+        @ViewContext.HttpContext.Request.Query["branch"]
     </div>
 }
 <div class="popupOverlay" >
@@ -85,7 +99,7 @@
         <div>
             <form method="get" asp-action="Index" class="d-flex gap-3 align-items-center">
                 <input type="hidden" name="statusFilter" value="@Context.Request.Query["statusFilter"]" />
-                <select name="typeFilter" class="form-select border-dark border-2" style="width: 200px;">
+                <select name="typeFilter" class="form-select border-dark border-1" style="width: 200px;">
                     <option value="">Filter by Type --</option>
                     <option value="hardware">Hardware</option>
                     <option value="software">Software</option>
@@ -93,6 +107,20 @@
                     <option value="security">Security</option>
                     <option value="access">Access</option>
                     <option value="other">Other</option>
+                </select>
+                <select name="branch">
+                    <option value="">Select a Branch</option>
+                    @{
+                        if (ViewBag.Branches != null)
+                        {
+                            List<Location> locations = ViewBag.Branches;
+
+                            foreach (var location in locations)
+                            {
+                                <option value="@location.Branch">@location.Branch</option>
+                            }
+                        }
+                    }
                 </select>
 
                 <button type="submit" class="btn btn-info border-dark border-2">Apply Filters</button>
@@ -104,8 +132,9 @@
     <table class="table_NICE">
         <thead>
             <tr>
-                <th>Level</th>
+                <th>Priority</th>
                 <th>Title</th>
+                <th>Type</th>
                 <th>Status</th>
                 <th>Assigned to</th>
                 <th>Branch</th>
@@ -116,37 +145,43 @@
         <tbody class="table_NICE_body">
             @foreach (Incident incident in Model.Items)
             {
-            string incidentStatusStyle = "";
-            string priorityLevelStyle = "";
-            // Determine priority style
-            switch (incident.Priority)
-            {
-            case Priority.low:
-            priorityLevelStyle = "priority_low";
-            break;
-            case Priority.medium:
-            priorityLevelStyle = "priority_medium";
-            break;
-            case Priority.high:
-            priorityLevelStyle = "priority_high";
-            break;
-            case Priority.critical:
-            priorityLevelStyle = "priority_critical";
-            break;
-            }
-            // Determine status style
-            switch (incident.Status)
-            {
-            case IncidentStatus.open:
-            incidentStatusStyle = "status_open";
-            break;
-            case IncidentStatus.resolved:
-            incidentStatusStyle = "status_closed";
-            break;
-            case IncidentStatus.closed_without_resolve:
-            incidentStatusStyle = "status_in_progress";
-            break;
-            }
+                string incidentStatusStyle = "";
+                string priorityLevelStyle = "";
+                // Determine priority style
+                switch (incident.Priority)
+                {
+                    case Priority.low:
+                        priorityLevelStyle = "priority_low";
+                        break;
+                    case Priority.medium:
+                        priorityLevelStyle = "priority_medium";
+                        break;
+                    case Priority.high:
+                        priorityLevelStyle = "priority_high";
+                        break;
+                    case Priority.critical:
+                        priorityLevelStyle = "priority_critical";
+                        break;
+                }
+                // Determine status style
+                switch (incident.Status)
+                {
+                    case IncidentStatus.open:
+                        incidentStatusStyle = "status_open";
+                        break;
+                    case IncidentStatus.resolved:
+                        incidentStatusStyle = "status_resolved";
+                        break;
+                    case IncidentStatus.closed_without_resolve:
+                        incidentStatusStyle = "status_closed_without_resolve";
+                        break;
+                    case IncidentStatus.inProgress:
+                        incidentStatusStyle = "status_in_progress";
+                        break;
+                    case IncidentStatus.closed:
+                        incidentStatusStyle = "status_closed";
+                        break;
+                }
                 
             <tr>
                 
@@ -157,6 +192,9 @@
                         <a class="incident_href" asp-controller="Incident" asp-action="IncidentDetails" asp-route-id="@incident.Id">
                             @incident.Subject
                         </a>
+                    </td>
+                    <td>
+                        @incident.IncidentType
                     </td>
                 <td>
                     <div class="priority_label @incidentStatusStyle">@incident.Status</div>
