@@ -10,6 +10,11 @@ namespace NoSQL_Project.Repositories.Interfaces
         Task<Incident> GetIncidentByIdAsync(string id);
         Task CreateNewIncidentAsync(Incident newIncident);
 
+        Task<List<Incident>> SearchIncidentsAsync(
+            string searchQuery,
+            SearchLogic logic,
+            IncidentSort sort,
+            string reporterId = null);
         Task<List<Incident>> GetIncidentsByReporter(string reporterId);
     }
 }

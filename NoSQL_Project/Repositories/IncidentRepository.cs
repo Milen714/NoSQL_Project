@@ -76,5 +76,49 @@ namespace NoSQL_Project.Repositories
             }
         }
 
+        public async Task<List<Incident>> SearchIncidentsAsync(
+            string searchQuery,
+            SearchLogic logic,
+            IncidentSort sort,
+            string reporterId = null)
+        {
+            var filters = new List<FilterDefinition<Incident>>();
+            var words = searchQuery?.Split(' ', StringSplitOptions.RemoveEmptyEntries) ?? Array.Empty<string>();
+
+            if (words.Length > 0)
+            {
+                var fieldFilters = words.Select(word =>
+                    Builders<Incident>.Filter.Or(
+                        Builders<Incident>.Filter.Regex(i => i.Subject, new BsonRegularExpression(word, "i")),
+                        Builders<Incident>.Filter.Regex(i => i.Description, new BsonRegularExpression(word, "i"))
+                ));
+
+                var combinedFilter = logic == SearchLogic.And
+                    ? Builders<Incident>.Filter.And(fieldFilters)
+                    : Builders<Incident>.Filter.Or(fieldFilters);
+
+                filters.Add(combinedFilter);
+            }
+
+            if (!string.IsNullOrEmpty(reporterId))
+            {
+                filters.Add(Builders<Incident>.Filter.Eq("ReportedBy.Id", reporterId));
+            }
+
+            var finalFilter = filters.Count > 0
+                ? Builders<Incident>.Filter.And(filters)
+                : Builders<Incident>.Filter.Empty;
+
+            SortDefinition<Incident> sortDef = sort switch
+            {
+                IncidentSort.MostRecent => Builders<Incident>.Sort.Descending(i => i.ReportedAt),
+                IncidentSort.PriorityAsc => Builders<Incident>.Sort.Ascending(i => i.Priority),
+                IncidentSort.PriorityDesc => Builders<Incident>.Sort.Descending(i => i.Priority),
+                _ => Builders<Incident>.Sort.Descending(i => i.ReportedAt)
+            };
+
+            return await _incidents.Find(finalFilter).Sort(sortDef).ToListAsync();
+        }
+
     }
 }

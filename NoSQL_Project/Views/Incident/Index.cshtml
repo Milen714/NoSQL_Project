@@ -66,8 +66,19 @@
     <div class="search_filters_container">
         <form asp-action="Index" method="get" class="search_form">
             <input class="search_form_input" type="search" name="searchString" value="@ViewData["CurrentFilter"]" placeholder="Search" />
-            <input type="hidden" name="sortOrder" value="@ViewData["CurrentSort"]" />
-            <button type="submit" class="btn btn-primary">Search</button>
+
+            <select name="searchLogic" class="form-control mr-2" style="display:inline-block; width:auto; margin-left:10px;">
+                <option value="or" selected="@(HttpContextAccessor.HttpContext.Request.Query["searchLogic"] == "or" ? "selected" : null)">OR</option>
+                <option value="and" selected="@(HttpContextAccessor.HttpContext.Request.Query["searchLogic"] == "and" ? "selected" : null)">AND</option>
+            </select>
+
+            <select name="sortOrder" class="form-control mr-2" style="display:inline-block; width:auto; margin-left:10px;">
+                <option value="" selected="@(String.IsNullOrEmpty(ViewData["CurrentSort"] as string) ? "selected" : null)">Most Recent</option>
+                <option value="priority" selected="@(ViewData["CurrentSort"]?.ToString() == "priority" ? "selected" : null)">Priority Ascending</option>
+                <option value="priority_desc" selected="@(ViewData["CurrentSort"]?.ToString() == "priority_desc" ? "selected" : null)">Priority Descending</option>
+            </select>
+
+            <button type="submit" class="btn btn-primary" style="margin-left:10px;">Search</button>
         </form>
     </div>
 </div>
@@ -155,6 +166,7 @@
                     <a class="page-link text-black" asp-route-pageNumber="1"
                        asp-route-searchString="@ViewData["CurrentFilter"]"
                        asp-route-sortOrder="@ViewData["CurrentSort"]"
+                       asp-route-searchLogic="@HttpContextAccessor.HttpContext.Request.Query["searchLogic"]"
                        asp-route-currentFilter="@ViewData["CurrentFilter"]">
                         <span>First</span>
                     </a>
@@ -164,6 +176,7 @@
                     <a class="page-link text-black" asp-route-pageNumber="@(Model.PageIndex - 1)"
                        asp-route-searchString="@ViewData["CurrentFilter"]"
                        asp-route-sortOrder="@ViewData["CurrentSort"]"
+                       asp-route-searchLogic="@HttpContextAccessor.HttpContext.Request.Query["searchLogic"]"
                        asp-route-currentFilter="@ViewData["CurrentFilter"]">
                         <span>Previous</span>
                     </a>
@@ -175,6 +188,7 @@
                         <a class="page-link text-black" asp-route-pageNumber="@i"
                            asp-route-searchString="@ViewData["CurrentFilter"]"
                            asp-route-sortOrder="@ViewData["CurrentSort"]"
+                           asp-route-searchLogic="@HttpContextAccessor.HttpContext.Request.Query["searchLogic"]"
                            asp-route-currentFilter="@ViewData["CurrentFilter"]">@i</a>
                     </li>
                 }
@@ -183,6 +197,7 @@
                     <a class="page-link text-black" asp-route-pageNumber="@(Model.PageIndex + 1)"
                        asp-route-searchString="@ViewData["CurrentFilter"]"
                        asp-route-sortOrder="@ViewData["CurrentSort"]"
+                       asp-route-searchLogic="@HttpContextAccessor.HttpContext.Request.Query["searchLogic"]"
                        asp-route-currentFilter="@ViewData["CurrentFilter"]">
                         <span>Next</span>
                     </a>
@@ -191,6 +206,7 @@
                     <a class="page-link text-black" asp-route-pageNumber="@Model.TotalPages"
                        asp-route-searchString="@ViewData["CurrentFilter"]"
                        asp-route-sortOrder="@ViewData["CurrentSort"]"
+                       asp-route-searchLogic="@HttpContextAccessor.HttpContext.Request.Query["searchLogic"]"
                        asp-route-currentFilter="@ViewData["CurrentFilter"]">
                         <span>Last</span>
                     </a>

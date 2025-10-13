@@ -11,12 +11,12 @@ namespace NoSQL_Project.Services
         private readonly IIncidentRepository _incidentRepository;
         private readonly ILocationService _locationService;
         private readonly IUserService _userService;
-		public IncidentService(IIncidentRepository incidentRepository, ILocationService locationService, IUserService userService)
+        public IncidentService(IIncidentRepository incidentRepository, ILocationService locationService, IUserService userService)
         {
             _incidentRepository = incidentRepository;
             _locationService = locationService;
             _userService = userService;
-		}
+        }
         public List<Incident> GetAll()
         {
             return _incidentRepository.GetAll().Result;
@@ -60,32 +60,41 @@ namespace NoSQL_Project.Services
 
         public async Task UpdateIncidentAsync(Incident updatedIncident)
         {
-			var existingIncident = await _incidentRepository.GetIncidentByIdAsync(updatedIncident.Id);
-			if (existingIncident == null)
-				throw new KeyNotFoundException("Incident not found");
+            var existingIncident = await _incidentRepository.GetIncidentByIdAsync(updatedIncident.Id);
+            if (existingIncident == null)
+                throw new KeyNotFoundException("Incident not found");
 
-			//Update employee 
-			/*!!!still need to implement in service and repo
+            //Update employee 
+            /*!!!still need to implement in service and repo
 			var employee = await _userService.FindUserByNameAsync(updatedIncident.AssignedTo.FirstName, updatedIncident.AssignedTo.LastName);
             if (employee == null)
 				throw new InvalidOperationException("Empleado no existe");            
 
 			existingIncident.AssignedTo = employee;*/
 
-			existingIncident.IncidentType = updatedIncident.IncidentType;
-			existingIncident.Status = updatedIncident.Status;
-			existingIncident.Priority = updatedIncident.Priority;
-			existingIncident.Deadline = updatedIncident.Deadline;
+            existingIncident.IncidentType = updatedIncident.IncidentType;
+            existingIncident.Status = updatedIncident.Status;
+            existingIncident.Priority = updatedIncident.Priority;
+            existingIncident.Deadline = updatedIncident.Deadline;
 
 
-			//await _incidentRepository.UpdateIncidentAsync(existingIncident);
-		}
+            //await _incidentRepository.UpdateIncidentAsync(existingIncident);
+        }
 
-	
+
 
         public Task<List<Incident>> GetIncidentsByReporter(string reporterId)
         {
             return _incidentRepository.GetIncidentsByReporter(reporterId);
+        }
+
+        public async Task<List<Incident>> SearchIncidentsAsync(
+            string searchQuery,
+            SearchLogic logic,
+            IncidentSort sort,
+            string reporterId = null)
+        {
+            return await _incidentRepository.SearchIncidentsAsync(searchQuery, logic, sort, reporterId);
         }
     }
 }
