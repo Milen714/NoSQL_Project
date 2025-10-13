@@ -12,14 +12,16 @@ namespace NoSQL_Project.Services
     {
         private readonly IIncidentRepository _incidentRepository;
         private readonly ILocationService _locationService;
+		private readonly IUserService _userService;
 
         private readonly IMongoCollection<Incident> _incidents;
 
-        public IncidentService(IIncidentRepository incidentRepository, ILocationService locationService, IMongoDatabase database)
+        public IncidentService(IIncidentRepository incidentRepository, ILocationService locationService, IMongoDatabase database, IUserService userService)
         {
             _incidentRepository = incidentRepository;
             _locationService = locationService;
             _incidents = database.GetCollection<Incident>("Incidents");
+            _userService = userService;
         }
         public List<Incident> GetAll()
         {
