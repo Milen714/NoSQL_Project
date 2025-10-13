@@ -215,7 +215,7 @@
 				<div class="other_information_row_withLable">
 					<p>SLA:</p>
 					<div>
-						<img src="~/assets/Stopwatch.svg" alt="Alternate Text" />  @((Model.Deadline - DateTime.Now).Days) Days
+						<img src="~/assets/@(Context.Request.Cookies["PreferedTheme"] == "Dark" ? "StopwatchLight.svg" : "Stopwatch.svg")" alt="Alternate Text" />  @((Model.Deadline - DateTime.Now).Days) Days
 					</div>
 				</div>
 				<div class="other_information_row_withLable">

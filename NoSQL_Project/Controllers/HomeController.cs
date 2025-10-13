@@ -72,12 +72,17 @@ namespace NoSQL_Project.Controllers
                     Response.Cookies.Append("PreferedTheme", theme, options);
                 }
                 TempData["Success"] = $"Theme set successfully!{theme}";
-                return RedirectToAction("Login");
+                var referer = Request.Headers["Referer"].ToString();
+                if (!string.IsNullOrEmpty(referer))
+                {
+                    return Redirect(referer);
+                }
+                return RedirectToAction("Index");
             }
             catch (Exception ex)
             {
                 TempData["Error"] = $"Failed to set theme: {ex.Message}";
-                return RedirectToAction("Login");
+                return RedirectToAction("Index");
             }
         }
 
