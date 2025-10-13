@@ -177,7 +177,7 @@ namespace NoSQL_Project.Repositories
 							{ "_id", "$assigned_to.userId" },
 							{ "TotalIncidents", new BsonDocument("$sum", 1) },
 							{ "FirstName", new BsonDocument("$first", "$assigned_to.first_name") },
-							{ "LastName", new BsonDocument("$first", "$assigned_to.last_name") }
+							{ "LastName", new BsonDocument("$first", "$assigned_to.last_name") },						    
 						}
 					}					
 				};
@@ -242,7 +242,8 @@ namespace NoSQL_Project.Repositories
 					UserId = new ObjectId(userForTransfer.Id),
 					FirstName = userForTransfer.FirstName,
 					LastName = userForTransfer.LastName,
-					IsActive = true
+					IsActive = true,
+					EmailAddress = userForTransfer.EmailAddress
 				};
 
 				var addNew = Builders<Incident>.Update.Push(i => i.AssignedTo, newAssignee);

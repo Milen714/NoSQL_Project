@@ -19,12 +19,18 @@ namespace NoSQL_Project.Models
 
         [BsonElement("is_active")]
         public bool IsActive { get; set; }
-    
+
+		[BsonElement("email_address")]
+		[BsonIgnoreIfNull]
+		public string? EmailAddress { get; set; }
+
+
 		public void MapAssignee(User user)
 		{
 			UserId = ObjectId.Parse(user.Id!);
 			FirstName = user.FirstName;
 			LastName = user.LastName;
+            EmailAddress = user.EmailAddress;
 		}
 	}
 }
