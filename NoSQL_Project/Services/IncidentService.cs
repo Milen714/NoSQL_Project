@@ -158,6 +158,11 @@ namespace NoSQL_Project.Services
 		{
 			return await _incidentRepository.GetUsersForTransferAsync();			
 		}
-	}
+
+        public Task<List<Incident>> GetAllOpenOverdueIncidents(string branch)
+        {
+            return _incidentRepository.GetAllOpenOverdueIncidents(branch);
+        }
+    }
 
 }

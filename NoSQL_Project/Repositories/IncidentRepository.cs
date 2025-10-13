@@ -302,5 +302,31 @@ namespace NoSQL_Project.Repositories
 			var count = await _incidents.CountDocumentsAsync(filter);
 			return (int)count;
 		}
+		public async Task<List<Incident>> GetAllOpenOverdueIncidents(string branch)
+		{
+            FilterDefinition<Incident> branchFilter = FilterDefinition<Incident>.Empty;
+            try
+            {
+                if (!string.IsNullOrWhiteSpace(branch))
+                {
+                    branchFilter = Builders<Incident>.Filter.Regex("location.branch", new BsonRegularExpression(branch, "i"));
+                }
+                
+                var excludedStatuses = new[] { IncidentStatus.closed, IncidentStatus.closed_without_resolve };
+                var filter = Builders<Incident>.Filter.And(
+                    Builders<Incident>.Filter.Lt(i => i.Deadline, DateTime.UtcNow.AddHours(8)),
+                    Builders<Incident>.Filter.In(i => i.Status, new[] {IncidentStatus.open, IncidentStatus.inProgress}),
+                    branchFilter
+                );
+
+                var result = await _incidents.Find(filter).SortBy(p => p.Priority).ToListAsync();
+                return result;
+            }
+            catch (Exception ex)
+            {
+
+                throw new Exception($"Could not retrieve incidents: {ex.Message}");
+            }
+        }
 	}
 }

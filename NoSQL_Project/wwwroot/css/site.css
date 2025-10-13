@@ -267,6 +267,9 @@ body {
     padding: 15px;
     margin-bottom: 15px;
 }
+.canvas_container a {
+    margin: auto;
+}
 .canvas_container canvas {
     width: 150px !important;
     height: 150px !important;
@@ -459,4 +462,7 @@ body {
     display: flex;
     justify-content: space-between;
     margin-bottom: 5px;
+}
+.option_select {
+    color: var(--color-text-dark);
 }

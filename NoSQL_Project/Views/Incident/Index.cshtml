@@ -3,6 +3,11 @@
 
 @{
     ViewData["Title"] = "Incidents";
+    if (ViewBag.ImmediateAttentionNeeded != null)
+    {
+        List<Incident> immediateAttentionNeeded = ViewBag.ImmediateAttentionNeeded;
+        int countOfImmediateAttentionNeeded = immediateAttentionNeeded.Count();
+    }
 }
 @if (TempData["Success"] != null)
 {
@@ -29,7 +34,7 @@
     </div>
     <div id="chart_right_container" class="canvas_container">
         <h4>Incidents past deadline</h4>
-        <p>Tickets needing immediate attention</p>
+        <a class="button_primary">Show Tickets needing immediate attention</a>
         <canvas id="chart2" width="150" height="150"></canvas>
     </div>
 </div>
@@ -100,16 +105,16 @@
             <form method="get" asp-action="Index" class="d-flex gap-3 align-items-center">
                 <input type="hidden" name="statusFilter" value="@Context.Request.Query["statusFilter"]" />
                 <select name="typeFilter" class="form-select border-dark border-1" style="width: 200px;">
-                    <option value="">Filter by Type --</option>
-                    <option value="hardware">Hardware</option>
-                    <option value="software">Software</option>
-                    <option value="network">Network</option>
-                    <option value="security">Security</option>
-                    <option value="access">Access</option>
-                    <option value="other">Other</option>
+                    <option class="option_select" value="">Filter by Type --</option>
+                    <option class="option_select" value="hardware">Hardware</option>
+                    <option class="option_select" value="software">Software</option>
+                    <option class="option_select" value="network">Network</option>
+                    <option class="option_select" value="security">Security</option>
+                    <option class="option_select" value="access">Access</option>
+                    <option class="option_select" value="other">Other</option>
                 </select>
                 <select name="branch">
-                    <option value="">Select a Branch</option>
+                    <option class="option_select" value="">Select a Branch</option>
                     @{
                         if (ViewBag.Branches != null)
                         {
@@ -117,7 +122,7 @@
 
                             foreach (var location in locations)
                             {
-                                <option value="@location.Branch">@location.Branch</option>
+                                <option class="option_select" value="@location.Branch">@location.Branch</option>
                             }
                         }
                     }
@@ -283,14 +288,14 @@
         context.stroke();
 
         //Text
-        context.fillStyle = "#000";
+        context.fillStyle = "#888888";
         context.font = "20px Arial";
         context.textAlign = "center";
         context.textBaseLine = "middle";
         context.fillText(value + (total ? "/" + total : ""), 75, 75);
     }
         drawDonut("chart1", @ViewData["NumberOfOpenIncidents"], @ViewData["NumberOfNonClosedIncidents"], "orange");
-        drawDonut("chart2", 14, 75, "orange");
+                            drawDonut("chart2", @ViewData["NumberImmediateAttentionNeeded"], @ViewData["NumberOfOpenIncidents"], "red");
 
 
                 var filter_button = document.getElementById("filter_button");

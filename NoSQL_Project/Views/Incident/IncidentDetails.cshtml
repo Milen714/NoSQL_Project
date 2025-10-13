@@ -98,11 +98,11 @@
 						<div class="form-group">
 							<label>Deadline</label>
 							<select asp-for="Deadline" class="form-control">
-								<option value="@DateTime.UtcNow.AddDays(7).ToString("o")"
+								<option class="option_select" value="@DateTime.UtcNow.AddDays(7).ToString("o")"
 										selected="@(Model.Deadline.Date == DateTime.UtcNow.AddDays(7).Date)">7 days</option>
-								<option value="@DateTime.UtcNow.AddDays(14).ToString("o")"
+								<option class="option_select" value="@DateTime.UtcNow.AddDays(14).ToString("o")"
 										selected="@(Model.Deadline.Date == DateTime.UtcNow.AddDays(14).Date)">14 days</option>
-								<option value="@DateTime.UtcNow.AddDays(28).ToString("o")"
+								<option class="option_select" value="@DateTime.UtcNow.AddDays(28).ToString("o")"
 										selected="@(Model.Deadline.Date == DateTime.UtcNow.AddDays(28).Date)">28 days</option>
 							</select>
 						</div>
