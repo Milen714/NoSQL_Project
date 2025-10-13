@@ -77,7 +77,7 @@ body {
   margin-bottom: 60px;
 }
 .loggout_Button_container a {
-    color: var(--color-text-light);
+    color: var(--color-text-light) !important; 
 }
 /*Button*/
 .button_primary {
