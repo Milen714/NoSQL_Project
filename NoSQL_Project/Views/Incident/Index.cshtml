@@ -34,7 +34,7 @@
     </div>
     <div id="chart_right_container" class="canvas_container">
         <h4>Incidents past deadline</h4>
-        <a class="button_primary">Show Tickets needing immediate attention</a>
+        <a asp-controller="Incident" asp-action="Index" asp-route-showImmediateAttention="true" class="button_primary">Show Tickets</a>
         <canvas id="chart2" width="150" height="150"></canvas>
     </div>
 </div>
@@ -226,14 +226,17 @@
             <ul class="pagination justify-content-center">
                 <li class="page-item @(Model.PageIndex == 1 ? "disabled" : "")">
                     <a class="page-link text-black" asp-route-pageNumber="1"
+                       asp-route-showImmediateAttention="@Context.Request.Query["showImmediateAttention"]"
                        asp-route-statusFilter="@ViewData["CurrentStatus"]"
                        asp-route-typeFilter="@ViewData["TypeFilter"]">
+
                         <span>First</span>
                     </a>
                 </li>
 
                 <li class="page-item @(Model.HasPreviousPage ? "" : "disabled")">
                     <a class="page-link text-black" asp-route-pageNumber="@(Model.PageIndex - 1)"
+                       asp-route-showImmediateAttention="@Context.Request.Query["showImmediateAttention"]"
                        asp-route-statusFilter="@ViewData["CurrentStatus"]"
                        asp-route-typeFilter="@ViewData["TypeFilter"]">
                         <span>Previous</span>
@@ -244,6 +247,7 @@
                 {
                 <li class="page-item @(Model.PageIndex == i ? "active" : "")">
                     <a class="page-link text-black" asp-route-pageNumber="@i"
+                       asp-route-showImmediateAttention="@Context.Request.Query["showImmediateAttention"]"
                        asp-route-statusFilter="@ViewData["CurrentStatus"]"
                        asp-route-typeFilter="@ViewData["TypeFilter"]">@i</a>
                 </li>
@@ -251,6 +255,7 @@
 
                 <li class="page-item @(Model.HasNextPage ? "" : "disabled")">
                     <a class="page-link text-black" asp-route-pageNumber="@(Model.PageIndex + 1)"
+                       asp-route-showImmediateAttention="@Context.Request.Query["showImmediateAttention"]"
                        asp-route-statusFilter="@ViewData["CurrentStatus"]"
                        asp-route-typeFilter="@ViewData["TypeFilter"]">
                         <span>Next</span>
@@ -258,6 +263,7 @@
                 </li>
                 <li class="page-item @(Model.PageIndex == Model.TotalPages ? "disabled" : "")">
                     <a class="page-link text-black" asp-route-pageNumber="@Model.TotalPages"
+                       asp-route-showImmediateAttention="@Context.Request.Query["showImmediateAttention"]"
                        asp-route-statusFilter="@ViewData["CurrentStatus"]"
                        asp-route-typeFilter="@ViewData["TypeFilter"]">
                         <span>Last</span>

@@ -81,6 +81,7 @@ namespace NoSQL_Project.Controllers
                 ViewData["NumberOfNonClosedIncidents"] = numNonClosedIncidents;
                 ViewBag.Branches = _locationService.GetAllLocations().Result;
                 ViewBag.ImmediateAttentionNeeded = immediateAttentionNeeded;
+                ViewData["NumberImmediateAttentionNeeded"] = immediateAttentionNeeded.Count();
 
 
                 if (pageNumber < 1)

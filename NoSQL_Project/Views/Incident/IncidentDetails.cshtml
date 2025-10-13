@@ -98,6 +98,9 @@
 						<div class="form-group">
 							<label>Deadline</label>
 							<select asp-for="Deadline" class="form-control">
+								<option class="option_select" value="@Model.Deadline.ToString("o")" selected>
+									Current (@Model.Deadline.ToString("yyyy-MM-dd"))
+								</option>
 								<option class="option_select" value="@DateTime.UtcNow.AddDays(7).ToString("o")"
 										selected="@(Model.Deadline.Date == DateTime.UtcNow.AddDays(7).Date)">7 days</option>
 								<option class="option_select" value="@DateTime.UtcNow.AddDays(14).ToString("o")"

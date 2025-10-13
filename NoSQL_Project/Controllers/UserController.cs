@@ -58,7 +58,7 @@ namespace NoSQL_Project.Controllers
         }
         //[SessionAuthorize(UserRoles.Admin)]
         [HttpPost]
-        public IActionResult AddNewUser(User user, string locationId)
+        public async Task<IActionResult> AddNewUser(User user, string locationId)
         {
             try
             {
@@ -66,7 +66,7 @@ namespace NoSQL_Project.Controllers
                 UserLocationRef userLocationRef = new UserLocationRef();
                 userLocationRef.MapLocation(userLocation);
                 user.Location = userLocationRef;
-                _userService.Add(user);
+                await _userService.Add(user);
                 return RedirectToAction("Index");
             }
             catch (Exception ex)

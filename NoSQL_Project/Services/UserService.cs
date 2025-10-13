@@ -15,9 +15,9 @@ namespace NoSQL_Project.Services
             _userRepository = userRepository;
         }
 
-        public void Add(User user)
+        public async Task Add(User user)
         {
-            _userRepository.Add(user);
+            await _userRepository.Add(user);
         }
 
         public async Task<User> AuthenticateUserAsync(LoginModel model)

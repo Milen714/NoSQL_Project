@@ -54,15 +54,16 @@ namespace NoSQL_Project.Repositories
             user.PasswordHash = hashedPassword;
             return user;
         }
-        public void Add(User user)
+        public async Task Add(User user)
         {
             try
             {
                 var hashedUser = HashUserPassword(user);
-                _users.InsertOneAsync(hashedUser);
+                await _users.InsertOneAsync(hashedUser);
             }
             catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
                 if (ex.Message.Contains("DuplicateKey"))
                 {
                     throw new Exception("A user with this email already exists.");
