@@ -210,7 +210,7 @@
                 <td>@(activeUser != null ? $"{activeUser.FirstName} {activeUser.LastName}" : "Unassigned")</td>
                 <td>@incident.Location.Branch</td>
                 <td>@incident.ReportedAt.ToString("g")</td>
-                <td>@incident.Deadline.ToString("g")</td>
+                <td>@((incident.Deadline - DateTime.Now).Days) Days</td>
             
             </tr>
                 

@@ -64,6 +64,10 @@ namespace NoSQL_Project.Repositories
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
+                if (ex.Message.Contains("phone_number"))
+                {
+                    throw new Exception("A user with this Phone number already exists.");
+                }
                 if (ex.Message.Contains("DuplicateKey"))
                 {
                     throw new Exception("A user with this email already exists.");
