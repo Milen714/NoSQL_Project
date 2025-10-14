@@ -317,7 +317,6 @@ namespace NoSQL_Project.Repositories
                     branchFilter = Builders<Incident>.Filter.Regex("location.branch", new BsonRegularExpression(branch, "i"));
                 }
                 
-                var excludedStatuses = new[] { IncidentStatus.closed, IncidentStatus.closed_without_resolve };
                 var filter = Builders<Incident>.Filter.And(
                     Builders<Incident>.Filter.Lt(i => i.Deadline, DateTime.UtcNow.AddHours(8)),
                     Builders<Incident>.Filter.In(i => i.Status, new[] {IncidentStatus.open, IncidentStatus.inProgress}),
