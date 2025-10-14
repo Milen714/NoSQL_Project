@@ -44,12 +44,12 @@ namespace NoSQL_Project.Models
 
         [BsonElement("assigned_to")]
         [BsonIgnoreIfNull]
-        public AssigneeSnapshot? AssignedTo { get; set; }
+        public List<AssigneeSnapshot> AssignedTo { get; set; } = new List<AssigneeSnapshot>();
 
         [BsonElement("tags")]
         [BsonIgnoreIfNull]
         public List<string>? Tags { get; set; }
 
-       
+
     }
 }

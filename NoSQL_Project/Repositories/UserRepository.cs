@@ -19,7 +19,7 @@ namespace NoSQL_Project.Repositories
         {
             try
             {
-                
+
                 return await _users.Find(_ => true).ToListAsync();
             }
             catch (Exception ex)
@@ -54,15 +54,20 @@ namespace NoSQL_Project.Repositories
             user.PasswordHash = hashedPassword;
             return user;
         }
-        public void Add(User user)
+        public async Task Add(User user)
         {
             try
             {
                 var hashedUser = HashUserPassword(user);
-                _users.InsertOneAsync(hashedUser);
+                await _users.InsertOneAsync(hashedUser);
             }
             catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
+                if (ex.Message.Contains("phone_number"))
+                {
+                    throw new Exception("A user with this Phone number already exists.");
+                }
                 if (ex.Message.Contains("DuplicateKey"))
                 {
                     throw new Exception("A user with this email already exists.");
@@ -82,6 +87,12 @@ namespace NoSQL_Project.Repositories
             await _users.ReplaceOneAsync(filter, user);
         }
 
+        public async Task<User> FindUserByNameAsync(string firstName, string lastName)
+        {
+            User user = await _users.Find(user => user.FirstName == firstName && user.LastName == lastName).FirstOrDefaultAsync();
+            return user;
+        }
+
         //public void DeleteEmployee(string id)
         //{
         //    FilterDefinition<User> filter = Builders<Users>.Filter.Eq(u => u.Id, user.id);
@@ -89,4 +100,3 @@ namespace NoSQL_Project.Repositories
         //}
     }
 }
-

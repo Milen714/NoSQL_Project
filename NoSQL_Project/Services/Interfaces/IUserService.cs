@@ -5,7 +5,7 @@ namespace NoSQL_Project.Services.Interfaces
     public interface IUserService
     {
         List<User> GetAll();
-        void Add(User user);
+        Task Add(User user);
         public Task<User> FindByIdAsync(string id);
         public Task<User> GetUserByEmailAsync(string email);
         public Task<string> GeneratePasswordResetTokenAsync(User user);
@@ -13,6 +13,7 @@ namespace NoSQL_Project.Services.Interfaces
         public User HashUserPassword(User user);
         Task UpdateUserAsync(User user);
 
+        Task<User> FindUserByNameAsync(string firstName, string lastName);
 
 
         // Future:

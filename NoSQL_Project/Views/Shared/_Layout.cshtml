@@ -13,10 +13,11 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/NoSQL_Project.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/@(Context.Request.Cookies["PreferedTheme"] == "Dark" ? "dark-theme.css" : "light-theme.css")" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Nunito+Sans:opsz,wght@6..12,200..1000&family=Roboto+Mono:ital,wght@0,100..700;1,100..700&display=swap" rel="stylesheet">
-    
+
 </head>
 <body class="Main_Layout_BodyContainer">
     <header>
@@ -31,23 +32,39 @@
                     <ul class="nav_ul">
                         <div class="nav_buttons_container">
 
-                        <li class="nav_li ">
-                            <a class="nav_li_a " asp-area="" asp-controller="User" asp-action="Index">Users</a>
+                        <li class="nav_li">
+                            <form action="/Home/SetTheme" method="post">
+                                <article class="input_group">
+                                    <label for="Theme">Theme</label>
+                                    <select onchange="this.form.submit()" id="Theme" name="theme" class="input_field">
+                                        <option style="color: black;" value="">
+                                            @(
+                                                                                        Context?.Request.Cookies["PreferedTheme"] ?? "Select Theme")
+                                        </option>
+                                        <option value="Dark">Dark</option>
+                                        <option value="Light">Light</option>
+                                    </select>
+                                </article>
+                            </form>
+                        </li>
+                        <li class="nav_li">
+                            <a class="nav_li_a"
+                               asp-area="" asp-controller="User" asp-action="Index">Users</a>
                         </li>
                         <li class="nav_li">
                             <a class="nav_li_a" asp-area="" asp-controller="Incident" asp-action="Index">Dashboard</a>
                         </li>
                 </div>
                 @{
-                if (loggedInUser != null && loggedInUser.UserType == UserType.Service_employee)
-                {
-                <li class="nav-item">
-                    <p>@loggedInUser.FirstName @loggedInUser.LastName</p>
-                            <div class="button_primary">
-                    <a href="/Home/Logout">Logout</a>
-                    </div>
-                </li>
-                }
+                    if (loggedInUser != null && loggedInUser.UserType == UserType.Service_employee)
+                    {
+                        <li class="nav-item justify-content-start text-center">
+                            <p>@loggedInUser.FirstName @loggedInUser.LastName</p>
+                            <div class="loggout_Button_container">
+                                <a class="button_primary" id="logoutBtn" href="/Home/Logout">Logout</a>
+                            </div>
+                        </li>
+                    }
                 }
                 </ul>
             </div>
@@ -60,7 +77,7 @@
         </main>
     </div>
 
-    
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>

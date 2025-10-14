@@ -15,9 +15,9 @@ namespace NoSQL_Project.Services
             _userRepository = userRepository;
         }
 
-        public void Add(User user)
+        public async Task Add(User user)
         {
-            _userRepository.Add(user);
+            await _userRepository.Add(user);
         }
 
         public async Task<User> AuthenticateUserAsync(LoginModel model)
@@ -28,6 +28,11 @@ namespace NoSQL_Project.Services
         public async Task<User> FindByIdAsync(string id)
         {
             return await _userRepository.FindByIdAsync(id);
+        }
+
+        public async Task<User> FindUserByNameAsync(string firstName, string lastName)
+        {
+            return await _userRepository.FindUserByNameAsync(firstName, lastName);
         }
 
         public string GenerateSecureToken(int length = 32)
