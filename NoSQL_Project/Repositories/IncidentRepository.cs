@@ -138,17 +138,21 @@ namespace NoSQL_Project.Repositories
 			}
 		}
 
-		public async Task<Incident> CreateNewIncidentAsync(Incident newIncident)
+		public async Task CreateNewIncidentAsync(Incident newIncident)
 		{
 			await _incidents.InsertOneAsync(newIncident);
-			return newIncident;
+			
 		}
 
 		public async Task UpdateIncidentAsync(Incident updatedIncident, List<UpdateDefinition<Incident>> updates)
 		{
+			//to find the incident to make the changes 
 			var filter = Builders<Incident>.Filter.Eq(i => i.Id, updatedIncident.Id);
+
+			//to combine the elements of updates list into a single update
 			var combinedUpdate = Builders<Incident>.Update.Combine(updates);
 
+			//filter: documents to update, combinedUpdate: changes to make
 			await _incidents.UpdateOneAsync(filter, combinedUpdate);
 		}
 

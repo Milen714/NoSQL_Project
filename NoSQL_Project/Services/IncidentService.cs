@@ -52,10 +52,10 @@ namespace NoSQL_Project.Services
         }
 
 
-        public async Task<Incident> CreateNewIncidentAsync(NewIncidentViewModel inicentModel)
+        public async Task<Incident> CreateNewIncidentAsync(NewIncidentViewModel incidentModel)
 		{
-			//get location branch name
-			Location location = await _locationService.GetLocationByName(inicentModel.LocationBranchName);
+			//get a full location object by its name
+			Location location = await _locationService.GetLocationByName(incidentModel.LocationBranchName);
 
 			//get location snapshot
 			LocationSnapshot locationSnapshot = new LocationSnapshot();
@@ -63,20 +63,20 @@ namespace NoSQL_Project.Services
 
 			var newIncident = new Incident
 			{
-				Subject = inicentModel.Subject,
-				IncidentType = inicentModel.IncidentType,
-				Priority = inicentModel.Priority,
-				Deadline = DateTime.Now.AddDays(inicentModel.Deadline),
+				Subject = incidentModel.Subject,
+				IncidentType = incidentModel.IncidentType,
+				Priority = incidentModel.Priority,
+				Deadline = DateTime.Now.AddDays(incidentModel.Deadline),
 				Location = locationSnapshot,
-				Description = inicentModel.Description,
-				ReportedBy = inicentModel.Reporter,
+				Description = incidentModel.Description,
+				ReportedBy = incidentModel.Reporter,
 				Status = IncidentStatus.open,
 				ReportedAt = DateTime.UtcNow
 			};
 
 			//create the incident
-			return await _incidentRepository.CreateNewIncidentAsync(newIncident);
-
+			await _incidentRepository.CreateNewIncidentAsync(newIncident);
+			return newIncident;
 		}
 
         public async Task<int> GetTheNumberOfAllOpenIncidents()
@@ -97,7 +97,7 @@ namespace NoSQL_Project.Services
 			var update = Builders<Incident>.Update;
 			var updates = new List<UpdateDefinition<Incident>>();
 
-			// Comprobar cambios y agregar a la lista de updates
+			//compare changes and send to the update list
 			if (updatedIncident.IncidentType != existingIncident.IncidentType)
 				updates.Add(update.Set(i => i.IncidentType, updatedIncident.IncidentType));
 
@@ -110,7 +110,7 @@ namespace NoSQL_Project.Services
 			if (updatedIncident.Status != existingIncident.Status)
 				updates.Add(update.Set(i => i.Status, updatedIncident.Status));
 
-			// Si hay cambios, actualizar
+			//if changes, update
 			if (updates.Any())
 			{
 				await _incidentRepository.UpdateIncidentAsync(updatedIncident, updates);
@@ -149,7 +149,7 @@ namespace NoSQL_Project.Services
 			if (existingUser == null)
 				throw new KeyNotFoundException("User not found");
 
-			//pasar el objeto para que compare el id y el user al que se lo tiene que pasar
+			//pass the object to compare the id and the user that has to be passed to
 			await _incidentRepository.TransferIncidentAsync(existingIncident, existingUser);
 			
 		}

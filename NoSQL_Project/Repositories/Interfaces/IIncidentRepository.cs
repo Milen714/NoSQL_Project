@@ -13,7 +13,7 @@ namespace NoSQL_Project.Repositories.Interfaces
         Task<List<Incident>> GetAllIncidentsByType(IncidentType type, string branch);
         Task<List<Incident>> GetIncidentsByStatusAndType(IncidentStatus status, IncidentType type, string branch);
         Task<Incident> GetIncidentByIdAsync(string id);
-        Task <Incident> CreateNewIncidentAsync(Incident newIncident);
+        Task CreateNewIncidentAsync(Incident newIncident);
         Task<int> GetTheNumberOfAllOpenIncidents();
         Task<int> GetTheNumberOfAllIncidents();
 
