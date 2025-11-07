@@ -62,79 +62,104 @@ namespace NoSQL_Project.Repositories
             }
         }
         public async Task<List<Incident>> GetAllIncidentsPerStatus(IncidentStatus status, string branch)
-        { 
-            FilterDefinition < Incident > branchFilter = FilterDefinition<Incident>.Empty;
+        {
             try
             {
+                // Start aggregation pipeline
+                var pipeline = _incidents.Aggregate();
+
+                // A branch filter
                 if (!string.IsNullOrWhiteSpace(branch))
                 {
-                    branchFilter = Builders<Incident>.Filter.Regex("location.branch", new BsonRegularExpression(branch, "i"));
+                    var regex = new BsonRegularExpression(branch, "i");
+                    pipeline = pipeline.Match(Builders<Incident>.Filter.Regex("location.branch", regex));
                 }
+
+                // Handle closed statuses
                 if (status == IncidentStatus.closed || status == IncidentStatus.closed_without_resolve)
                 {
-                    var withClosedFilter = Builders<Incident>.Filter.And(
-                    Builders<Incident>.Filter.Eq(i => i.Status, status),
-                    branchFilter
-                    );
-                    var withClosedResilt = await _incidents.Find(withClosedFilter).SortBy(p => p.Priority).ToListAsync();
-                    return withClosedResilt;
+                    pipeline = pipeline
+                        .Match(i => i.Status == status)
+                        .SortBy(i => i.Priority);
+
+                    return await pipeline.ToListAsync();
                 }
+
+                // Otherwise exclude closed statuses
                 var excludedStatuses = new[] { IncidentStatus.closed, IncidentStatus.closed_without_resolve };
-                var filter = Builders<Incident>.Filter.And(
-                    Builders<Incident>.Filter.Eq(i => i.Status, status),
-                    Builders<Incident>.Filter.Nin(i => i.Status, excludedStatuses),
-                    branchFilter
-                );
 
-				var result = await _incidents.Find(filter).SortBy(p => p.Priority).ToListAsync();
-				return result;
-			}
-			catch (Exception ex)
-			{
+                pipeline = pipeline
+                    .Match(i => i.Status == status && !excludedStatuses.Contains(i.Status))
+                    .SortBy(i => i.Priority);
 
-				throw new Exception($"Could not retrieve incidents: {ex.Message}");
-			}
-		}
+                
+                var result = await pipeline.ToListAsync();
+                return result;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Could not retrieve incidents: {ex.Message}");
+            }
+        }
 
         public async Task<List<Incident>> GetAllIncidentsByType(IncidentType type, string branch)
         {
-             var branchFilter = Builders<Incident>.Filter.Regex("location.branch", new BsonRegularExpression(branch, "i"));
-
             try
             {
-                var filter = Builders<Incident>.Filter.And(
-                    Builders<Incident>.Filter.Eq(i => i.IncidentType, type), branchFilter);
-                
+                var pipeline = new List<BsonDocument>();
 
-				var result = await _incidents.Find(filter).SortBy(p => p.Priority).ToListAsync();
-				return result;
-			}
-			catch (Exception ex)
-			{
-				throw new Exception($"Could not retrieve incidents: {ex.Message}");
-			}
-		}
+                // Match by type
+                var matchStage = new BsonDocument("$match", new BsonDocument("IncidentType", type.ToString()));
+
+                // If branch is specified, add regex filter on location.branch
+                if (!string.IsNullOrWhiteSpace(branch))
+                {
+                    var branchMatch = new BsonDocument("$match", new BsonDocument("location.branch",
+                        new BsonDocument("$regex", branch).Add("$options", "i")));
+                    pipeline.Add(branchMatch);
+                }
+
+                // match by type first
+                pipeline.Insert(0, matchStage);
+
+                // Sort by ascending
+                var sortStage = new BsonDocument("$sort", new BsonDocument("Priority", 1));
+                pipeline.Add(sortStage);
+
+                var result = await _incidents.Aggregate<Incident>(pipeline).ToListAsync();
+                return result;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Could not retrieve incidents: {ex.Message}");
+            }
+        }
 
 		public async Task<List<Incident>> GetIncidentsByStatusAndType(IncidentStatus status, IncidentType type, string branch)
 		{
-			FilterDefinition<Incident> branchFilter = FilterDefinition<Incident>.Empty;
-			try
-			{
-				if (!string.IsNullOrWhiteSpace(branch))
-					branchFilter = Builders<Incident>.Filter.Regex("location.branch", new BsonRegularExpression(branch, "i"));
+            try
+            {
+                var pipeline = _incidents.Aggregate()
+                    .Match(i => i.Status == status && i.IncidentType == type);
 
-				var filter = Builders<Incident>.Filter.And(
-					Builders<Incident>.Filter.Eq(i => i.Status, status),
-					Builders<Incident>.Filter.Eq(i => i.IncidentType, type),
-					branchFilter);
+               
+                if (!string.IsNullOrWhiteSpace(branch))
+                {
+                    var regex = new BsonRegularExpression(branch, "i");
+                    pipeline = pipeline.Match(Builders<Incident>.Filter.Regex("location.branch", regex));
+                }
 
-				return await _incidents.Find(filter).SortBy(p => p.Priority).ToListAsync();
-			}
-			catch (Exception ex)
-			{
-				throw new Exception($"Could not retrieve incidents: {ex.Message}");
-			}
-		}
+                
+                pipeline = pipeline.SortBy(i => i.Priority);
+
+                var result = await pipeline.ToListAsync();
+                return result;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Could not retrieve incidents: {ex.Message}");
+            }
+        }
 
 		public async Task CreateNewIncidentAsync(Incident newIncident)
 		{
