@@ -33,7 +33,7 @@ namespace NoSQL_Project.Controllers
                     searchString = currentFilter;
                 }
 
-                var users = _userService.GetAll().Where(u => u.UserType == UserType.Service_employee);
+                var users = _userService.GetAll().Where(u => u.UserType == UserType.Reg_employee);
 
                 if (pageNumber < 1)
                 {
