@@ -22,7 +22,6 @@ namespace NoSQL_Project.Repositories
 			}
 			catch (Exception ex)
 			{
-				Console.WriteLine(ex.Message);
 				throw new Exception($"Could not retrieve incidents: {ex.Message}");
 			}
 		}
@@ -59,7 +58,6 @@ namespace NoSQL_Project.Repositories
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
                 throw new Exception($"Could not retrieve incident {id}: {ex.Message}");
             }
         }
@@ -254,7 +252,6 @@ namespace NoSQL_Project.Repositories
 
 				await _incidents.UpdateOneAsync(filter, addNew);
 
-				Console.WriteLine("Transfer complete");
 			}
 			catch (Exception ex)
 			{

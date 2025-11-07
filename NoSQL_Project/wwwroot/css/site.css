@@ -84,8 +84,8 @@ body {
     text-decoration: none;
     text-align: center;
     align-content: center;
-    width: 60%;
-    height: 40px;
+    min-width: 60%;
+    min-height: 40px;
     margin: 10px auto;
     justify-content: center;
     box-shadow: var(--shadow-m);
@@ -465,4 +465,29 @@ body {
 }
 .option_select {
     color: var(--color-text-dark);
+}
+#forgotPassword_Container{
+    margin: 10px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+.forgotPassword_FormWrapper {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.forgotPassword_Header {
+    justify-self: flex-start;
+}
+.field-validation-error {
+    min-height: 20px;
+    padding: 10px;
+    border-radius: 10px;
+    background-color: lightcoral;
+    color: red;
+    font-family: "Roboto Mono", monospace;
 }

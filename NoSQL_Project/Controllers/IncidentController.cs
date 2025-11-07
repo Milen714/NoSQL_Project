@@ -214,13 +214,11 @@ namespace NoSQL_Project.Controllers
             catch (KeyNotFoundException ex)
             {
                 TempData["Error"] = ex.Message;
-                Console.WriteLine(ex);
                 return RedirectToAction("Index");
             }
             catch (Exception ex)
             {
                 TempData["Error"] = $"Could not close incident: {ex.Message}";
-                Console.WriteLine(ex);
                 return RedirectToAction("Index");
             }
         }
