@@ -301,7 +301,7 @@
         context.fillText(value + (total ? "/" + total : ""), 75, 75);
     }
         drawDonut("chart1", @ViewData["NumberOfOpenIncidents"], @ViewData["NumberOfNonClosedIncidents"], "orange");
-                            drawDonut("chart2", @ViewData["NumberImmediateAttentionNeeded"], @ViewData["NumberOfOpenIncidents"], "red");
+            drawDonut("chart2", @ViewData["NumberImmediateAttentionNeeded"], @ViewData["NumberOfNonClosedIncidents"], "red");
 
 
                 var filter_button = document.getElementById("filter_button");
