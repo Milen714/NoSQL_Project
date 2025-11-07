@@ -17,12 +17,23 @@ namespace NoSQL_Project.Services
 
         public async Task Add(User user)
         {
-            await _userRepository.Add(user);
+            User hashedUser = HashUserPassword(user);
+            await _userRepository.Add(hashedUser);
         }
 
         public async Task<User> AuthenticateUserAsync(LoginModel model)
         {
-            return await _userRepository.AuthenticateUserAsync(model);
+            User existingUser = await GetUserByEmailAsync(model.Email);
+            if (existingUser == null)
+                return null;
+            var hasher = new PasswordHasher<string>();
+            var result = hasher.VerifyHashedPassword(null, existingUser.PasswordHash, model.Password);
+            if (result == PasswordVerificationResult.Success)
+            {
+                return existingUser;
+            }
+            return null;
+
         }
 
         public async Task<User> FindByIdAsync(string id)
@@ -67,7 +78,10 @@ namespace NoSQL_Project.Services
 
         public User HashUserPassword(User user)
         {
-            return _userRepository.HashUserPassword(user);
+            var hasher = new PasswordHasher<string>();
+            string hashedPassword = hasher.HashPassword(null, user.PasswordHash);
+            user.PasswordHash = hashedPassword;
+            return user;
         }
     }
 }
