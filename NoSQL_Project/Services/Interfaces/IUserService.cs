@@ -16,9 +16,5 @@ namespace NoSQL_Project.Services.Interfaces
 		Task<User> FindUserByNameAsync(string firstName, string lastName);
 
 
-		// Future:
-		// User? GetById(string id);
-		// void Update(User user);
-		// void Delete(string id);
 	}
 }

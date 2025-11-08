@@ -113,7 +113,7 @@
                     <option class="option_select" value="access">Access</option>
                     <option class="option_select" value="other">Other</option>
                 </select>
-                <select name="branch">
+                <select name="branch" class="form-select border-dark border-1" style="width: 200px;">
                     <option class="option_select" value="">Select a Branch</option>
                     @{
                         if (ViewBag.Branches != null)
@@ -301,7 +301,7 @@
         context.fillText(value + (total ? "/" + total : ""), 75, 75);
     }
         drawDonut("chart1", @ViewData["NumberOfOpenIncidents"], @ViewData["NumberOfNonClosedIncidents"], "orange");
-                            drawDonut("chart2", @ViewData["NumberImmediateAttentionNeeded"], @ViewData["NumberOfOpenIncidents"], "red");
+            drawDonut("chart2", @ViewData["NumberImmediateAttentionNeeded"], @ViewData["NumberOfNonClosedIncidents"], "red");
 
 
                 var filter_button = document.getElementById("filter_button");

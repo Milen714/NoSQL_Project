@@ -131,6 +131,10 @@ namespace NoSQL_Project.Services
 			{
 				existingIncident.Status = IncidentStatus.closed_without_resolve;
 			}
+			else if (IncidentStatus.closed.ToString().Equals(updatedStatus, StringComparison.OrdinalIgnoreCase))
+			{
+				existingIncident.Status = IncidentStatus.closed;
+			}
 			else
 			{
 				throw new ArgumentException("Invalid status value");

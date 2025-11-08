@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
-using NoSQL_Project.Models;
-using NoSQL_Project.Services.Interfaces;
-using System.Diagnostics;
 using NoSQL_Project.Commons;
+using NoSQL_Project.Models;
+using NoSQL_Project.Models.Enums;
+using NoSQL_Project.Services.Interfaces;
+using System.Data;
+using System.Diagnostics;
 
 namespace NoSQL_Project.Controllers
 {
@@ -23,18 +25,30 @@ namespace NoSQL_Project.Controllers
         [HttpPost]
         public async Task<IActionResult> Login(LoginModel loginModel)
         {
-            User user = await _userService.AuthenticateUserAsync(loginModel);
-            if (user == null)
+            try
             {
-                // Failed login
-                TempData["ErrorMessage"] = "Invalid Email or Password";
-                return View();
+                User user = await _userService.AuthenticateUserAsync(loginModel);
+                // Successful login
+                TempData["Success"] = "Login successful!";
+                HttpContext.Session.SetObject("LoggedInUser", user);
 
+                switch (user.UserType)
+                {
+                    case UserType.Reg_employee:
+                        return RedirectToAction("Index", "Incident");
+                    case UserType.Service_employee:
+                        return RedirectToAction("Index", "Incident");
+                    default:
+                        TempData["Error"] = "User role is not recognized.";
+                        return RedirectToAction("Login");
+                }
             }
-            // Successful login
-            TempData["Success"] = "Login successful!";
-            HttpContext.Session.SetObject("LoggedInUser", user);
-            return RedirectToAction("Index", "User");
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+                return View();
+            }
+
         }
 
         public IActionResult Logout()
