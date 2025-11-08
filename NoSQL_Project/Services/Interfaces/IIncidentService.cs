@@ -22,5 +22,8 @@ namespace NoSQL_Project.Services.Interfaces
         Task TransferIncidentAsync(string incidentId, string userForTransferId);
         Task<List<Incident>> GetAllOpenOverdueIncidents(string branch);
 
+
+       
+
     }
 }

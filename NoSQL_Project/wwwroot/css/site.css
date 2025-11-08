@@ -154,9 +154,10 @@ body {
     border-radius: 5px;
     color: var(--color-text-dark);
 }
-#addUserFrom {
-    background-color: #fff;
+.add_User_Form {
+    background-color: var(--color-bg-light);
 }
+
 
 #addUserFrom .form-label {
     color: var(--color-text-dark);

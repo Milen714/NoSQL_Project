@@ -1,9 +1,15 @@
 ﻿@using NoSQL_Project.Models.Enums
+@using NoSQL_Project.Commons
 @model NoSQL_Project.Models.Incident
 
 @{
 	ViewData["Title"] = "Incident Details";
 	bool isEditing = ViewBag.IsEditing ?? false;
+
+	// Get logged-in user and check role
+	var loggedInUser = Context.Session.GetObject<User>("LoggedInUser");
+	bool isServiceDesk = loggedInUser?.UserType == UserType.Service_employee;
+	bool isRegularEmployee = loggedInUser?.UserType == UserType.Reg_employee;
 }
 
 @if (TempData["Error"] != null)
@@ -63,8 +69,9 @@
 		</header>
 
 		<div>
-			@if (isEditing)
+			@if (isEditing && isServiceDesk)
 			{
+				@* ADMIN ONLY - Edit Mode *@
 				<div class="other_info_header_container">
 					<h5 class="incident_details_title title">Edit Incident:</h5>
 				</div>
@@ -119,46 +126,70 @@
 			}
 			else
 			{
-				<div class="incident_management_buttons">					
-					<a asp-action="EditIncident" asp-route-id="@Model.Id" class="btn btn-primary"> Edit	</a>
+				
+				<div class="incident_management_buttons">
 
-					<form asp-action="TransferIncident" method="get" style="display:inline;">
-						<input type="hidden" name="incidentId" value="@Model.Id" />
-						@if (Model.AssignedTo == null || !Model.AssignedTo.Any())
-						{
-							<button type="submit" class="btn btn-primary">Assign Incident</button>
-						}
-						else
-						{
-							<button type="submit" class="btn btn-primary">Transfer Incident</button>
-						}
-					</form>
+					@if (isServiceDesk)
+					{
+						
+						<a asp-action="EditIncident" asp-route-id="@Model.Id" class="btn btn-primary">Edit</a>
 
-					<form asp-action="CloseIncident" method="post" style="display:inline;">
-						<input type="hidden" name="incidentId" value="@Model.Id" />
-						<input type="hidden" name="updatedStatus" value="resolved" />
-						<button type="submit" class="btn btn-warning">Resolve</button>
-					</form>
+						<form asp-action="TransferIncident" method="get" style="display:inline;">
+							<input type="hidden" name="incidentId" value="@Model.Id" />
+							@if (Model.AssignedTo == null || !Model.AssignedTo.Any())
+							{
+								<button type="submit" class="btn btn-primary">Assign Incident</button>
+							}
+							else
+							{
+								<button type="submit" class="btn btn-primary">Transfer Incident</button>
+							}
+						</form>
 
-					<form asp-action="CloseIncident" method="post" style="display:inline;">
-						<input type="hidden" name="incidentId" value="@Model.Id" />
-						<input type="hidden" name="updatedStatus" value="closed" />
-						<button type="submit" class="btn btn-warning">Close</button>
-					</form>
+						<form asp-action="CloseIncident" method="post" style="display:inline;">
+							<input type="hidden" name="incidentId" value="@Model.Id" />
+							<input type="hidden" name="updatedStatus" value="resolved" />
+							<button type="submit" class="btn btn-warning">Resolve</button>
+						</form>
 
-					<form asp-action="CloseIncident" method="post" style="display:inline;">
-						<input type="hidden" name="incidentId" value="@Model.Id" />
-						<input type="hidden" name="updatedStatus" value="closed_without_resolve" />
-						<button type="submit" class="btn btn-warning">Close Unresolved</button>
-					</form>					
+						<form asp-action="CloseIncident" method="post" style="display:inline;">
+							<input type="hidden" name="incidentId" value="@Model.Id" />
+							<input type="hidden" name="updatedStatus" value="closed" />
+							<button type="submit" class="btn btn-warning">Close</button>
+						</form>
 
-					<a asp-controller="Incident" asp-action="Index" class="btn btn-secondary">Return</a>
+						<form asp-action="CloseIncident" method="post" style="display:inline;">
+							<input type="hidden" name="incidentId" value="@Model.Id" />
+							<input type="hidden" name="updatedStatus" value="closed_without_resolve" />
+							<button type="submit" class="btn btn-warning">Close Unresolved</button>
+						</form>
+
+						<a asp-controller="Incident" asp-action="Index" class="btn btn-secondary">Return to All Tickets</a>
+					}
+					else if (isRegularEmployee)
+					{
+						@* REGULAR EMPLOYEE - Read-Only View *@
+						<div class="alert alert-info w-100 mb-3">
+							<strong>ℹ️ Note:</strong> You can view this ticket's details, but only Service Desk employees can modify tickets.
+						</div>
+
+						<a asp-controller="Incident" asp-action="MyTickets" class="btn btn-secondary">Return to My Tickets</a>
+					}
+					else
+					{
+						@* NOT LOGGED IN *@
+						<div class="alert alert-warning w-100">
+							<strong>⚠️ Access Denied:</strong> Please log in to view ticket details.
+						</div>
+						<a asp-controller="Home" asp-action="Login" class="btn btn-primary">Go to Login</a>
+					}
+
 				</div>
 			}
 		</div>
 	</div>
 
-	
+
 
 	<article class="incident_other_information">
 		<div class="other_information_container">
@@ -240,6 +271,6 @@
 		</div>
 	</article>
 
-	
+
 
 </div>

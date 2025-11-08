@@ -57,6 +57,13 @@ namespace NoSQL_Project
             builder.Services.AddScoped<IIncidentRepository, IncidentRepository>();
             builder.Services.AddScoped<IIncidentService, IncidentService>();
 
+            // Search functionality
+            builder.Services.AddScoped<IIncidentSearchRepository, IncidentSearchRepository>();
+            builder.Services.AddScoped<IIncidentSearchService, IncidentSearchService>();
+
+            // Sort functionality 
+            builder.Services.AddScoped<IIncidentSortRepository, IncidentSortRepository>();
+            builder.Services.AddScoped<IIncidentSortService, IncidentSortService>();
 
             //Session
             builder.Services.AddSession(options =>
