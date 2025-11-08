@@ -34,7 +34,7 @@ namespace NoSQL_Project.Repositories
 				{
 					branchFilter = Builders<Incident>.Filter.Regex("location.branch", new BsonRegularExpression(branch, "i"));
 				}
-				var excludedStatuses = new[] { IncidentStatus.closed, IncidentStatus.closed_without_resolve };
+				var excludedStatuses = new[] { IncidentStatus.closed, IncidentStatus.closed_without_resolve, IncidentStatus.resolved };
 				var filter = Builders<Incident>.Filter.And(
 					Builders<Incident>.Filter.Nin(i => i.Status, excludedStatuses),
 					branchFilter
@@ -107,9 +107,12 @@ namespace NoSQL_Project.Repositories
             try
             {
                 var pipeline = new List<BsonDocument>();
+                
 
                 // Match by type
-                var matchStage = new BsonDocument("$match", new BsonDocument("IncidentType", type.ToString()));
+                var matchStage = new BsonDocument("$match", new BsonDocument("incident_type", type.ToString()));
+                // match by type first
+                pipeline.Add(matchStage);
 
                 // If branch is specified, add regex filter on location.branch
                 if (!string.IsNullOrWhiteSpace(branch))
@@ -118,12 +121,8 @@ namespace NoSQL_Project.Repositories
                         new BsonDocument("$regex", branch).Add("$options", "i")));
                     pipeline.Add(branchMatch);
                 }
-
-                // match by type first
-                pipeline.Insert(0, matchStage);
-
                 // Sort by ascending
-                var sortStage = new BsonDocument("$sort", new BsonDocument("Priority", 1));
+                var sortStage = new BsonDocument("$sort", new BsonDocument("priority", 1));
                 pipeline.Add(sortStage);
 
                 var result = await _incidents.Aggregate<Incident>(pipeline).ToListAsync();

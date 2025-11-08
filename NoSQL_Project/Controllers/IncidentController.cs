@@ -4,7 +4,6 @@ using MongoDB.Driver;
 using NoSQL_Project.Commons;
 using NoSQL_Project.Models;
 using NoSQL_Project.Models.Enums;
-using NoSQL_Project.Services;
 using NoSQL_Project.Services.Interfaces;
 using NoSQL_Project.ViewModels;
 
@@ -17,21 +16,21 @@ namespace NoSQL_Project.Controllers
         private readonly IUserService _userService;
         private readonly ILocationService _locationService;
         private readonly IIncidentService _incidentService;
-        private readonly IIncidentSearchService _searchService;        
-        private readonly IIncidentSortService _sortService;     
-        
+        private readonly IIncidentSearchService _searchService;
+        private readonly IIncidentSortService _sortService;
+
         public IncidentController(
             IUserService userService,
             ILocationService locationSrvice,
             IIncidentService incidentService,
-            IIncidentSearchService searchService,                     
-            IIncidentSortService sortService)                         
+            IIncidentSearchService searchService,
+            IIncidentSortService sortService)
         {
             _locationService = locationSrvice;
             _userService = userService;
             _incidentService = incidentService;
-            _searchService = searchService;                          
-            _sortService = sortService;                               
+            _searchService = searchService;
+            _sortService = sortService;
         }
 
         public async Task<IActionResult> Index(
@@ -80,18 +79,18 @@ namespace NoSQL_Project.Controllers
                 }
 
                 //SEARCH FUNCTIONALITY
-                
+
                 if (!string.IsNullOrWhiteSpace(searchString))
                 {
                     var searchOp = searchOperator?.ToLower() == "or" ? SearchOperator.Or : SearchOperator.And;
 
-                   
+
                     incidents = await _searchService.SearchIncidentsAsync(
                         searchString,
                         searchOp,
                         branchValue,
-                        parsedStatus, 
-                        parsedType     
+                        parsedStatus,
+                        parsedType
                     );
 
                     ViewData["CurrentFilter"] = searchString;
@@ -100,13 +99,13 @@ namespace NoSQL_Project.Controllers
                 //SORT FUNCTIONALITY 
                 else if (sortByPriority)
                 {
-                   
+
                     incidents = await _sortService.GetIncidentsSortedByPriorityAsync(branchValue, sortPriorityAscending);
 
                     ViewData["SortByPriority"] = true;
                     ViewData["SortPriorityAscending"] = sortPriorityAscending;
                 }
-                
+
                 else if (hasStatus && hasType)
                 {
                     incidents = await _incidentService.GetIncidentsByStatusAndType(parsedStatus.Value, parsedType.Value, branchValue);
@@ -151,8 +150,8 @@ namespace NoSQL_Project.Controllers
             }
         }
 
-            //Create Incident
-            [HttpGet]
+        //Create Incident
+        [HttpGet]
         public async Task<IActionResult> CreateIncident()
         {
             var user = HttpContext.Session.GetObject<User>("LoggedInUser");
@@ -336,7 +335,7 @@ namespace NoSQL_Project.Controllers
                     searchString = currentFilter;
                 }
 
-                
+
                 IncidentStatus? parsedStatus = null;
                 if (!string.IsNullOrEmpty(statusFilter) && statusFilter != "All")
                 {
@@ -346,12 +345,12 @@ namespace NoSQL_Project.Controllers
                     }
                 }
 
-                
+
                 if (!string.IsNullOrWhiteSpace(searchString))
                 {
                     var searchOp = searchOperator?.ToLower() == "or" ? SearchOperator.Or : SearchOperator.And;
 
-                    
+
                     var searchResults = await _searchService.SearchIncidentsAsync(
                         searchString,
                         searchOp,
@@ -359,13 +358,13 @@ namespace NoSQL_Project.Controllers
                         parsedStatus,
                         null);
 
-                   
+
                     incidents = FilterByUser(searchResults, loggedInUser);
 
                     ViewData["CurrentFilter"] = searchString;
                     ViewData["SearchOperator"] = searchOperator?.ToLower() ?? "and";
                 }
-                
+
                 else if (sortByPriority)
                 {
                     var allIncidents = await _incidentService.GetAllWitoutclosed("");
@@ -379,7 +378,7 @@ namespace NoSQL_Project.Controllers
                     ViewData["SortByPriority"] = true;
                     ViewData["SortPriorityAscending"] = sortPriorityAscending;
                 }
-                
+
                 else if (parsedStatus.HasValue)
                 {
                     var allIncidents = await _incidentService.GetAllIncidentsPerStatus(parsedStatus.Value, "");
@@ -387,12 +386,12 @@ namespace NoSQL_Project.Controllers
                 }
                 else
                 {
-                    
+
                     var allIncidents = await _incidentService.GetAllWitoutclosed("");
                     incidents = FilterByUser(allIncidents, loggedInUser);
                 }
 
-               
+
                 var allMyIncidents = FilterByUser(_incidentService.GetAll(), loggedInUser);
                 ViewData["TotalTickets"] = allMyIncidents.Count;
                 ViewData["OpenTickets"] = allMyIncidents.Count(i => i.Status == IncidentStatus.open || i.Status == IncidentStatus.inProgress);
