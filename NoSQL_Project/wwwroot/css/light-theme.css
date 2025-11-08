@@ -1,0 +1,56 @@
+﻿:root {
+    /* --- Primary Brand & Accent Colors --- */
+    --color-primary-dark: #121828;
+    --color-primary-blue: #3f6cf2;
+    --color-primary-blue-accent: #ebf5ff;
+    --color-primary-link-active: #2757C2;
+    /* --- Text Colors --- */
+    --color-text-light: #fefefe; /* Text on dark backgrounds */
+    --color-text-dark: #333333; /* Primary text */
+    --color-text-secondary: #888888; /* Muted text */
+    --color-text-inverse: #000000; /* Used for dark text inside white elements */
+    /* --- Backgrounds & Borders --- */
+    --color-bg-light: #e5e5e5;
+    --color-bg-subtle: #f9f9fb;
+    --color-bg-white: #ffffff;
+    --color-bg-grey: #e5e5e5;
+    --color-bg-grey-dark: #CACACA;
+    --color-bg-input: #e0dede;
+    --color-bg-form: #ffffff;
+    --color-border-subtle: #e0e0e0;
+    --color-border-focus: #c5c5c5;
+    /* --- Shadows --- */
+    --shadow-s: inset 0 1px 2px #ffffff30, 0 1px 2px #00000030, 0 2px 4px #00000015;
+    --shadow-m: inset 0 1px 2px #ffffff50, 0 2px 4px #00000030, 0 4px 8px #00000015;
+    --shadow-l: inset 0 1px 2px #ffffff30, 0 4px 6px #00000030, 0 6px 10px #00000015;
+    /* --- Sidebar & Navigation --- */
+    --color-sidebar-bg: #13263F;
+    --color-sidebar-accent: #3B4D66;
+    /* --- Status & Level Colors --- */
+    --color-status-resolved: #D6F6F4;
+    --color-status-resolved-text: #5CC9C2;
+    --color-status-inProgress: #FFF0DE;
+    --color-status-inProgress-text: #EE9F33;
+    --color-status-closed: #2e7d32;
+    --color-status-closed-text: #ffffff;
+    --color-status-closed-without-resolve: #e0e0e0;
+    --color-status-closed-without-resolve-text: #888888;
+    --color-status-open: #f5b0ae;
+    --color-status-open-text: #dc3545;
+    --color-status-acknowledged: #fff3cd;
+    --color-status-acknowledged-text: #ffc107;
+    /* --- Priority Levels --- */
+    --color-level-low: #FEE3E5;
+    --color-level-low-text: #FC4556;
+    --color-level-medium: #FF94A0;
+    --color-level-medium-text: #ffffff;
+    --color-level-high: #FD4B5C;
+    --color-level-high-text: #ffffff;
+    /* --- Other --- */
+    --color-tableheader-offwhite: #F9FBFC;
+    --color-popup-overlay: rgba(0, 0, 0, 0.5);
+    --color-login-bg-top: #001E2B;
+    --color-login-bg-bottom: #112733;
+    --color-button-primary-bg: #573b8a;
+    --color-button-primary-bg-hover: #6d44b8;
+}

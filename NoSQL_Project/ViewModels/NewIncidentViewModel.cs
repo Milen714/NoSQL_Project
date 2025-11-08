@@ -21,12 +21,3 @@ namespace NoSQL_Project.ViewModels
 }
 
 
-
-
-// Dropdowns
-/*
-public IEnumerable<SelectListItem> IncidentTypeOptions { get; set; } = Enumerable.Empty<SelectListItem>();
-public IEnumerable<SelectListItem> PriorityOptions { get; set; } = Enumerable.Empty<SelectListItem>();
-public IEnumerable<SelectListItem> DeadlineOptions { get; set; } = Enumerable.Empty<SelectListItem>();
-public IEnumerable<SelectListItem> LocationOptions { get; set; } = Enumerable.Empty<SelectListItem>();
-*/

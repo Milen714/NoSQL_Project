@@ -15,14 +15,25 @@ namespace NoSQL_Project.Services
             _userRepository = userRepository;
         }
 
-        public void Add(User user)
+        public async Task Add(User user)
         {
-            _userRepository.Add(user);
+            User hashedUser = HashUserPassword(user);
+            await _userRepository.Add(hashedUser);
         }
 
         public async Task<User> AuthenticateUserAsync(LoginModel model)
         {
-            return await _userRepository.AuthenticateUserAsync(model);
+            User existingUser = await GetUserByEmailAsync(model.Email);
+            if (existingUser == null)
+                throw new Exception($"User with email {model.Email} not found");
+            var hasher = new PasswordHasher<string>();
+            var result = hasher.VerifyHashedPassword(null, existingUser.PasswordHash, model.Password);
+            if (result == PasswordVerificationResult.Success)
+            {
+                return existingUser;
+            }
+            throw new Exception("Entered Password is Incorrect");
+
         }
 
         public async Task<User> FindByIdAsync(string id)
@@ -30,7 +41,12 @@ namespace NoSQL_Project.Services
             return await _userRepository.FindByIdAsync(id);
         }
 
-        public string GenerateSecureToken(int length = 32)
+		public async Task<User> FindUserByNameAsync(string firstName, string lastName)
+        {
+            return await _userRepository.FindUserByNameAsync(firstName, lastName);
+		}
+
+		private string GenerateSecureToken(int length = 32)
         {
             var bytes = RandomNumberGenerator.GetBytes(length);
             return Convert.ToBase64String(bytes);
@@ -39,7 +55,7 @@ namespace NoSQL_Project.Services
         {
             var token = GenerateSecureToken();
             user.RessetToken = token;
-            user.RessetTokenExpiry = DateTime.UtcNow.AddHours(1); // Token valid for 1 hour
+            user.RessetTokenExpiry = DateTime.UtcNow.AddHours(1); 
             await UpdateUserAsync(user);
             return token;
 
@@ -62,7 +78,10 @@ namespace NoSQL_Project.Services
 
         public User HashUserPassword(User user)
         {
-            return _userRepository.HashUserPassword(user);
+            var hasher = new PasswordHasher<string>();
+            string hashedPassword = hasher.HashPassword(null, user.PasswordHash);
+            user.PasswordHash = hashedPassword;
+            return user;
         }
     }
 }
