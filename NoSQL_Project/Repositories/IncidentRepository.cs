@@ -354,5 +354,7 @@ namespace NoSQL_Project.Repositories
                 throw new Exception($"Could not retrieve incidents: {ex.Message}");
             }
         }
-	}
+
+        
+    }
 }

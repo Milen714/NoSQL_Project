@@ -167,6 +167,7 @@ namespace NoSQL_Project.Services
         {
             return _incidentRepository.GetAllOpenOverdueIncidents(branch);
         }
+
     }
 
 }

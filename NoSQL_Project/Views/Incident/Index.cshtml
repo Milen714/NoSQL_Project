@@ -40,16 +40,48 @@
 </div>
 
 
-
-
-
 <div class="search_and_fileter_container">
 
     <div class="search_sub_container">
-        <form class="d-flex" role="search">
-            <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+        @* Enhanced Search Form with AND/OR operators *@
+        <form class="d-flex" role="search" method="get" asp-action="Index">
+            <input class="form-control me-2"
+                   type="search"
+                   name="searchString"
+                   placeholder="Search subject or description..."
+                   aria-label="Search"
+                   value="@ViewData["CurrentFilter"]">
+
+            <select name="searchOperator" class="form-select me-2" style="width: 120px;">
+                <option value="and" selected="@(ViewData["SearchOperator"]?.ToString() == "and")">AND</option>
+                <option value="or" selected="@(ViewData["SearchOperator"]?.ToString() == "or")">OR</option>
+            </select>
+
             <button class="btn btn-outline-success" type="submit">Search</button>
+
+            @* Preserve existing filters in search *@
+            <input type="hidden" name="statusFilter" value="@ViewData["CurrentStatus"]" />
+            <input type="hidden" name="typeFilter" value="@ViewData["TypeFilter"]" />
+            <input type="hidden" name="branch" value="@Context.Request.Query["branch"]" />
         </form>
+
+        @* Priority Sort Form with Direction Selection - Author: Dylan Mohlen - Date: 2025-01-08 *@
+        <form method="get" asp-action="Index" class="d-flex align-items-center ms-2">
+            <input type="hidden" name="statusFilter" value="@ViewData["CurrentStatus"]" />
+            <input type="hidden" name="typeFilter" value="@ViewData["TypeFilter"]" />
+            <input type="hidden" name="branch" value="@Context.Request.Query["branch"]" />
+            <input type="hidden" name="sortByPriority" value="true" />
+
+            <select name="sortPriorityAscending" class="form-select me-2" style="width: 200px;">
+                <option value="false" selected="@(ViewData["SortPriorityAscending"]?.ToString() != "True")">Critical → Low</option>
+                <option value="true" selected="@(ViewData["SortPriorityAscending"]?.ToString() == "True")">Low → Critical</option>
+            </select>
+
+            <button class="btn btn-warning" type="submit" title="Sort by Priority">
+                <img src="/assets/FiltersIcon.svg" alt="Sort" style="width: 16px; height: 16px;" /> Sort Priority
+            </button>
+        </form>
+
         <button class="filter_button_class" id="filter_button"><img src="/assets/FiltersIcon.svg" alt="Alternate Text" /> Filters</button>
     </div>
 
@@ -59,27 +91,27 @@
                 <ul class="search_options_ul">
                     <li class="search_options_li">
                         <a class="search_options_a @(ViewContext.HttpContext.Request.Query["statusFilter"] == "All" ? "activeFilter" : "")"
-                        asp-action="Index" asp-route-statusFilter="All" asp-route-typeFilter="@Context.Request.Query["typeFilter"]">All</a>
+                           asp-action="Index" asp-route-statusFilter="All" asp-route-typeFilter="@Context.Request.Query["typeFilter"]">All</a>
                     </li>
                     <li class="search_options_li">
-                        <a class="search_options_a @(ViewContext.HttpContext.Request.Query["statusFilter"] == "open" ? "activeFilter" : "")" 
-                        asp-action="Index" asp-route-statusFilter="open" asp-route-typeFilter="@Context.Request.Query["typeFilter"]">Open</a>
+                        <a class="search_options_a @(ViewContext.HttpContext.Request.Query["statusFilter"] == "open" ? "activeFilter" : "")"
+                           asp-action="Index" asp-route-statusFilter="open" asp-route-typeFilter="@Context.Request.Query["typeFilter"]">Open</a>
                     </li>
                     <li class="search_options_li">
                         <a class="search_options_a @(ViewContext.HttpContext.Request.Query["statusFilter"] == "inProgress" ? "activeFilter" : "")"
-                        asp-action="Index" asp-route-statusFilter="inProgress" asp-route-typeFilter="@Context.Request.Query["typeFilter"]">In Progress</a>
+                           asp-action="Index" asp-route-statusFilter="inProgress" asp-route-typeFilter="@Context.Request.Query["typeFilter"]">In Progress</a>
                     </li>
                     <li class="search_options_li">
                         <a class="search_options_a @(ViewContext.HttpContext.Request.Query["statusFilter"] == "resolved" ? "activeFilter" : "")"
-                        asp-action="Index" asp-route-statusFilter="resolved" asp-route-typeFilter="@Context.Request.Query["typeFilter"]">Resolved</a>
+                           asp-action="Index" asp-route-statusFilter="resolved" asp-route-typeFilter="@Context.Request.Query["typeFilter"]">Resolved</a>
                     </li>
                     <li class="search_options_li">
                         <a class="search_options_a @(ViewContext.HttpContext.Request.Query["statusFilter"] == "closed_without_resolve" ? "activeFilter" : "")"
-                        asp-action="Index" asp-route-statusFilter="closed_without_resolve" asp-route-typeFilter="@Context.Request.Query["typeFilter"]">Closed W/O Resolve</a>
+                           asp-action="Index" asp-route-statusFilter="closed_without_resolve" asp-route-typeFilter="@Context.Request.Query["typeFilter"]">Closed W/O Resolve</a>
                     </li>
                     <li class="search_options_li">
                         <a class="search_options_a @(ViewContext.HttpContext.Request.Query["statusFilter"] == "closed" ? "activeFilter" : "")"
-                        asp-action="Index" asp-route-statusFilter="closed" asp-route-typeFilter="@Context.Request.Query["typeFilter"]">Closed</a>
+                           asp-action="Index" asp-route-statusFilter="closed" asp-route-typeFilter="@Context.Request.Query["typeFilter"]">Closed</a>
                     </li>
                 </ul>
             </nav>
@@ -89,17 +121,63 @@
     <a class="btn btn-primary" href="/Incident/CreateIncident">Create New Incident</a>
 
 </div>
+
+
 @if (!string.IsNullOrEmpty(ViewContext.HttpContext.Request.Query["statusFilter"]) ||
-   !string.IsNullOrEmpty(ViewContext.HttpContext.Request.Query["typeFilter"]))
+   !string.IsNullOrEmpty(ViewContext.HttpContext.Request.Query["typeFilter"]) ||
+   !string.IsNullOrEmpty(ViewData["CurrentFilter"]?.ToString()) ||
+   (ViewData["SortByPriority"] != null && (bool)ViewData["SortByPriority"]))
 {
     <div class="alert alert-info mt-3">
-        <strong>Filters applied:</strong>
-        @ViewContext.HttpContext.Request.Query["statusFilter"]
-        @ViewContext.HttpContext.Request.Query["typeFilter"]
-        @ViewContext.HttpContext.Request.Query["branch"]
+        <strong>Active Filters/Actions:</strong>
+
+        @if (!string.IsNullOrEmpty(ViewData["CurrentFilter"]?.ToString()))
+        {
+            <span class="badge bg-success ms-2">
+                🔍 Search: "@ViewData["CurrentFilter"]" (@(ViewData["SearchOperator"]?.ToString().ToUpper() ?? "AND"))
+            </span>
+        }
+
+        @if (ViewData["SortByPriority"] != null && (bool)ViewData["SortByPriority"])
+        {
+            var sortDirection = ViewData["SortPriorityAscending"]?.ToString() == "True" ? "Low → Critical" : "Critical → Low";
+            <span class="badge bg-warning text-dark ms-2">
+                ⚡ Sorted by Priority (@sortDirection)
+            </span>
+        }
+
+        @if (!string.IsNullOrEmpty(ViewContext.HttpContext.Request.Query["statusFilter"]))
+        {
+            <span class="badge bg-primary ms-2">Status: @ViewContext.HttpContext.Request.Query["statusFilter"]</span>
+        }
+
+        @if (!string.IsNullOrEmpty(ViewContext.HttpContext.Request.Query["typeFilter"]))
+        {
+            <span class="badge bg-primary ms-2">Type: @ViewContext.HttpContext.Request.Query["typeFilter"]</span>
+        }
+
+        @if (!string.IsNullOrEmpty(ViewContext.HttpContext.Request.Query["branch"]))
+        {
+            <span class="badge bg-primary ms-2">Branch: @ViewContext.HttpContext.Request.Query["branch"]</span>
+        }
+
+        <a asp-action="Index" class="btn btn-sm btn-outline-secondary ms-3">Clear All</a>
     </div>
+
+    
+    @if (!string.IsNullOrEmpty(ViewData["CurrentFilter"]?.ToString()))
+    {
+        <div class="alert alert-light border mt-2">
+            <small class="text-muted">
+                <strong>💡 Search Tips:</strong>
+                Use <strong>AND</strong> to find incidents containing all terms (e.g., "printer problem").
+                Use <strong>OR</strong> with pipe "|" to find incidents with any term (e.g., "printer | network | server").
+            </small>
+        </div>
+    }
 }
-<div class="popupOverlay" >
+
+<div class="popupOverlay">
     <div class="popupContainer">
         <div>
             <form method="get" asp-action="Index" class="d-flex gap-3 align-items-center">
@@ -133,6 +211,7 @@
         </div>
     </div>
 </div>
+
 <div class="table_NICE_container">
     <table class="table_NICE">
         <thead>
@@ -187,12 +266,12 @@
                         incidentStatusStyle = "status_closed";
                         break;
                 }
-                
-            <tr>
-                
-                <td>
-                    <div class="priority_label @priorityLevelStyle">@incident.Priority</div>
-                </td>
+
+                <tr>
+
+                    <td>
+                        <div class="priority_label @priorityLevelStyle">@incident.Priority</div>
+                    </td>
                     <td>
                         <a class="incident_href" asp-controller="Incident" asp-action="IncidentDetails" asp-route-id="@incident.Id">
                             @incident.Subject
@@ -201,23 +280,25 @@
                     <td>
                         @incident.IncidentType
                     </td>
-                <td>
-                    <div class="priority_label @incidentStatusStyle">@incident.Status</div>
-                </td>
-                @{
-                    var activeUser = incident.AssignedTo?.FirstOrDefault(a => a.IsActive);
-                }
-                <td>@(activeUser != null ? $"{activeUser.FirstName} {activeUser.LastName}" : "Unassigned")</td>
-                <td>@incident.Location.Branch</td>
-                <td>@incident.ReportedAt.ToString("g")</td>
-                <td>@((incident.Deadline - DateTime.Now).Days) Days</td>
-            
-            </tr>
-                
+                    <td>
+                        <div class="priority_label @incidentStatusStyle">@incident.Status</div>
+                    </td>
+                    @{
+                        var activeUser = incident.AssignedTo?.FirstOrDefault(a => a.IsActive);
+                    }
+                    <td>@(activeUser != null ? $"{activeUser.FirstName} {activeUser.LastName}" : "Unassigned")</td>
+                    <td>@incident.Location.Branch</td>
+                    <td>@incident.ReportedAt.ToString("g")</td>
+                    <td>@((incident.Deadline - DateTime.Now).Days) Days</td>
+
+                </tr>
+
             }
         </tbody>
     </table>
 </div>
+
+
 <div class="row">
     <div class="col-md-6">
     </div>
@@ -228,7 +309,12 @@
                     <a class="page-link text-black" asp-route-pageNumber="1"
                        asp-route-showImmediateAttention="@Context.Request.Query["showImmediateAttention"]"
                        asp-route-statusFilter="@ViewData["CurrentStatus"]"
-                       asp-route-typeFilter="@ViewData["TypeFilter"]">
+                       asp-route-typeFilter="@ViewData["TypeFilter"]"
+                       asp-route-searchString="@ViewData["CurrentFilter"]"
+                       asp-route-searchOperator="@ViewData["SearchOperator"]"
+                       asp-route-sortByPriority="@ViewData["SortByPriority"]"
+                       asp-route-sortPriorityAscending="@ViewData["SortPriorityAscending"]"
+                       asp-route-branch="@Context.Request.Query["branch"]">
 
                         <span>First</span>
                     </a>
@@ -238,26 +324,41 @@
                     <a class="page-link text-black" asp-route-pageNumber="@(Model.PageIndex - 1)"
                        asp-route-showImmediateAttention="@Context.Request.Query["showImmediateAttention"]"
                        asp-route-statusFilter="@ViewData["CurrentStatus"]"
-                       asp-route-typeFilter="@ViewData["TypeFilter"]">
+                       asp-route-typeFilter="@ViewData["TypeFilter"]"
+                       asp-route-searchString="@ViewData["CurrentFilter"]"
+                       asp-route-searchOperator="@ViewData["SearchOperator"]"
+                       asp-route-sortByPriority="@ViewData["SortByPriority"]"
+                       asp-route-sortPriorityAscending="@ViewData["SortPriorityAscending"]"
+                       asp-route-branch="@Context.Request.Query["branch"]">
                         <span>Previous</span>
                     </a>
                 </li>
 
                 @for (int i = 1; i <= Model.TotalPages; i++)
                 {
-                <li class="page-item @(Model.PageIndex == i ? "active" : "")">
-                    <a class="page-link text-black" asp-route-pageNumber="@i"
-                       asp-route-showImmediateAttention="@Context.Request.Query["showImmediateAttention"]"
-                       asp-route-statusFilter="@ViewData["CurrentStatus"]"
-                       asp-route-typeFilter="@ViewData["TypeFilter"]">@i</a>
-                </li>
+                    <li class="page-item @(Model.PageIndex == i ? "active" : "")">
+                        <a class="page-link text-black" asp-route-pageNumber="@i"
+                           asp-route-showImmediateAttention="@Context.Request.Query["showImmediateAttention"]"
+                           asp-route-statusFilter="@ViewData["CurrentStatus"]"
+                           asp-route-typeFilter="@ViewData["TypeFilter"]"
+                           asp-route-searchString="@ViewData["CurrentFilter"]"
+                           asp-route-searchOperator="@ViewData["SearchOperator"]"
+                           asp-route-sortByPriority="@ViewData["SortByPriority"]"
+                           asp-route-sortPriorityAscending="@ViewData["SortPriorityAscending"]"
+                           asp-route-branch="@Context.Request.Query["branch"]">@i</a>
+                    </li>
                 }
 
                 <li class="page-item @(Model.HasNextPage ? "" : "disabled")">
                     <a class="page-link text-black" asp-route-pageNumber="@(Model.PageIndex + 1)"
                        asp-route-showImmediateAttention="@Context.Request.Query["showImmediateAttention"]"
                        asp-route-statusFilter="@ViewData["CurrentStatus"]"
-                       asp-route-typeFilter="@ViewData["TypeFilter"]">
+                       asp-route-typeFilter="@ViewData["TypeFilter"]"
+                       asp-route-searchString="@ViewData["CurrentFilter"]"
+                       asp-route-searchOperator="@ViewData["SearchOperator"]"
+                       asp-route-sortByPriority="@ViewData["SortByPriority"]"
+                       asp-route-sortPriorityAscending="@ViewData["SortPriorityAscending"]"
+                       asp-route-branch="@Context.Request.Query["branch"]">
                         <span>Next</span>
                     </a>
                 </li>
@@ -265,7 +366,12 @@
                     <a class="page-link text-black" asp-route-pageNumber="@Model.TotalPages"
                        asp-route-showImmediateAttention="@Context.Request.Query["showImmediateAttention"]"
                        asp-route-statusFilter="@ViewData["CurrentStatus"]"
-                       asp-route-typeFilter="@ViewData["TypeFilter"]">
+                       asp-route-typeFilter="@ViewData["TypeFilter"]"
+                       asp-route-searchString="@ViewData["CurrentFilter"]"
+                       asp-route-searchOperator="@ViewData["SearchOperator"]"
+                       asp-route-sortByPriority="@ViewData["SortByPriority"]"
+                       asp-route-sortPriorityAscending="@ViewData["SortPriorityAscending"]"
+                       asp-route-branch="@Context.Request.Query["branch"]">
                         <span>Last</span>
                     </a>
                 </li>
@@ -275,48 +381,48 @@
         </nav>
     </div>
 </div>
-@section Scripts{
-<script>
-    function drawDonut(canvasId, value, total, color){
-        const canvas = document.getElementById(canvasId);
-        const context = canvas.getContext("2d");
-        const percent = value / total;
+@section Scripts {
+    <script>
+        function drawDonut(canvasId, value, total, color){
+            const canvas = document.getElementById(canvasId);
+            const context = canvas.getContext("2d");
+            const percent = value / total;
 
-        context.lineWidth = 25;
-        context.strokeStyle = "lightgrey";
-        context.beginPath();
-        context.arc(75, 75, 55, 0, 2 * Math.PI);
-        context.stroke();
+            context.lineWidth = 25;
+            context.strokeStyle = "lightgrey";
+            context.beginPath();
+            context.arc(75, 75, 55, 0, 2 * Math.PI);
+            context.stroke();
 
-        context.strokeStyle = color;
-        context.beginPath();
-        context.arc(75, 75, 55, -0.5 * Math.PI, (percent * 2 * Math.PI) - 0.5 * Math.PI);
-        context.stroke();
+            context.strokeStyle = color;
+            context.beginPath();
+            context.arc(75, 75, 55, -0.5 * Math.PI, (percent * 2 * Math.PI) - 0.5 * Math.PI);
+            context.stroke();
 
-        //Text
-        context.fillStyle = "#888888";
-        context.font = "20px Arial";
-        context.textAlign = "center";
-        context.textBaseLine = "middle";
-        context.fillText(value + (total ? "/" + total : ""), 75, 75);
-    }
-        drawDonut("chart1", @ViewData["NumberOfOpenIncidents"], @ViewData["NumberOfNonClosedIncidents"], "orange");
-            drawDonut("chart2", @ViewData["NumberImmediateAttentionNeeded"], @ViewData["NumberOfNonClosedIncidents"], "red");
+            //Text
+            context.fillStyle = "#888888";
+            context.font = "20px Arial";
+            context.textAlign = "center";
+            context.textBaseLine = "middle";
+            context.fillText(value + (total ? "/" + total : ""), 75, 75);
+        }
+            drawDonut("chart1", @ViewData["NumberOfOpenIncidents"], @ViewData["NumberOfNonClosedIncidents"], "orange");
+                drawDonut("chart2", @ViewData["NumberImmediateAttentionNeeded"], @ViewData["NumberOfNonClosedIncidents"], "red");
 
 
-                var filter_button = document.getElementById("filter_button");
-        filter_button.addEventListener('click', function(){
-            var overlays = document.getElementsByClassName('popupOverlay');
-            for (var i = 0; i < overlays.length; i++) {
-                overlays[i].style.display = "block";
-                overlays[i].addEventListener('click', function (e) {
-                    if (e.target === this) {
-                        this.style.display = 'none';
-                    }
-                });
-            }
-        });
-            
-        
-</script>
+                    var filter_button = document.getElementById("filter_button");
+            filter_button.addEventListener('click', function(){
+                var overlays = document.getElementsByClassName('popupOverlay');
+                for (var i = 0; i < overlays.length; i++) {
+                    overlays[i].style.display = "block";
+                    overlays[i].addEventListener('click', function (e) {
+                        if (e.target === this) {
+                            this.style.display = 'none';
+                        }
+                    });
+                }
+            });
+
+
+    </script>
 }

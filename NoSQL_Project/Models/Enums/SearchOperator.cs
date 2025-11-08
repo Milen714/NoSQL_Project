@@ -1,6 +1,6 @@
 ﻿namespace NoSQL_Project.Models.Enums
 {
-    public enum SearchLogic
+    public enum SearchOperator
     {
         And,
         Or
