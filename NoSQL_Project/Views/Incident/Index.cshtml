@@ -1,8 +1,19 @@
 ﻿@using NoSQL_Project.Models.Enums
+@using NoSQL_Project.Commons
 @model PaginatedList<NoSQL_Project.Models.Incident>
 
 @{
     ViewData["Title"] = "Incidents";
+    var loggedInUser = Context.Session.GetObject<User>("LoggedInUser");
+    bool isServiceDesk = loggedInUser?.UserType == UserType.Service_employee;
+
+    // Redirect regular employees to their own tickets page
+    if (!isServiceDesk)
+    {
+        Context.Response.Redirect("/Incident/MyTickets");
+        return;
+    }
+
     if (ViewBag.ImmediateAttentionNeeded != null)
     {
         List<Incident> immediateAttentionNeeded = ViewBag.ImmediateAttentionNeeded;

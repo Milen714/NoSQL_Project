@@ -299,5 +299,130 @@ namespace NoSQL_Project.Controllers
             }
         }
 
+        /// <summary>
+        /// Shows a regular employee's own tickets only.
+        /// Reuses existing search/sort/filter logic but filters by logged-in user.
+        /// Author: Dylan Mohlen
+        /// Date: 2025-01-08
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> MyTickets(
+            string searchString,
+            string searchOperator,
+            bool sortByPriority = false,
+            bool sortPriorityAscending = false,
+            int pageNumber = 1,
+            string currentFilter = "",
+            string statusFilter = "")
+        {
+            // Get logged-in user
+            var loggedInUser = HttpContext.Session.GetObject<User>("LoggedInUser");
+
+            if (loggedInUser == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            List<Incident> incidents;
+
+            try
+            {
+                if (searchString != null)
+                {
+                    pageNumber = 1;
+                }
+                else
+                {
+                    searchString = currentFilter;
+                }
+
+                
+                IncidentStatus? parsedStatus = null;
+                if (!string.IsNullOrEmpty(statusFilter) && statusFilter != "All")
+                {
+                    if (Enum.TryParse<IncidentStatus>(statusFilter, true, out var tempStatus))
+                    {
+                        parsedStatus = tempStatus;
+                    }
+                }
+
+                
+                if (!string.IsNullOrWhiteSpace(searchString))
+                {
+                    var searchOp = searchOperator?.ToLower() == "or" ? SearchOperator.Or : SearchOperator.And;
+
+                    
+                    var searchResults = await _searchService.SearchIncidentsAsync(
+                        searchString,
+                        searchOp,
+                        "",
+                        parsedStatus,
+                        null);
+
+                   
+                    incidents = FilterByUser(searchResults, loggedInUser);
+
+                    ViewData["CurrentFilter"] = searchString;
+                    ViewData["SearchOperator"] = searchOperator?.ToLower() ?? "and";
+                }
+                
+                else if (sortByPriority)
+                {
+                    var allIncidents = await _incidentService.GetAllWitoutclosed("");
+                    var myIncidents = FilterByUser(allIncidents, loggedInUser);
+
+                    // Apply sorting
+                    incidents = sortPriorityAscending
+                        ? myIncidents.OrderByDescending(i => (int)i.Priority).ThenByDescending(i => i.ReportedAt).ToList()
+                        : myIncidents.OrderBy(i => (int)i.Priority).ThenByDescending(i => i.ReportedAt).ToList();
+
+                    ViewData["SortByPriority"] = true;
+                    ViewData["SortPriorityAscending"] = sortPriorityAscending;
+                }
+                
+                else if (parsedStatus.HasValue)
+                {
+                    var allIncidents = await _incidentService.GetAllIncidentsPerStatus(parsedStatus.Value, "");
+                    incidents = FilterByUser(allIncidents, loggedInUser);
+                }
+                else
+                {
+                    
+                    var allIncidents = await _incidentService.GetAllWitoutclosed("");
+                    incidents = FilterByUser(allIncidents, loggedInUser);
+                }
+
+               
+                var allMyIncidents = FilterByUser(_incidentService.GetAll(), loggedInUser);
+                ViewData["TotalTickets"] = allMyIncidents.Count;
+                ViewData["OpenTickets"] = allMyIncidents.Count(i => i.Status == IncidentStatus.open || i.Status == IncidentStatus.inProgress);
+                ViewData["ResolvedTickets"] = allMyIncidents.Count(i => i.Status == IncidentStatus.resolved || i.Status == IncidentStatus.closed);
+                ViewData["ClosedWithoutResolve"] = allMyIncidents.Count(i => i.Status == IncidentStatus.closed_without_resolve);
+                ViewData["CurrentStatus"] = statusFilter;
+
+                if (pageNumber < 1)
+                {
+                    pageNumber = 1;
+                }
+
+                int pageSize = 10;
+                return View(PaginatedList<Incident>.CreateAsync(incidents, pageNumber, pageSize));
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"Could not retrieve your tickets: {ex.Message}";
+                return View(new PaginatedList<Incident>(new List<Incident>(), 0, 1, 1));
+            }
+        }
+
+        private List<Incident> FilterByUser(List<Incident> incidents, User user)
+        {
+            return incidents
+                .Where(i => i.ReportedBy != null &&
+                           i.ReportedBy.FirstName == user.FirstName &&
+                           i.ReportedBy.LastName == user.LastName)
+                .ToList();
+        }
+
     }
 }

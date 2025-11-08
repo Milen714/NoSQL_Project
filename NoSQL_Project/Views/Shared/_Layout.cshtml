@@ -3,6 +3,8 @@
 @using NoSQL_Project.Models.Enums
 @{
     User? loggedInUser = ViewBag.LoggedInEmployee as User;
+    bool isServiceDesk = loggedInUser?.UserType == UserType.Service_employee;
+    bool isRegularEmployee = loggedInUser?.UserType == UserType.Reg_employee;
 }
 <!DOCTYPE html>
 <html lang="en">
@@ -17,13 +19,14 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Nunito+Sans:opsz,wght@6..12,200..1000&family=Roboto+Mono:ital,wght@0,100..700;1,100..700&display=swap" rel="stylesheet">
-    
 </head>
 <body class="Main_Layout_BodyContainer">
     <header>
         <nav class="main_nav_parent">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index"><img src="/assets/GGLogoSmaller.svg" alt="Logo" /></a>
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
+                    <img src="/assets/GGLogoSmaller.svg" alt="Logo" />
+                </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -38,8 +41,7 @@
                                     <label for="Theme">Theme</label>
                                     <select onchange="this.form.submit()" id="Theme" name="theme" class="input_field">
                                         <option style="color: black;" value="">
-                                                @(
-                                                    Context?.Request.Cookies["PreferedTheme"] ?? "Select Theme")
+                                            @(Context?.Request.Cookies["PreferedTheme"] ?? "Select Theme")
                                         </option>
                                         <option value="Dark">Dark</option>
                                         <option value="Light">Light</option>
@@ -47,24 +49,78 @@
                                 </article>
                             </form>
                         </li>
-                        <li class="nav_li">
-                            <a class="nav_li_a"
-                               asp-area="" asp-controller="User" asp-action="Index">Users</a>
-                        </li>
-                        <li class="nav_li">
-                            <a class="nav_li_a" asp-area="" asp-controller="Incident" asp-action="Index">Dashboard</a>
-                        </li>
+
+                        @*ROLE-BASED NAVIGATION *@
+
+                        @if (isServiceDesk)
+                        {
+                            @* SERVICE DESK EMPLOYEE - Full Admin Access *@
+                            <li class="nav_li">
+                                <a class="nav_li_a" asp-area="" asp-controller="User" asp-action="Index">
+                                    Users
+                                </a>
+                            </li>
+                            <li class="nav_li">
+                                <a class="nav_li_a" asp-area="" asp-controller="Incident" asp-action="Index">
+                                    All Tickets
+                                </a>
+                            </li>
+                            <li class="nav_li">
+                                <a class="nav_li_a" asp-area="" asp-controller="Incident" asp-action="MyTickets">
+                                    My Tickets
+                                </a>
+                            </li>
+                            <li class="nav_li">
+                                <a class="nav_li_a" asp-area="" asp-controller="Incident" asp-action="CreateIncident">
+                                    Create Ticket
+                                </a>
+                            </li>
+                        }
+                        else if (isRegularEmployee)
+                        {
+                            @* REGULAR EMPLOYEE - Limited Access *@
+                            <li class="nav_li">
+                                <a class="nav_li_a" asp-area="" asp-controller="Incident" asp-action="MyTickets">
+                                    My Tickets
+                                </a>
+                            </li>
+                            <li class="nav_li">
+                                <a class="nav_li_a" asp-area="" asp-controller="Incident" asp-action="CreateIncident">
+                                    Create Ticket
+                                </a>
+                            </li>
+                        }
+                        else
+                        {
+                            @* NOT LOGGED IN *@
+                            <li class="nav_li">
+                                <a class="nav_li_a" asp-area="" asp-controller="Home" asp-action="Login">
+                                    Login
+                                </a>
+                            </li>
+                        }
+
                 </div>
-                @{
-                if (loggedInUser != null && loggedInUser.UserType == UserType.Service_employee)
+
+                @* User Info & Logout *@
+                @if (loggedInUser != null)
                 {
-                        <li class="nav-item justify-content-start text-center">
-                    <p>@loggedInUser.FirstName @loggedInUser.LastName</p>
-                            <div class="loggout_Button_container" >
-                                <a class="button_primary" id="logoutBtn" href="/Home/Logout">Logout</a>
-                    </div>
-                </li>
-                }
+                    <li class="nav-item justify-content-start text-center">
+                        <p>
+                            @loggedInUser.FirstName @loggedInUser.LastName
+                            @if (isServiceDesk)
+                            {
+                                <span class="badge bg-primary ms-1">Admin</span>
+                            }
+                            else if (isRegularEmployee)
+                            {
+                                <span class="badge bg-secondary ms-1">Employee</span>
+                            }
+                        </p>
+                        <div class="loggout_Button_container">
+                            <a class="button_primary" id="logoutBtn" href="/Home/Logout">Logout</a>
+                        </div>
+                    </li>
                 }
                 </ul>
             </div>
@@ -77,7 +133,6 @@
         </main>
     </div>
 
-    
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
