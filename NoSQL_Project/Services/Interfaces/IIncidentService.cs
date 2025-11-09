@@ -21,9 +21,12 @@ namespace NoSQL_Project.Services.Interfaces
         Task<List<UserForTransferDto>> GetUsersForTransferAsync();
         Task TransferIncidentAsync(string incidentId, string userForTransferId);
         Task<List<Incident>> GetAllOpenOverdueIncidents(string branch);
+        Task<List<Incident>> GetAwaitingToBeArchivedIncidents();
+        Task DeleteArchivedIncidents(List<Incident> toDelete);
 
 
-       
+
+
 
     }
 }

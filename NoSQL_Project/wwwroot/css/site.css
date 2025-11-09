@@ -223,11 +223,15 @@ body {
     flex-direction: row;
     justify-content: space-between;
 }
+.main_container_header_sub {
+    display: flex;
+    flex-direction: row;
+    gap:15px;
+}
 
 .nav_li {
     padding: 5px;
     border-radius: 5px;
-    
 }
 .nav_li:hover, active{
     background-color: var(--color-primary-link-active);
