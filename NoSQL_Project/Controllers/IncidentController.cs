@@ -18,19 +18,22 @@ namespace NoSQL_Project.Controllers
         private readonly IIncidentService _incidentService;
         private readonly IIncidentSearchService _searchService;
         private readonly IIncidentSortService _sortService;
+        private readonly IArchiveIncidentService _archiveIncidentService;
 
         public IncidentController(
             IUserService userService,
             ILocationService locationSrvice,
             IIncidentService incidentService,
             IIncidentSearchService searchService,
-            IIncidentSortService sortService)
+            IIncidentSortService sortService,
+            IArchiveIncidentService archiveIncidentService)
         {
             _locationService = locationSrvice;
             _userService = userService;
             _incidentService = incidentService;
             _searchService = searchService;
             _sortService = sortService;
+            _archiveIncidentService = archiveIncidentService;
         }
 
         public async Task<IActionResult> Index(
@@ -126,7 +129,8 @@ namespace NoSQL_Project.Controllers
                 {
                     incidents = await _incidentService.GetAllWitoutclosed(branchValue);
                 }
-
+                var awaitingArchival = await _incidentService.GetAwaitingToBeArchivedIncidents();
+                ViewData["AwaitingArchival"] = awaitingArchival.Count();
                 ViewData["TypeFilter"] = typeFilter;
                 ViewData["CurrentStatus"] = statusFilter;
                 ViewData["NumberOfOpenIncidents"] = openIncidents;
@@ -421,6 +425,55 @@ namespace NoSQL_Project.Controllers
                            i.ReportedBy.FirstName == user.FirstName &&
                            i.ReportedBy.LastName == user.LastName)
                 .ToList();
+        }
+        public async Task<IActionResult> DisplayAwaitingArchival(bool archive)
+        {
+            int pageSize = 5;
+            try
+            {
+                var awaitingArchivalIncidents = await _incidentService.GetAwaitingToBeArchivedIncidents();
+                pageSize += awaitingArchivalIncidents.Count();
+
+                return PartialView("_IncidentsToBeArchived", PaginatedList<Incident>.CreateAsync(awaitingArchivalIncidents, 1, pageSize));
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"Could not retrieve archived incidents: {ex.Message}";
+                List<Incident> empty = new List<Incident>();
+                return PartialView("_IncidentsToBeArchived", PaginatedList<Incident>.CreateAsync(empty, 1, pageSize));
+            }
+        }
+        public async Task<IActionResult> ArchiveOldIncidents()
+        {
+            try
+            {
+                var awaitingArchivalIncidents = await _incidentService.GetAwaitingToBeArchivedIncidents();
+                await _archiveIncidentService.ArchiveOldIncidentsAsync(awaitingArchivalIncidents);
+                await _incidentService.DeleteArchivedIncidents(awaitingArchivalIncidents);
+                TempData["Success"] = "Old incidents archived successfully.";
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"Could not archive incidents: {ex.Message}";
+                return RedirectToAction("Index");
+            }
+        }
+        public async Task<IActionResult> DisplayArchivedIncidents()
+        {
+            int pageSize = 5;
+            try
+            {
+                var archivedIncidents = await _archiveIncidentService.GetArchivedIncidents();
+                pageSize += archivedIncidents.Count();
+                return PartialView("_IncidentsToBeArchived", PaginatedList<Incident>.CreateAsync(archivedIncidents, 1, pageSize));
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"Could not retrieve archived incidents: {ex.Message}";
+                List<Incident> empty = new List<Incident>();
+                return PartialView("_IncidentsToBeArchived", PaginatedList<Incident>.CreateAsync(empty, 1, pageSize));
+            }
         }
 
     }

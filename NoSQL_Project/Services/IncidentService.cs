@@ -167,6 +167,14 @@ namespace NoSQL_Project.Services
         {
             return _incidentRepository.GetAllOpenOverdueIncidents(branch);
         }
+		public async Task<List<Incident>> GetAwaitingToBeArchivedIncidents()
+		{
+			return await _incidentRepository.GetAwaitingToBeArchivedIncidents(); 
+		}
+		public async Task DeleteArchivedIncidents(List<Incident> toDelete)
+		{
+			await _incidentRepository.DeleteArchivedIncidents(toDelete);
+		}
 
     }
 

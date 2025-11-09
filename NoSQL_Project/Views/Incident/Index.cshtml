@@ -28,156 +28,164 @@
 {
     <p class="alert-danger">@TempData["Error"]</p>
 }
+<div id="To_be_archived_container"></div>
 
-
-<header class="main_container_header">
-    <div>
-        <h3>Incidents</h3>
-    </div>
-
-</header>
-
-<div class="charts_container">
-    <div id="chart_left_container" class="canvas_container">
-        <h4>Unresolved Incidents</h4>
-        <p>All tickets curently Open</p>
-        <canvas id="chart1" width="150" height="150"></canvas>
-    </div>
-    <div id="chart_right_container" class="canvas_container">
-        <h4>Incidents past deadline</h4>
-        <a asp-controller="Incident" asp-action="Index" asp-route-showImmediateAttention="true" class="button_primary">Show Tickets</a>
-        <canvas id="chart2" width="150" height="150"></canvas>
-    </div>
-</div>
-
-
-<div class="search_and_fileter_container">
-
-    <div class="search_sub_container">
-        @* Enhanced Search Form with AND/OR operators *@
-        <form class="d-flex" role="search" method="get" asp-action="Index">
-            <input class="form-control me-2"
-                   type="search"
-                   name="searchString"
-                   placeholder="Search subject or description..."
-                   aria-label="Search"
-                   value="@ViewData["CurrentFilter"]">
-
-            <select name="searchOperator" class="form-select me-2" style="width: 120px;">
-                <option value="and" selected="@(ViewData["SearchOperator"]?.ToString() == "and")">AND</option>
-                <option value="or" selected="@(ViewData["SearchOperator"]?.ToString() == "or")">OR</option>
-            </select>
-
-            <button class="btn btn-outline-success" type="submit">Search</button>
-
-            @* Preserve existing filters in search *@
-            <input type="hidden" name="statusFilter" value="@ViewData["CurrentStatus"]" />
-            <input type="hidden" name="typeFilter" value="@ViewData["TypeFilter"]" />
-            <input type="hidden" name="branch" value="@Context.Request.Query["branch"]" />
-        </form>
-
-        @* Priority Sort Form with Direction Selection - Author: Dylan Mohlen - Date: 2025-01-08 *@
-        <form method="get" asp-action="Index" class="d-flex align-items-center ms-2">
-            <input type="hidden" name="statusFilter" value="@ViewData["CurrentStatus"]" />
-            <input type="hidden" name="typeFilter" value="@ViewData["TypeFilter"]" />
-            <input type="hidden" name="branch" value="@Context.Request.Query["branch"]" />
-            <input type="hidden" name="sortByPriority" value="true" />
-
-            <select name="sortPriorityAscending" class="form-select me-2" style="width: 200px;">
-                <option value="false" selected="@(ViewData["SortPriorityAscending"]?.ToString() != "True")">Critical → Low</option>
-                <option value="true" selected="@(ViewData["SortPriorityAscending"]?.ToString() == "True")">Low → Critical</option>
-            </select>
-
-            <button class="btn btn-warning" type="submit" title="Sort by Priority">
-                <img src="/assets/FiltersIcon.svg" alt="Sort" style="width: 16px; height: 16px;" /> Sort Priority
+    <div id="Index_container">
+        <header class="main_container_header">
+            <div class="main_container_header_sub">
+                <h3>Incidents</h3>
+            <button onclick="loadPartialView(false)" type="button" class="btn btn-primary position-relative">
+                Show Awaiting Archival<span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                    @ViewData["AwaitingArchival"]
+                    <span class="visually-hidden">Incidents</span>
+                </span>
             </button>
-        </form>
+            <button onclick="loadPartialView(true)" type="button" class="btn btn-success">Show Archived Incidents</button>
+            </div>
 
-        <button class="filter_button_class" id="filter_button"><img src="/assets/FiltersIcon.svg" alt="Alternate Text" /> Filters</button>
-    </div>
+        </header>
 
-    <div class="search_container">
-        <div class="search_options_container">
-            <nav>
-                <ul class="search_options_ul">
-                    <li class="search_options_li">
-                        <a class="search_options_a @(ViewContext.HttpContext.Request.Query["statusFilter"] == "All" ? "activeFilter" : "")"
-                           asp-action="Index" asp-route-statusFilter="All" asp-route-typeFilter="@Context.Request.Query["typeFilter"]">All</a>
-                    </li>
-                    <li class="search_options_li">
-                        <a class="search_options_a @(ViewContext.HttpContext.Request.Query["statusFilter"] == "open" ? "activeFilter" : "")"
-                           asp-action="Index" asp-route-statusFilter="open" asp-route-typeFilter="@Context.Request.Query["typeFilter"]">Open</a>
-                    </li>
-                    <li class="search_options_li">
-                        <a class="search_options_a @(ViewContext.HttpContext.Request.Query["statusFilter"] == "inProgress" ? "activeFilter" : "")"
-                           asp-action="Index" asp-route-statusFilter="inProgress" asp-route-typeFilter="@Context.Request.Query["typeFilter"]">In Progress</a>
-                    </li>
-                    <li class="search_options_li">
-                        <a class="search_options_a @(ViewContext.HttpContext.Request.Query["statusFilter"] == "resolved" ? "activeFilter" : "")"
-                           asp-action="Index" asp-route-statusFilter="resolved" asp-route-typeFilter="@Context.Request.Query["typeFilter"]">Resolved</a>
-                    </li>
-                    <li class="search_options_li">
-                        <a class="search_options_a @(ViewContext.HttpContext.Request.Query["statusFilter"] == "closed_without_resolve" ? "activeFilter" : "")"
-                           asp-action="Index" asp-route-statusFilter="closed_without_resolve" asp-route-typeFilter="@Context.Request.Query["typeFilter"]">Closed W/O Resolve</a>
-                    </li>
-                    <li class="search_options_li">
-                        <a class="search_options_a @(ViewContext.HttpContext.Request.Query["statusFilter"] == "closed" ? "activeFilter" : "")"
-                           asp-action="Index" asp-route-statusFilter="closed" asp-route-typeFilter="@Context.Request.Query["typeFilter"]">Closed</a>
-                    </li>
-                </ul>
-            </nav>
+        <div class="charts_container">
+            <div id="chart_left_container" class="canvas_container">
+                <h4>Unresolved Incidents</h4>
+                <p>All tickets curently Open</p>
+                <canvas id="chart1" width="150" height="150"></canvas>
+            </div>
+            <div id="chart_right_container" class="canvas_container">
+                <h4>Incidents past deadline</h4>
+                <a asp-controller="Incident" asp-action="Index" asp-route-showImmediateAttention="true" class="button_primary">Show Tickets</a>
+                <canvas id="chart2" width="150" height="150"></canvas>
+            </div>
         </div>
-    </div>
-
-    <a class="btn btn-primary" href="/Incident/CreateIncident">Create New Incident</a>
-
-</div>
 
 
-@if (!string.IsNullOrEmpty(ViewContext.HttpContext.Request.Query["statusFilter"]) ||
-   !string.IsNullOrEmpty(ViewContext.HttpContext.Request.Query["typeFilter"]) ||
-   !string.IsNullOrEmpty(ViewData["CurrentFilter"]?.ToString()) ||
-   (ViewData["SortByPriority"] != null && (bool)ViewData["SortByPriority"]))
-{
-    <div class="alert alert-info mt-3">
-        <strong>Active Filters/Actions:</strong>
+        <div class="search_and_fileter_container">
 
-        @if (!string.IsNullOrEmpty(ViewData["CurrentFilter"]?.ToString()))
+            <div class="search_sub_container">
+                @* Enhanced Search Form with AND/OR operators *@
+                <form class="d-flex" role="search" method="get" asp-action="Index">
+                    <input class="form-control me-2"
+                           type="search"
+                           name="searchString"
+                           placeholder="Search subject or description..."
+                           aria-label="Search"
+                           value="@ViewData["CurrentFilter"]">
+
+                    <select name="searchOperator" class="form-select me-2" style="width: 120px;">
+                        <option value="and" selected="@(ViewData["SearchOperator"]?.ToString() == "and")">AND</option>
+                        <option value="or" selected="@(ViewData["SearchOperator"]?.ToString() == "or")">OR</option>
+                    </select>
+
+                    <button class="btn btn-outline-success" type="submit">Search</button>
+
+                    @* Preserve existing filters in search *@
+                    <input type="hidden" name="statusFilter" value="@ViewData["CurrentStatus"]" />
+                    <input type="hidden" name="typeFilter" value="@ViewData["TypeFilter"]" />
+                    <input type="hidden" name="branch" value="@Context.Request.Query["branch"]" />
+                </form>
+
+                @* Priority Sort Form with Direction Selection - Author: Dylan Mohlen - Date: 2025-01-08 *@
+                <form method="get" asp-action="Index" class="d-flex align-items-center ms-2">
+                    <input type="hidden" name="statusFilter" value="@ViewData["CurrentStatus"]" />
+                    <input type="hidden" name="typeFilter" value="@ViewData["TypeFilter"]" />
+                    <input type="hidden" name="branch" value="@Context.Request.Query["branch"]" />
+                    <input type="hidden" name="sortByPriority" value="true" />
+
+                    <select name="sortPriorityAscending" class="form-select me-2" style="width: 200px;">
+                        <option value="false" selected="@(ViewData["SortPriorityAscending"]?.ToString() != "True")">Critical → Low</option>
+                        <option value="true" selected="@(ViewData["SortPriorityAscending"]?.ToString() == "True")">Low → Critical</option>
+                    </select>
+
+                    <button class="btn btn-warning" type="submit" title="Sort by Priority">
+                        <img src="/assets/FiltersIcon.svg" alt="Sort" style="width: 16px; height: 16px;" /> Sort Priority
+                    </button>
+                </form>
+
+                <button class="filter_button_class" id="filter_button"><img src="/assets/FiltersIcon.svg" alt="Alternate Text" /> Filters</button>
+            </div>
+
+            <div class="search_container">
+                <div class="search_options_container">
+                    <nav>
+                        <ul class="search_options_ul">
+                            <li class="search_options_li">
+                                <a class="search_options_a @(string.IsNullOrEmpty(ViewContext.HttpContext.Request.Query["statusFilter"]) || ViewContext.HttpContext.Request.Query["statusFilter"] == "All" ? "activeFilter" : "")"
+                                   asp-action="Index" asp-route-statusFilter="All" asp-route-typeFilter="@Context.Request.Query["typeFilter"]">All</a>
+                            </li>
+                            <li class="search_options_li">
+                                <a class="search_options_a @(ViewContext.HttpContext.Request.Query["statusFilter"] == "open" ? "activeFilter" : "")"
+                                   asp-action="Index" asp-route-statusFilter="open" asp-route-typeFilter="@Context.Request.Query["typeFilter"]">Open</a>
+                            </li>
+                            <li class="search_options_li">
+                                <a class="search_options_a @(ViewContext.HttpContext.Request.Query["statusFilter"] == "inProgress" ? "activeFilter" : "")"
+                                   asp-action="Index" asp-route-statusFilter="inProgress" asp-route-typeFilter="@Context.Request.Query["typeFilter"]">In Progress</a>
+                            </li>
+                            <li class="search_options_li">
+                                <a class="search_options_a @(ViewContext.HttpContext.Request.Query["statusFilter"] == "resolved" ? "activeFilter" : "")"
+                                   asp-action="Index" asp-route-statusFilter="resolved" asp-route-typeFilter="@Context.Request.Query["typeFilter"]">Resolved</a>
+                            </li>
+                            <li class="search_options_li">
+                                <a class="search_options_a @(ViewContext.HttpContext.Request.Query["statusFilter"] == "closed_without_resolve" ? "activeFilter" : "")"
+                                   asp-action="Index" asp-route-statusFilter="closed_without_resolve" asp-route-typeFilter="@Context.Request.Query["typeFilter"]">Closed W/O Resolve</a>
+                            </li>
+                            <li class="search_options_li">
+                                <a class="search_options_a @(ViewContext.HttpContext.Request.Query["statusFilter"] == "closed" ? "activeFilter" : "")"
+                                   asp-action="Index" asp-route-statusFilter="closed" asp-route-typeFilter="@Context.Request.Query["typeFilter"]">Closed</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+
+            <a class="btn btn-primary" href="/Incident/CreateIncident">Create New Incident</a>
+
+        </div>
+
+
+        @if (!string.IsNullOrEmpty(ViewContext.HttpContext.Request.Query["statusFilter"]) ||
+        !string.IsNullOrEmpty(ViewContext.HttpContext.Request.Query["typeFilter"]) ||
+        !string.IsNullOrEmpty(ViewData["CurrentFilter"]?.ToString()) ||
+        (ViewData["SortByPriority"] != null && (bool)ViewData["SortByPriority"]))
         {
+        <div class="alert alert-info mt-3">
+            <strong>Active Filters/Actions:</strong>
+
+            @if (!string.IsNullOrEmpty(ViewData["CurrentFilter"]?.ToString()))
+            {
             <span class="badge bg-success ms-2">
                 🔍 Search: "@ViewData["CurrentFilter"]" (@(ViewData["SearchOperator"]?.ToString().ToUpper() ?? "AND"))
             </span>
-        }
+            }
 
-        @if (ViewData["SortByPriority"] != null && (bool)ViewData["SortByPriority"])
-        {
+            @if (ViewData["SortByPriority"] != null && (bool)ViewData["SortByPriority"])
+            {
             var sortDirection = ViewData["SortPriorityAscending"]?.ToString() == "True" ? "Low → Critical" : "Critical → Low";
             <span class="badge bg-warning text-dark ms-2">
                 ⚡ Sorted by Priority (@sortDirection)
             </span>
-        }
+            }
 
-        @if (!string.IsNullOrEmpty(ViewContext.HttpContext.Request.Query["statusFilter"]))
-        {
+            @if (!string.IsNullOrEmpty(ViewContext.HttpContext.Request.Query["statusFilter"]))
+            {
             <span class="badge bg-primary ms-2">Status: @ViewContext.HttpContext.Request.Query["statusFilter"]</span>
-        }
+            }
 
-        @if (!string.IsNullOrEmpty(ViewContext.HttpContext.Request.Query["typeFilter"]))
-        {
+            @if (!string.IsNullOrEmpty(ViewContext.HttpContext.Request.Query["typeFilter"]))
+            {
             <span class="badge bg-primary ms-2">Type: @ViewContext.HttpContext.Request.Query["typeFilter"]</span>
-        }
+            }
 
-        @if (!string.IsNullOrEmpty(ViewContext.HttpContext.Request.Query["branch"]))
-        {
+            @if (!string.IsNullOrEmpty(ViewContext.HttpContext.Request.Query["branch"]))
+            {
             <span class="badge bg-primary ms-2">Branch: @ViewContext.HttpContext.Request.Query["branch"]</span>
-        }
+            }
 
-        <a asp-action="Index" class="btn btn-sm btn-outline-secondary ms-3">Clear All</a>
-    </div>
+            <a asp-action="Index" class="btn btn-sm btn-outline-secondary ms-3">Clear All</a>
+        </div>
 
-    
-    @if (!string.IsNullOrEmpty(ViewData["CurrentFilter"]?.ToString()))
-    {
+
+        @if (!string.IsNullOrEmpty(ViewData["CurrentFilter"]?.ToString()))
+        {
         <div class="alert alert-light border mt-2">
             <small class="text-muted">
                 <strong>💡 Search Tips:</strong>
@@ -185,213 +193,214 @@
                 Use <strong>OR</strong> with pipe "|" to find incidents with any term (e.g., "printer | network | server").
             </small>
         </div>
-    }
-}
+        }
+        }
 
-<div class="popupOverlay">
-    <div class="popupContainer">
-        <div>
-            <form method="get" asp-action="Index" class="d-flex gap-3 align-items-center">
-                <input type="hidden" name="statusFilter" value="@Context.Request.Query["statusFilter"]" />
-                <select name="typeFilter" class="form-select border-dark border-1" style="width: 200px;">
-                    <option class="option_select" value="">Filter by Type --</option>
-                    <option class="option_select" value="hardware">Hardware</option>
-                    <option class="option_select" value="software">Software</option>
-                    <option class="option_select" value="network">Network</option>
-                    <option class="option_select" value="security">Security</option>
-                    <option class="option_select" value="access">Access</option>
-                    <option class="option_select" value="other">Other</option>
-                </select>
-                <select name="branch" class="form-select border-dark border-1" style="width: 200px;">
-                    <option class="option_select" value="">Select a Branch</option>
-                    @{
-                        if (ViewBag.Branches != null)
-                        {
+        <div class="popupOverlay">
+            <div class="popupContainer">
+                <div>
+                    <form method="get" asp-action="Index" class="d-flex gap-3 align-items-center">
+                        <input type="hidden" name="statusFilter" value="@Context.Request.Query["statusFilter"]" />
+                        <select name="typeFilter" class="form-select border-dark border-1" style="width: 200px;">
+                            <option class="option_select" value="">Filter by Type --</option>
+                            <option class="option_select" value="hardware">Hardware</option>
+                            <option class="option_select" value="software">Software</option>
+                            <option class="option_select" value="network">Network</option>
+                            <option class="option_select" value="security">Security</option>
+                            <option class="option_select" value="access">Access</option>
+                            <option class="option_select" value="other">Other</option>
+                        </select>
+                        <select name="branch" class="form-select border-dark border-1" style="width: 200px;">
+                            <option class="option_select" value="">Select a Branch</option>
+                            @{
+                            if (ViewBag.Branches != null)
+                            {
                             List<Location> locations = ViewBag.Branches;
 
                             foreach (var location in locations)
                             {
-                                <option class="option_select" value="@location.Branch">@location.Branch</option>
+                            <option class="option_select" value="@location.Branch">@location.Branch</option>
                             }
-                        }
-                    }
-                </select>
+                            }
+                            }
+                        </select>
 
-                <button type="submit" class="btn btn-info border-dark border-2">Apply Filters</button>
-            </form>
+                        <button type="submit" class="btn btn-info border-dark border-2">Apply Filters</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="table_NICE_container">
+            <table class="table_NICE">
+                <thead>
+                    <tr>
+                        <th>Priority</th>
+                        <th>Title</th>
+                        <th>Type</th>
+                        <th>Status</th>
+                        <th>Assigned to</th>
+                        <th>Branch</th>
+                        <th>Reported At</th>
+                        <th>SLA</th>
+                    </tr>
+                </thead>
+                <tbody class="table_NICE_body">
+                    @foreach (Incident incident in Model.Items)
+                    {
+                    string incidentStatusStyle = "";
+                    string priorityLevelStyle = "";
+                    // Determine priority style
+                    switch (incident.Priority)
+                    {
+                    case Priority.low:
+                    priorityLevelStyle = "priority_low";
+                    break;
+                    case Priority.medium:
+                    priorityLevelStyle = "priority_medium";
+                    break;
+                    case Priority.high:
+                    priorityLevelStyle = "priority_high";
+                    break;
+                    case Priority.critical:
+                    priorityLevelStyle = "priority_critical";
+                    break;
+                    }
+                    // Determine status style
+                    switch (incident.Status)
+                    {
+                    case IncidentStatus.open:
+                    incidentStatusStyle = "status_open";
+                    break;
+                    case IncidentStatus.resolved:
+                    incidentStatusStyle = "status_resolved";
+                    break;
+                    case IncidentStatus.closed_without_resolve:
+                    incidentStatusStyle = "status_closed_without_resolve";
+                    break;
+                    case IncidentStatus.inProgress:
+                    incidentStatusStyle = "status_in_progress";
+                    break;
+                    case IncidentStatus.closed:
+                    incidentStatusStyle = "status_closed";
+                    break;
+                    }
+
+                    <tr>
+
+                        <td>
+                            <div class="priority_label @priorityLevelStyle">@incident.Priority</div>
+                        </td>
+                        <td>
+                            <a class="incident_href" asp-controller="Incident" asp-action="IncidentDetails" asp-route-id="@incident.Id">
+                                @incident.Subject
+                            </a>
+                        </td>
+                        <td>
+                            @incident.IncidentType
+                        </td>
+                        <td>
+                            <div class="priority_label @incidentStatusStyle">@incident.Status</div>
+                        </td>
+                        @{
+                        var activeUser = incident.AssignedTo?.FirstOrDefault(a => a.IsActive);
+                        }
+                        <td>@(activeUser != null ? $"{activeUser.FirstName} {activeUser.LastName}" : "Unassigned")</td>
+                        <td>@incident.Location.Branch</td>
+                        <td>@incident.ReportedAt.ToString("g")</td>
+                        <td>@((incident.Deadline - DateTime.Now).Days) Days</td>
+
+                    </tr>
+
+                    }
+                </tbody>
+            </table>
+        </div>
+
+
+        <div class="row">
+            <div class="col-md-6">
+            </div>
+            <div class="col-md-6">
+                <nav>
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item @(Model.PageIndex == 1 ? "disabled" : "")">
+                            <a class="page-link text-black" asp-route-pageNumber="1"
+                               asp-route-showImmediateAttention="@Context.Request.Query["showImmediateAttention"]"
+                               asp-route-statusFilter="@ViewData["CurrentStatus"]"
+                               asp-route-typeFilter="@ViewData["TypeFilter"]"
+                               asp-route-searchString="@ViewData["CurrentFilter"]"
+                               asp-route-searchOperator="@ViewData["SearchOperator"]"
+                               asp-route-sortByPriority="@ViewData["SortByPriority"]"
+                               asp-route-sortPriorityAscending="@ViewData["SortPriorityAscending"]"
+                               asp-route-branch="@Context.Request.Query["branch"]">
+
+                                <span>First</span>
+                            </a>
+                        </li>
+
+                        <li class="page-item @(Model.HasPreviousPage ? "" : "disabled")">
+                            <a class="page-link text-black" asp-route-pageNumber="@(Model.PageIndex - 1)"
+                               asp-route-showImmediateAttention="@Context.Request.Query["showImmediateAttention"]"
+                               asp-route-statusFilter="@ViewData["CurrentStatus"]"
+                               asp-route-typeFilter="@ViewData["TypeFilter"]"
+                               asp-route-searchString="@ViewData["CurrentFilter"]"
+                               asp-route-searchOperator="@ViewData["SearchOperator"]"
+                               asp-route-sortByPriority="@ViewData["SortByPriority"]"
+                               asp-route-sortPriorityAscending="@ViewData["SortPriorityAscending"]"
+                               asp-route-branch="@Context.Request.Query["branch"]">
+                                <span>Previous</span>
+                            </a>
+                        </li>
+
+                        @for (int i = 1; i <= Model.TotalPages; i++)
+                        {
+                        <li class="page-item @(Model.PageIndex == i ? "active" : "")">
+                            <a class="page-link text-black" asp-route-pageNumber="@i"
+                               asp-route-showImmediateAttention="@Context.Request.Query["showImmediateAttention"]"
+                               asp-route-statusFilter="@ViewData["CurrentStatus"]"
+                               asp-route-typeFilter="@ViewData["TypeFilter"]"
+                               asp-route-searchString="@ViewData["CurrentFilter"]"
+                               asp-route-searchOperator="@ViewData["SearchOperator"]"
+                               asp-route-sortByPriority="@ViewData["SortByPriority"]"
+                               asp-route-sortPriorityAscending="@ViewData["SortPriorityAscending"]"
+                               asp-route-branch="@Context.Request.Query["branch"]">@i</a>
+                        </li>
+                        }
+
+                        <li class="page-item @(Model.HasNextPage ? "" : "disabled")">
+                            <a class="page-link text-black" asp-route-pageNumber="@(Model.PageIndex + 1)"
+                               asp-route-showImmediateAttention="@Context.Request.Query["showImmediateAttention"]"
+                               asp-route-statusFilter="@ViewData["CurrentStatus"]"
+                               asp-route-typeFilter="@ViewData["TypeFilter"]"
+                               asp-route-searchString="@ViewData["CurrentFilter"]"
+                               asp-route-searchOperator="@ViewData["SearchOperator"]"
+                               asp-route-sortByPriority="@ViewData["SortByPriority"]"
+                               asp-route-sortPriorityAscending="@ViewData["SortPriorityAscending"]"
+                               asp-route-branch="@Context.Request.Query["branch"]">
+                                <span>Next</span>
+                            </a>
+                        </li>
+                        <li class="page-item @(Model.PageIndex == Model.TotalPages ? "disabled" : "")">
+                            <a class="page-link text-black" asp-route-pageNumber="@Model.TotalPages"
+                               asp-route-showImmediateAttention="@Context.Request.Query["showImmediateAttention"]"
+                               asp-route-statusFilter="@ViewData["CurrentStatus"]"
+                               asp-route-typeFilter="@ViewData["TypeFilter"]"
+                               asp-route-searchString="@ViewData["CurrentFilter"]"
+                               asp-route-searchOperator="@ViewData["SearchOperator"]"
+                               asp-route-sortByPriority="@ViewData["SortByPriority"]"
+                               asp-route-sortPriorityAscending="@ViewData["SortPriorityAscending"]"
+                               asp-route-branch="@Context.Request.Query["branch"]">
+                                <span>Last</span>
+                            </a>
+                        </li>
+
+
+                    </ul>
+                </nav>
+            </div>
         </div>
     </div>
-</div>
-
-<div class="table_NICE_container">
-    <table class="table_NICE">
-        <thead>
-            <tr>
-                <th>Priority</th>
-                <th>Title</th>
-                <th>Type</th>
-                <th>Status</th>
-                <th>Assigned to</th>
-                <th>Branch</th>
-                <th>Reported At</th>
-                <th>SLA</th>
-            </tr>
-        </thead>
-        <tbody class="table_NICE_body">
-            @foreach (Incident incident in Model.Items)
-            {
-                string incidentStatusStyle = "";
-                string priorityLevelStyle = "";
-                // Determine priority style
-                switch (incident.Priority)
-                {
-                    case Priority.low:
-                        priorityLevelStyle = "priority_low";
-                        break;
-                    case Priority.medium:
-                        priorityLevelStyle = "priority_medium";
-                        break;
-                    case Priority.high:
-                        priorityLevelStyle = "priority_high";
-                        break;
-                    case Priority.critical:
-                        priorityLevelStyle = "priority_critical";
-                        break;
-                }
-                // Determine status style
-                switch (incident.Status)
-                {
-                    case IncidentStatus.open:
-                        incidentStatusStyle = "status_open";
-                        break;
-                    case IncidentStatus.resolved:
-                        incidentStatusStyle = "status_resolved";
-                        break;
-                    case IncidentStatus.closed_without_resolve:
-                        incidentStatusStyle = "status_closed_without_resolve";
-                        break;
-                    case IncidentStatus.inProgress:
-                        incidentStatusStyle = "status_in_progress";
-                        break;
-                    case IncidentStatus.closed:
-                        incidentStatusStyle = "status_closed";
-                        break;
-                }
-
-                <tr>
-
-                    <td>
-                        <div class="priority_label @priorityLevelStyle">@incident.Priority</div>
-                    </td>
-                    <td>
-                        <a class="incident_href" asp-controller="Incident" asp-action="IncidentDetails" asp-route-id="@incident.Id">
-                            @incident.Subject
-                        </a>
-                    </td>
-                    <td>
-                        @incident.IncidentType
-                    </td>
-                    <td>
-                        <div class="priority_label @incidentStatusStyle">@incident.Status</div>
-                    </td>
-                    @{
-                        var activeUser = incident.AssignedTo?.FirstOrDefault(a => a.IsActive);
-                    }
-                    <td>@(activeUser != null ? $"{activeUser.FirstName} {activeUser.LastName}" : "Unassigned")</td>
-                    <td>@incident.Location.Branch</td>
-                    <td>@incident.ReportedAt.ToString("g")</td>
-                    <td>@((incident.Deadline - DateTime.Now).Days) Days</td>
-
-                </tr>
-
-            }
-        </tbody>
-    </table>
-</div>
-
-
-<div class="row">
-    <div class="col-md-6">
-    </div>
-    <div class="col-md-6">
-        <nav>
-            <ul class="pagination justify-content-center">
-                <li class="page-item @(Model.PageIndex == 1 ? "disabled" : "")">
-                    <a class="page-link text-black" asp-route-pageNumber="1"
-                       asp-route-showImmediateAttention="@Context.Request.Query["showImmediateAttention"]"
-                       asp-route-statusFilter="@ViewData["CurrentStatus"]"
-                       asp-route-typeFilter="@ViewData["TypeFilter"]"
-                       asp-route-searchString="@ViewData["CurrentFilter"]"
-                       asp-route-searchOperator="@ViewData["SearchOperator"]"
-                       asp-route-sortByPriority="@ViewData["SortByPriority"]"
-                       asp-route-sortPriorityAscending="@ViewData["SortPriorityAscending"]"
-                       asp-route-branch="@Context.Request.Query["branch"]">
-
-                        <span>First</span>
-                    </a>
-                </li>
-
-                <li class="page-item @(Model.HasPreviousPage ? "" : "disabled")">
-                    <a class="page-link text-black" asp-route-pageNumber="@(Model.PageIndex - 1)"
-                       asp-route-showImmediateAttention="@Context.Request.Query["showImmediateAttention"]"
-                       asp-route-statusFilter="@ViewData["CurrentStatus"]"
-                       asp-route-typeFilter="@ViewData["TypeFilter"]"
-                       asp-route-searchString="@ViewData["CurrentFilter"]"
-                       asp-route-searchOperator="@ViewData["SearchOperator"]"
-                       asp-route-sortByPriority="@ViewData["SortByPriority"]"
-                       asp-route-sortPriorityAscending="@ViewData["SortPriorityAscending"]"
-                       asp-route-branch="@Context.Request.Query["branch"]">
-                        <span>Previous</span>
-                    </a>
-                </li>
-
-                @for (int i = 1; i <= Model.TotalPages; i++)
-                {
-                    <li class="page-item @(Model.PageIndex == i ? "active" : "")">
-                        <a class="page-link text-black" asp-route-pageNumber="@i"
-                           asp-route-showImmediateAttention="@Context.Request.Query["showImmediateAttention"]"
-                           asp-route-statusFilter="@ViewData["CurrentStatus"]"
-                           asp-route-typeFilter="@ViewData["TypeFilter"]"
-                           asp-route-searchString="@ViewData["CurrentFilter"]"
-                           asp-route-searchOperator="@ViewData["SearchOperator"]"
-                           asp-route-sortByPriority="@ViewData["SortByPriority"]"
-                           asp-route-sortPriorityAscending="@ViewData["SortPriorityAscending"]"
-                           asp-route-branch="@Context.Request.Query["branch"]">@i</a>
-                    </li>
-                }
-
-                <li class="page-item @(Model.HasNextPage ? "" : "disabled")">
-                    <a class="page-link text-black" asp-route-pageNumber="@(Model.PageIndex + 1)"
-                       asp-route-showImmediateAttention="@Context.Request.Query["showImmediateAttention"]"
-                       asp-route-statusFilter="@ViewData["CurrentStatus"]"
-                       asp-route-typeFilter="@ViewData["TypeFilter"]"
-                       asp-route-searchString="@ViewData["CurrentFilter"]"
-                       asp-route-searchOperator="@ViewData["SearchOperator"]"
-                       asp-route-sortByPriority="@ViewData["SortByPriority"]"
-                       asp-route-sortPriorityAscending="@ViewData["SortPriorityAscending"]"
-                       asp-route-branch="@Context.Request.Query["branch"]">
-                        <span>Next</span>
-                    </a>
-                </li>
-                <li class="page-item @(Model.PageIndex == Model.TotalPages ? "disabled" : "")">
-                    <a class="page-link text-black" asp-route-pageNumber="@Model.TotalPages"
-                       asp-route-showImmediateAttention="@Context.Request.Query["showImmediateAttention"]"
-                       asp-route-statusFilter="@ViewData["CurrentStatus"]"
-                       asp-route-typeFilter="@ViewData["TypeFilter"]"
-                       asp-route-searchString="@ViewData["CurrentFilter"]"
-                       asp-route-searchOperator="@ViewData["SearchOperator"]"
-                       asp-route-sortByPriority="@ViewData["SortByPriority"]"
-                       asp-route-sortPriorityAscending="@ViewData["SortPriorityAscending"]"
-                       asp-route-branch="@Context.Request.Query["branch"]">
-                        <span>Last</span>
-                    </a>
-                </li>
-
-
-            </ul>
-        </nav>
-    </div>
-</div>
 @section Scripts {
     <script>
         function drawDonut(canvasId, value, total, color){
@@ -433,6 +442,30 @@
                     });
                 }
             });
+          function loadPartialView(isArchived) {
+            const container = document.getElementById('To_be_archived_container');
+			const toHideContaier = document.getElementById('Index_container');
+
+            fetch(`/Incident/${isArchived == true ? "DisplayArchivedIncidents" : "DisplayAwaitingArchival"}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.text();
+                })
+                .then(html => {
+					toHideContaier.style.display = 'none';
+                    container.innerHTML = html;
+                      
+                })
+                .catch(error => console.error('Error loading partial view:', error));
+          }
+          function returnToAllTickets(){
+              const toShow = document.getElementById('Index_container');
+              const toHideContaier = document.getElementById('To_be_archived_container');
+              toHideContaier.style.display = 'none';
+              toShow.style.display = 'block';
+          }
 
 
     </script>

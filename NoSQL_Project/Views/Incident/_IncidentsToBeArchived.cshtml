@@ -1,0 +1,113 @@
+﻿@using NoSQL_Project.Models.Enums
+@using NoSQL_Project.Commons
+@model PaginatedList<NoSQL_Project.Models.Incident>
+
+@if (TempData["Success"] != null)
+{
+    <p class="alert-success">@TempData["Success"]</p>
+}
+@if (TempData["Error"] != null)
+{
+    <p class="alert-danger">@TempData["Error"]</p>
+}
+<div>
+    <header class="main_container_header">
+        <div class="main_container_header_sub">
+            <h3>Incidents Waiting Archival</h3>
+            <a asp-controller="Incident" asp-action="ArchiveOldIncidents" type="button" class="btn btn-warning position-relative">
+                Archive Incidents<span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                    @Model.Items.Count()
+                    <span class="visually-hidden">Incidents</span>
+                </span>
+            </a>
+            <button onclick="returnToAllTickets()" type="button" class="btn btn-info">Return</button>
+            
+        </div>
+
+    </header>
+    <div class="table_NICE_container">
+        <table class="table_NICE">
+            <thead>
+                <tr>
+                    <th>Priority</th>
+                    <th>Title</th>
+                    <th>Type</th>
+                    <th>Status</th>
+                    <th>Assigned to</th>
+                    <th>Branch</th>
+                    <th>Reported At</th>
+                    <th>SLA</th>
+                </tr>
+            </thead>
+            <tbody class="table_NICE_body">
+                @foreach (Incident incident in Model.Items)
+                {
+                string incidentStatusStyle = "";
+                string priorityLevelStyle = "";
+                // Determine priority style
+                switch (incident.Priority)
+                {
+                case Priority.low:
+                priorityLevelStyle = "priority_low";
+                break;
+                case Priority.medium:
+                priorityLevelStyle = "priority_medium";
+                break;
+                case Priority.high:
+                priorityLevelStyle = "priority_high";
+                break;
+                case Priority.critical:
+                priorityLevelStyle = "priority_critical";
+                break;
+                }
+                // Determine status style
+                switch (incident.Status)
+                {
+                case IncidentStatus.open:
+                incidentStatusStyle = "status_open";
+                break;
+                case IncidentStatus.resolved:
+                incidentStatusStyle = "status_resolved";
+                break;
+                case IncidentStatus.closed_without_resolve:
+                incidentStatusStyle = "status_closed_without_resolve";
+                break;
+                case IncidentStatus.inProgress:
+                incidentStatusStyle = "status_in_progress";
+                break;
+                case IncidentStatus.closed:
+                incidentStatusStyle = "status_closed";
+                break;
+                }
+
+                <tr>
+
+                    <td>
+                        <div class="priority_label @priorityLevelStyle">@incident.Priority</div>
+                    </td>
+                    <td>
+                        <a class="incident_href" asp-controller="Incident" asp-action="IncidentDetails" asp-route-id="@incident.Id">
+                            @incident.Subject
+                        </a>
+                    </td>
+                    <td>
+                        @incident.IncidentType
+                    </td>
+                    <td>
+                        <div class="priority_label @incidentStatusStyle">@incident.Status</div>
+                    </td>
+                    @{
+                    var activeUser = incident.AssignedTo?.FirstOrDefault(a => a.IsActive);
+                    }
+                    <td>@(activeUser != null ? $"{activeUser.FirstName} {activeUser.LastName}" : "Unassigned")</td>
+                    <td>@incident.Location.Branch</td>
+                    <td>@incident.ReportedAt.ToString("g")</td>
+                    <td>@((incident.Deadline - DateTime.Now).Days) Days</td>
+
+                </tr>
+
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
