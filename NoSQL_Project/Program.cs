@@ -44,9 +44,17 @@ namespace NoSQL_Project
 
                 var dbName = builder.Configuration["Mongo:Database"]; // from appsettings.json
                 if (string.IsNullOrWhiteSpace(dbName))
-                    throw new InvalidOperationException("Mongo:Database is not configured in appsettings.json.");
+                    throw new InvalidOperationException("Mongo:ArchiveDatabase is not configured in appsettings.json.");
 
                 return client.GetDatabase(dbName);
+            });
+            builder.Services.AddScoped<ArchiveDatabase>(sp =>
+            {
+                var client = sp.GetRequiredService<IMongoClient>();
+                var dbName = builder.Configuration["Mongo:ArchiveDatabase"];
+                if (string.IsNullOrWhiteSpace(dbName))
+                    throw new InvalidOperationException("Mongo:ArchiveDatabase is not configured in appsettings.json.");
+                return new ArchiveDatabase(client.GetDatabase(dbName));
             });
             // Add services to the container.
             builder.Services.AddControllersWithViews();
@@ -56,7 +64,16 @@ namespace NoSQL_Project
             builder.Services.AddScoped<ILocationService, LocationService>();
             builder.Services.AddScoped<IIncidentRepository, IncidentRepository>();
             builder.Services.AddScoped<IIncidentService, IncidentService>();
+            builder.Services.AddScoped<IArchiveIncidentRepository, ArchiveIncidentRepository>();
+            builder.Services.AddScoped<IArchiveIncidentService, ArchiveIncidentService>();
 
+            // Search functionality
+            builder.Services.AddScoped<IIncidentSearchRepository, IncidentSearchRepository>();
+            builder.Services.AddScoped<IIncidentSearchService, IncidentSearchService>();
+
+            // Sort functionality 
+            builder.Services.AddScoped<IIncidentSortRepository, IncidentSortRepository>();
+            builder.Services.AddScoped<IIncidentSortService, IncidentSortService>();
 
             //Session
             builder.Services.AddSession(options =>

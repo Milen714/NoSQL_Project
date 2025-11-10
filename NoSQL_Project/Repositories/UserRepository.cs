@@ -19,12 +19,10 @@ namespace NoSQL_Project.Repositories
         {
             try
             {
-                
                 return await _users.Find(_ => true).ToListAsync();
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
                 throw new Exception("Could not retrieve users.");
             }
         }
@@ -33,37 +31,15 @@ namespace NoSQL_Project.Repositories
         {
             return await _users.Find(user => user.EmailAddress == email).FirstOrDefaultAsync();
         }
-        public async Task<User> AuthenticateUserAsync(LoginModel model)
-        {
-            User existingUser = await GetUserByEmailAsync(model.Email);
-            if (existingUser == null)
-                return null;
-            var hasher = new PasswordHasher<string>();
-            var result = hasher.VerifyHashedPassword(null, existingUser.PasswordHash, model.Password);
-            if (result == PasswordVerificationResult.Success)
-            {
-                return existingUser;
-            }
-            return null;
-
-        }
-        public User HashUserPassword(User user)
-        {
-            var hasher = new PasswordHasher<string>();
-            string hashedPassword = hasher.HashPassword(null, user.PasswordHash);
-            user.PasswordHash = hashedPassword;
-            return user;
-        }
+        
         public async Task Add(User user)
         {
             try
             {
-                var hashedUser = HashUserPassword(user);
-                await _users.InsertOneAsync(hashedUser);
+                await _users.InsertOneAsync(user);
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
                 if (ex.Message.Contains("phone_number"))
                 {
                     throw new Exception("A user with this Phone number already exists.");
