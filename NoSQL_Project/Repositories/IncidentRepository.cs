@@ -3,6 +3,7 @@ using MongoDB.Driver;
 using NoSQL_Project.Models;
 using NoSQL_Project.Models.Enums;
 using NoSQL_Project.Repositories.Interfaces;
+using Sprache;
 
 namespace NoSQL_Project.Repositories
 {
@@ -160,97 +161,89 @@ namespace NoSQL_Project.Repositories
             }
         }
 
-        public async Task CreateNewIncidentAsync(Incident newIncident)
-        {
-            await _incidents.InsertOneAsync(newIncident);
+		public async Task CreateNewIncidentAsync(Incident newIncident)
+		{
+			await _incidents.InsertOneAsync(newIncident);
 
-        }
+		}
 
-        public async Task UpdateIncidentAsync(Incident updatedIncident, List<UpdateDefinition<Incident>> updates)
-        {
-            //to find the incident to make the changes 
-            var filter = Builders<Incident>.Filter.Eq(i => i.Id, updatedIncident.Id);
+		public async Task UpdateIncidentAsync(Incident updatedIncident, List<UpdateDefinition<Incident>> updates)
+		{
+			try
+			{
+				//to find the incident to make the changes 
+				var filter = Builders<Incident>.Filter.Eq(i => i.Id, updatedIncident.Id);
 
-            //to combine the elements of updates list into a single update
-            var combinedUpdate = Builders<Incident>.Update.Combine(updates);
+				//to combine the elements of updates list into a single update
+				var combinedUpdate = Builders<Incident>.Update.Combine(updates);
 
-            //filter: documents to update, combinedUpdate: changes to make
-            await _incidents.UpdateOneAsync(filter, combinedUpdate);
-        }
+				//filter: documents to update, combinedUpdate: changes to make
+				await _incidents.UpdateOneAsync(filter, combinedUpdate);
+			}
+			catch(Exception ex)
+			{
+				throw new Exception("Could not update incident", ex);
+			}
+		}
 
-        public async Task<List<UserForTransferDto>> GetUsersForTransferAsync()
-        {
+		public async Task<List<UserForTransferDto>> GetUsersForTransferAsync()
+		{
+			try
+			{
+				var pipeline = new List<BsonDocument>();
 
-            try
-            {
-                BsonDocument stageOne = new BsonDocument
-                {
-                        { "$unwind", "$assigned_to" }
-                };
+				//stage 1: unwind the array assigned_to
+				pipeline.Add(new BsonDocument("$unwind", "$assigned_to"));
 
+				//stage 2: filter users who have active incidents
+				pipeline.Add(new BsonDocument("$match", new BsonDocument("assigned_to.is_active", true)));
 
-                //filter users with active incidents
-                BsonDocument stageTwo = new BsonDocument
-                {
-                    { "$match", new BsonDocument { { "assigned_to.is_active", true } } }
-                };
+				//stage 3: group by user and count their incidents
+				pipeline.Add(new BsonDocument("$group", new BsonDocument
+				{
+					{"_id", "$assigned_to.userId"},
+					{"TotalIncidents", new BsonDocument("$sum", 1)},
+					{"FirstName", new BsonDocument("$first", "$assigned_to.first_name")},
+					{"LastName", new BsonDocument("$first", "$assigned_to.last_name")}
+				}));
 
-                //group by user and count incidents
-                BsonDocument stageThree = new BsonDocument
-                {
-                    { "$group", new BsonDocument
-                        {
-                            { "_id", "$assigned_to.userId" },
-                            { "TotalIncidents", new BsonDocument("$sum", 1) },
-                            { "FirstName", new BsonDocument("$first", "$assigned_to.first_name") },
-                            { "LastName", new BsonDocument("$first", "$assigned_to.last_name") },
-                        }
-                    }
-                };
+				//stage 4: filter by users with less than 6 incidents
+				pipeline.Add(new BsonDocument("$match", new BsonDocument("TotalIncidents", new BsonDocument("$lt", 6))));
 
-                //filter users with less than 6 incidents
-                BsonDocument stageFour = new BsonDocument
-                {
-                    { "$match", new BsonDocument { { "TotalIncidents", new BsonDocument("$lt", 6) } } }
-                };
+				//stage 5: sort users alphabetically by First Name and then Last Name
+				pipeline.Add(new BsonDocument("$sort", new BsonDocument
+				{
+					{"FirstName", 1},
+					{"LastName", 1}
+				}));
 
+				var result = await _incidents.Aggregate<BsonDocument>(pipeline).ToListAsync();
 
-                BsonDocument[] pipeline = new BsonDocument[] { stageOne, stageTwo, stageThree, stageFour };
+				return result.Select(r => new UserForTransferDto
+				{
+					UserId = r.GetValue("_id", ObjectId.Empty).AsObjectId,
+					TotalIncidents = r.GetValue("TotalIncidents", 0).AsInt32,
+					FirstName = r.GetValue("FirstName", "(Unknown)").AsString,
+					LastName = r.GetValue("LastName", "").AsString
+				}).ToList();
+			}
+			catch (Exception ex)
+			{
+				throw new Exception("Could not retrieve users for transfer", ex);
+			}
+		}
 
+		public async Task TransferIncidentAsync(Incident existingIncident, User userForTransfer)
+		{
+			try
+			{
+				var filter = Builders<Incident>.Filter.Eq("_id", ObjectId.Parse(existingIncident.Id));
 
-                var result = await _incidents.Aggregate<BsonDocument>(pipeline).ToListAsync();
-
-
-                return result.Select(r => new UserForTransferDto
-                {
-                    UserId = r.GetValue("_id", ObjectId.Empty).AsObjectId,
-                    TotalIncidents = r.GetValue("TotalIncidents", 0).AsInt32,
-                    FirstName = r.GetValue("FirstName", "(Unknown)").AsString,
-                    LastName = r.GetValue("LastName", "").AsString
-                }).ToList();
-
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Could not retrieve users for transfer: ", ex);
-            }
-
-
-        }
-
-
-        public async Task TransferIncidentAsync(Incident existingIncident, User userForTransfer)
-        {
-
-            try
-            {
-                var filter = Builders<Incident>.Filter.Eq(i => i.Id, existingIncident.Id);
-
-                if (existingIncident.AssignedTo != null && existingIncident.AssignedTo.Any())
-                //only deactivate if the array is not empty
-                {
-                    var deactivate = Builders<Incident>.Update
-                    .Set("assigned_to.$[elem].is_active", false);
+				if (existingIncident.AssignedTo != null && existingIncident.AssignedTo.Any())
+				//only deactivate if the array is not empty
+				{
+					var deactivate = Builders<Incident>.Update
+					.Set("assigned_to.$[elem].is_active", false);
 
                     var arrayFilters = new List<ArrayFilterDefinition>
                     {
@@ -259,29 +252,68 @@ namespace NoSQL_Project.Repositories
 
                     var updateOptions = new UpdateOptions { ArrayFilters = arrayFilters };
 
-                    await _incidents.UpdateOneAsync(filter, deactivate, updateOptions);
+					await _incidents.UpdateOneAsync(filter, deactivate, updateOptions);
+				}
 
-                }
-
-                var newAssignee = new AssigneeSnapshot
-                {
-                    UserId = new ObjectId(userForTransfer.Id),
-                    FirstName = userForTransfer.FirstName,
-                    LastName = userForTransfer.LastName,
-                    IsActive = true,
-                    EmailAddress = userForTransfer.EmailAddress
-                };
+				var newAssignee = new AssigneeSnapshot
+				{
+					UserId = new ObjectId(userForTransfer.Id),
+					FirstName = userForTransfer.FirstName,
+					LastName = userForTransfer.LastName,
+					IsActive = true,
+					EmailAddress = userForTransfer.EmailAddress,
+					Timestamp = DateTime.UtcNow
+				};
 
                 var addNew = Builders<Incident>.Update.Push(i => i.AssignedTo, newAssignee);
 
-                await _incidents.UpdateOneAsync(filter, addNew);
+				await _incidents.UpdateOneAsync(filter, addNew);
+			}
+			catch (Exception ex)
+			{
+				throw new Exception($"Error in transfer: ", ex);
+			}
+		}
 
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Error in transfer: ", ex);
-            }
-        }
+		public async Task AddTransferMessage(Incident existingIncident, AssigneeSnapshot userBeforeTransfer, string transferMessage)
+		{
+			try
+			{
+				var filter = Builders<Incident>.Filter.And(
+					Builders<Incident>.Filter.Eq(i => i.Id, existingIncident.Id),
+					Builders<Incident>.Filter.Eq("assigned_to.userId", userBeforeTransfer.UserId)
+				);
+
+				var update = Builders<Incident>.Update.Set("assigned_to.$.message", transferMessage);
+
+				await _incidents.UpdateOneAsync(filter, update);
+			}
+			catch (Exception ex)
+			{
+				throw new Exception($"Error in adding transfer message: ", ex);
+			}
+		}
+
+		public async Task<List<AssigneeSnapshot>> GetTransferHistory(Incident existingIncident)
+		{
+			try
+			{
+				var filter = Builders<Incident>.Filter.Eq(i => i.Id, existingIncident.Id);
+
+				var incident = await _incidents.Find(filter).FirstOrDefaultAsync();
+
+				//if assinged to is null for any reason, it returns an empty list 
+				if (incident == null || incident.AssignedTo == null)
+				{
+					return new List<AssigneeSnapshot>();
+				}
+				return incident.AssignedTo;
+			}
+			catch (Exception ex)
+			{
+				throw new Exception($"Error getting assignation history: ", ex);
+			}
+		}
 
         public async Task<int> GetTheNumberOfAllOpenIncidents()
         {
@@ -344,11 +376,11 @@ namespace NoSQL_Project.Repositories
                     branchFilter
                 );
 
-                var result = await _incidents.Find(filter).SortBy(p => p.Priority).ToListAsync();
-                return result;
-            }
-            catch (Exception ex)
-            {
+				var result = await _incidents.Find(filter).SortBy(p => p.Priority).ToListAsync();
+				return result;
+			}
+			catch (Exception ex)
+			{
 
                 throw new Exception($"Could not retrieve incidents: {ex.Message}");
             }

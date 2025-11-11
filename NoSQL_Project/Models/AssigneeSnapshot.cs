@@ -24,13 +24,22 @@ namespace NoSQL_Project.Models
 		[BsonIgnoreIfNull]
 		public string? EmailAddress { get; set; }
 
+		[BsonElement("message")]
+		[BsonIgnoreIfNull]
+		public string? Message { get; set; }
 
-		public void MapAssignee(User user)
+		[BsonElement("timestamp")]
+		public DateTime Timestamp { get; set; }
+
+		public void MapAssignee(User user, string? message = null)
 		{
 			UserId = ObjectId.Parse(user.Id!);
 			FirstName = user.FirstName;
 			LastName = user.LastName;
             EmailAddress = user.EmailAddress;
+			Message = message;
+			Timestamp = DateTime.UtcNow; 
+
 		}
 	}
 }

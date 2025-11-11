@@ -1,6 +1,7 @@
 ﻿using NoSQL_Project.Models;
 using NoSQL_Project.Models.Enums;
 using NoSQL_Project.ViewModels;
+using System.Threading.Tasks;
 
 namespace NoSQL_Project.Services.Interfaces
 {
@@ -19,13 +20,17 @@ namespace NoSQL_Project.Services.Interfaces
 
         Task CloseIncidentAsync(string closedIncidentId, string updatedStatus);
         Task<List<UserForTransferDto>> GetUsersForTransferAsync();
-        Task TransferIncidentAsync(string incidentId, string userForTransferId);
+        
         Task<List<Incident>> GetAllOpenOverdueIncidents(string branch);
         Task<List<Incident>> GetAwaitingToBeArchivedIncidents();
         Task DeleteArchivedIncidents(List<Incident> toDelete);
 
 
 
+
+        Task<List<AssigneeSnapshot>> GetTransferHistory(string incidentId);
+
+		Task TransferIncidentAsync(string incidentId, string userForTransferId, string transferMessage);
 
 
     }
