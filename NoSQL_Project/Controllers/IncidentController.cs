@@ -35,7 +35,7 @@ namespace NoSQL_Project.Controllers
             _sortService = sortService;
             _archiveIncidentService = archiveIncidentService;
         }
-
+        [SessionAuthorize(UserType.Service_employee, UserType.Reg_employee)]
         public async Task<IActionResult> Index(
      string searchString,
      string searchOperator,
@@ -155,6 +155,7 @@ namespace NoSQL_Project.Controllers
         }
 
         //Create Incident
+        [SessionAuthorize(UserType.Service_employee, UserType.Reg_employee)]
         [HttpGet]
         public async Task<IActionResult> CreateIncident()
         {
@@ -180,7 +181,7 @@ namespace NoSQL_Project.Controllers
 
             return View(viewModel);
         }
-
+        [SessionAuthorize(UserType.Service_employee, UserType.Reg_employee)]
         [HttpPost]
         public async Task<IActionResult> CreateIncident(NewIncidentViewModel newIncident)
         {
@@ -195,7 +196,7 @@ namespace NoSQL_Project.Controllers
                 return RedirectToAction("Index");
             }
         }
-
+        [SessionAuthorize(UserType.Service_employee, UserType.Reg_employee)]
         //Details 
         public async Task<IActionResult> IncidentDetails(string id, bool isEditing = false)
         {
@@ -227,6 +228,7 @@ namespace NoSQL_Project.Controllers
         }
 
         //Update the edited incident
+        [SessionAuthorize(UserType.Service_employee)]
         [HttpPost]
         public async Task<IActionResult> UpdateIncident(Incident updatedIncident)
         {
@@ -286,7 +288,7 @@ namespace NoSQL_Project.Controllers
             var usersForTransfer = await _incidentService.GetUsersForTransferAsync();
             return View("TransferIncident", usersForTransfer);
         }
-
+        [SessionAuthorize(UserType.Service_employee, UserType.Reg_employee)]
         [HttpPost]
         public async Task<IActionResult> TransferIncident(string incidentId, string userForTransferId)
         {
@@ -308,6 +310,8 @@ namespace NoSQL_Project.Controllers
         /// Author: Dylan Mohlen
         /// Date: 2025-01-08
         /// </summary>
+        /// 
+        [SessionAuthorize(UserType.Service_employee, UserType.Reg_employee)]
         [HttpGet]
         public async Task<IActionResult> MyTickets(
             string searchString,
@@ -426,6 +430,7 @@ namespace NoSQL_Project.Controllers
                            i.ReportedBy.LastName == user.LastName)
                 .ToList();
         }
+        [SessionAuthorize(UserType.Service_employee)]
         public async Task<IActionResult> DisplayAwaitingArchival(bool archive)
         {
             int pageSize = 5;
@@ -443,6 +448,7 @@ namespace NoSQL_Project.Controllers
                 return PartialView("_IncidentsToBeArchived", PaginatedList<Incident>.CreateAsync(empty, 1, pageSize));
             }
         }
+        [SessionAuthorize(UserType.Service_employee)]
         public async Task<IActionResult> ArchiveOldIncidents()
         {
             try
@@ -459,6 +465,7 @@ namespace NoSQL_Project.Controllers
                 return RedirectToAction("Index");
             }
         }
+        [SessionAuthorize(UserType.Service_employee)]
         public async Task<IActionResult> DisplayArchivedIncidents()
         {
             int pageSize = 5;

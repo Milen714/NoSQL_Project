@@ -114,6 +114,10 @@ body {
     justify-content: center;
     height: 100vh;
 }
+.Logo{
+    justify-content: center;
+    align-items: center;
+}
 .login_main {
     width: 50vw;
     height: 60vh;
