@@ -236,11 +236,12 @@ namespace NoSQL_Project.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> TransferIncident(string incidentId, string userForTransferId)
+        public async Task<IActionResult> TransferIncident(string incidentId, string userForTransferId, string? transferMessage)
         {
             try
             {
-                await _incidentService.TransferIncidentAsync(incidentId, userForTransferId);
+                await _incidentService.TransferIncidentAsync(incidentId, userForTransferId, transferMessage);              
+
                 return RedirectToAction("IncidentDetails", new { id = incidentId });
             }
             catch (Exception ex)
@@ -249,6 +250,15 @@ namespace NoSQL_Project.Controllers
                 return RedirectToAction("Index");
             }
         }
+
+        [HttpGet]
+        public async Task<IActionResult> DisplayTransferHistory(string incidentId)
+        {
+			ViewBag.IncidentId = incidentId;
+
+			var transferHistory = await _incidentService.GetTransferHistory(incidentId);
+            return View("DisplayTransferHistory", transferHistory);
+		}
 
     }
 }

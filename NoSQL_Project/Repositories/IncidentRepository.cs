@@ -3,6 +3,7 @@ using MongoDB.Driver;
 using NoSQL_Project.Models;
 using NoSQL_Project.Models.Enums;
 using NoSQL_Project.Repositories.Interfaces;
+using Sprache;
 
 namespace NoSQL_Project.Repositories
 {
@@ -158,30 +159,28 @@ namespace NoSQL_Project.Repositories
 
 		public async Task<List<UserForTransferDto>> GetUsersForTransferAsync()
 		{
-			
 			try
 			{
 				BsonDocument stageOne = new BsonDocument
 				{
-						{ "$unwind", "$assigned_to" }
+						{"$unwind", "$assigned_to"}
 				};
-
 
 				//filter users with active incidents
 				BsonDocument stageTwo = new BsonDocument
 				{
-					{ "$match", new BsonDocument { { "assigned_to.is_active", true } } }
+					{"$match", new BsonDocument {{"assigned_to.is_active", true}}}
 				};
 
 				//group by user and count incidents
 				BsonDocument stageThree = new BsonDocument
 				{
-					{ "$group", new BsonDocument
+					{"$group", new BsonDocument
 						{
-							{ "_id", "$assigned_to.userId" },
-							{ "TotalIncidents", new BsonDocument("$sum", 1) },
-							{ "FirstName", new BsonDocument("$first", "$assigned_to.first_name") },
-							{ "LastName", new BsonDocument("$first", "$assigned_to.last_name") },						    
+							{"_id", "$assigned_to.userId"},
+							{"TotalIncidents", new BsonDocument("$sum", 1)},
+							{"FirstName", new BsonDocument("$first", "$assigned_to.first_name")},
+							{"LastName", new BsonDocument("$first", "$assigned_to.last_name")},						    
 						}
 					}					
 				};
@@ -189,15 +188,23 @@ namespace NoSQL_Project.Repositories
 				//filter users with less than 6 incidents
 				BsonDocument stageFour = new BsonDocument
 				{
-					{ "$match", new BsonDocument { { "TotalIncidents", new BsonDocument("$lt", 6) } } }
+					{"$match", new BsonDocument {{"TotalIncidents", new BsonDocument("$lt", 6)}}}
 				};
 
+				// sort users alphabetically by FirstName, then LastName
+				BsonDocument stageFive = new BsonDocument
+{
+	{ "$sort", new BsonDocument
+		{
+			{"FirstName", 1},
+			{"LastName", 1}
+	}
+					}
+};
 
-				BsonDocument[] pipeline = new BsonDocument[] { stageOne, stageTwo, stageThree, stageFour };
-
+				BsonDocument[] pipeline = new BsonDocument[]{stageOne, stageTwo, stageThree, stageFour, stageFive};
 
 				var result = await _incidents.Aggregate<BsonDocument>(pipeline).ToListAsync();
-
 
 				return result.Select(r => new UserForTransferDto
 				{
@@ -212,17 +219,13 @@ namespace NoSQL_Project.Repositories
 			{
 				throw new Exception($"Could not retrieve users for transfer: ", ex);
 			}
-		
-
 		}
-
 
 		public async Task TransferIncidentAsync(Incident existingIncident, User userForTransfer)
 		{
-
 			try
 			{
-				var filter = Builders<Incident>.Filter.Eq(i => i.Id, existingIncident.Id);
+				var filter = Builders<Incident>.Filter.Eq("_id", ObjectId.Parse(existingIncident.Id));
 
 				if (existingIncident.AssignedTo != null && existingIncident.AssignedTo.Any()) 
 					//only deactivate if the array is not empty
@@ -238,7 +241,6 @@ namespace NoSQL_Project.Repositories
 					var updateOptions = new UpdateOptions { ArrayFilters = arrayFilters };
 
 					await _incidents.UpdateOneAsync(filter, deactivate, updateOptions);
-
 				}
 
 				var newAssignee = new AssigneeSnapshot
@@ -247,19 +249,44 @@ namespace NoSQL_Project.Repositories
 					FirstName = userForTransfer.FirstName,
 					LastName = userForTransfer.LastName,
 					IsActive = true,
-					EmailAddress = userForTransfer.EmailAddress
+					EmailAddress = userForTransfer.EmailAddress,
+					Timestamp = DateTime.UtcNow
 				};
 
 				var addNew = Builders<Incident>.Update.Push(i => i.AssignedTo, newAssignee);
 
 				await _incidents.UpdateOneAsync(filter, addNew);
-
-				Console.WriteLine("Transfer complete");
 			}
 			catch (Exception ex)
 			{
 				throw new Exception($"Error in transfer: ", ex);
 			}
+		}
+
+		public async Task AddTransferMessage(Incident existingIncident, AssigneeSnapshot userBeforeTransfer, string transferMessage)
+		{
+			var filter = Builders<Incident>.Filter.And(
+				Builders<Incident>.Filter.Eq(i => i.Id, existingIncident.Id),
+				Builders<Incident>.Filter.Eq("assigned_to.userId", userBeforeTransfer.UserId)
+			);
+
+			var update = Builders<Incident>.Update.Set("assigned_to.$.mensaje", transferMessage);
+
+			await _incidents.UpdateOneAsync(filter, update);
+		}
+
+		public async Task<List<AssigneeSnapshot>> GetTransferHistory(Incident existingIncident)
+		{
+			var filter = Builders<Incident>.Filter.Eq(i => i.Id, existingIncident.Id);
+
+			var incident = await _incidents.Find(filter).FirstOrDefaultAsync();
+
+			//if assinged to is null for any reason, it returns an empty list 
+			if (incident == null || incident.AssignedTo == null)
+			{
+				return new List<AssigneeSnapshot>();
+			}
+			return incident.AssignedTo;			
 		}
 
 		public async Task<int> GetTheNumberOfAllOpenIncidents()

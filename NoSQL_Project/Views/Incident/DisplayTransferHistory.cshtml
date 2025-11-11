@@ -1,0 +1,37 @@
+﻿@model List<AssigneeSnapshot>
+
+@{
+    ViewData["Title"] = "Assignation History";
+    string incidentId = ViewBag.IncidentId;
+}
+
+<h2>Transfer History</h2>
+
+@if (Model == null || !Model.Any())
+{
+    <p>No assignations or transfers registered for this incident</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Date of assignation</th>
+                <th>User</th>
+                <th>Message</th>                
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var assignee in Model)
+            {
+                <tr>
+                    <td>@assignee.Timestamp.ToString("dd/MM/yyyy HH:mm")</td>
+                    <td>@assignee.UserId</td>
+                    <td>@assignee.Message</td>                    
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+<a asp-controller="Incident" asp-action="IncidentDetails" asp-route-id="@incidentId" class="btn btn-secondary mt-2">Return</a>

@@ -32,6 +32,14 @@
         </tbody>
     </table>
 
+    <div class="form-group mt-3">
+        <label for="transferMessage">Message for Transfer</label>
+        <textarea class="form-control" id="transferMessage" name="transferMessage" rows="3"
+                  placeholder="Write comments or the reason for your ticket transfer here"></textarea>
+    </div>
+
     <button type="submit" class="btn btn-primary">Transfer</button>
 </form>
+
+<a asp-controller="Incident" asp-action="IncidentDetails" asp-route-id="@incidentId" class="btn btn-secondary mt-2">Return</a>
 

@@ -23,7 +23,11 @@ namespace NoSQL_Project.Repositories.Interfaces
 		Task<List<UserForTransferDto>> GetUsersForTransferAsync();
 
         Task TransferIncidentAsync(Incident existingIncident, User userForTransfer);
-        Task<List<Incident>> GetAllOpenOverdueIncidents(string branch);
+
+        Task AddTransferMessage(Incident existingIncident, AssigneeSnapshot userBeforeTransfer, string transferMessage);
+        Task<List<AssigneeSnapshot>> GetTransferHistory(Incident existingIncident);
+
+		Task<List<Incident>> GetAllOpenOverdueIncidents(string branch);
 
 
 

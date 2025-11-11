@@ -134,6 +134,8 @@
 						}
 					</form>
 
+					<a asp-action="DisplayTransferHistory" asp-route-incidentId="@Model.Id" class="btn btn-info">Assgination History</a>
+
 					<form asp-action="CloseIncident" method="post" style="display:inline;">
 						<input type="hidden" name="incidentId" value="@Model.Id" />
 						<input type="hidden" name="updatedStatus" value="resolved" />

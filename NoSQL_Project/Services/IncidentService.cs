@@ -38,8 +38,12 @@ namespace NoSQL_Project.Services
         }
         public async Task<Incident> GetIncidentByIdAsync(string id)
         {
-            return _incidentRepository.GetIncidentByIdAsync(id).Result;
-        }
+			var existingIncident = await _incidentRepository.GetIncidentByIdAsync(id);
+			if (existingIncident == null)
+				throw new KeyNotFoundException("Incident not found");
+
+			return existingIncident;
+		}
         
         public Task<List<Incident>> GetAllIncidentsByType(IncidentType type, string branch)
         {
@@ -90,9 +94,7 @@ namespace NoSQL_Project.Services
 
 		public async Task UpdateIncidentAsync(Incident updatedIncident)
 		{
-			var existingIncident = await _incidentRepository.GetIncidentByIdAsync(updatedIncident.Id);
-			if (existingIncident == null)
-				throw new KeyNotFoundException("Incident not found");
+			var existingIncident = await GetIncidentByIdAsync(updatedIncident.Id);
 
 			var update = Builders<Incident>.Update;
 			var updates = new List<UpdateDefinition<Incident>>();
@@ -119,9 +121,7 @@ namespace NoSQL_Project.Services
 
 		public async Task CloseIncidentAsync(string closedIncidentId, string updatedStatus)
 		{
-			var existingIncident = await _incidentRepository.GetIncidentByIdAsync(closedIncidentId);
-			if (existingIncident == null)
-				throw new KeyNotFoundException("Incident not found");
+			var existingIncident = await GetIncidentByIdAsync(closedIncidentId);
 
 			if (IncidentStatus.resolved.ToString().Equals(updatedStatus, StringComparison.OrdinalIgnoreCase))
 			{
@@ -143,11 +143,12 @@ namespace NoSQL_Project.Services
 			await UpdateIncidentAsync(existingIncident);
 		}
 
-		public async Task TransferIncidentAsync(string incidentId, string userForTransferId)
+		public async Task TransferIncidentAsync(string incidentId, string userForTransferId, string transferMessage)
 		{
-			var existingIncident = await _incidentRepository.GetIncidentByIdAsync(incidentId);
-			if (existingIncident == null)
-				throw new KeyNotFoundException("Incident not found");
+			var existingIncident = await GetIncidentByIdAsync(incidentId);
+
+			//before trasnfering the ticket i save the old user for the sake of the message
+			var userBeforeTransfer = existingIncident.AssignedTo.FirstOrDefault(u => u.IsActive);
 
 			var existingUser = await _userService.FindByIdAsync(userForTransferId);
 			if (existingUser == null)
@@ -155,7 +156,8 @@ namespace NoSQL_Project.Services
 
 			//pass the object to compare the id and the user that has to be passed to
 			await _incidentRepository.TransferIncidentAsync(existingIncident, existingUser);
-			
+
+			await _incidentRepository.AddTransferMessage(existingIncident, userBeforeTransfer, transferMessage);
 		}
 
 		public async Task <List<UserForTransferDto>> GetUsersForTransferAsync()
@@ -163,7 +165,16 @@ namespace NoSQL_Project.Services
 			return await _incidentRepository.GetUsersForTransferAsync();			
 		}
 
-        public Task<List<Incident>> GetAllOpenOverdueIncidents(string branch)
+		public async Task<List<AssigneeSnapshot>> GetTransferHistory(string incidentId)
+		{
+			var existingIncident = await GetIncidentByIdAsync(incidentId);
+
+			var transferHistory = await _incidentRepository.GetTransferHistory(existingIncident);
+
+			return transferHistory;
+		}
+
+		public Task<List<Incident>> GetAllOpenOverdueIncidents(string branch)
         {
             return _incidentRepository.GetAllOpenOverdueIncidents(branch);
         }
