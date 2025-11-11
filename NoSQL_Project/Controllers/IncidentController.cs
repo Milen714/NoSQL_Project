@@ -16,14 +16,37 @@ namespace NoSQL_Project.Controllers
         private readonly IUserService _userService;
         private readonly ILocationService _locationService;
         private readonly IIncidentService _incidentService;
-        public IncidentController(IUserService userService, ILocationService locationSrvice, IIncidentService incidentService, IIncidentService incidents)
+        private readonly IIncidentSearchService _searchService;
+        private readonly IIncidentSortService _sortService;
+        private readonly IArchiveIncidentService _archiveIncidentService;
+
+        public IncidentController(
+            IUserService userService,
+            ILocationService locationSrvice,
+            IIncidentService incidentService,
+            IIncidentSearchService searchService,
+            IIncidentSortService sortService,
+            IArchiveIncidentService archiveIncidentService)
         {
             _locationService = locationSrvice;
             _userService = userService;
             _incidentService = incidentService;
+            _searchService = searchService;
+            _sortService = sortService;
+            _archiveIncidentService = archiveIncidentService;
         }
-        public async Task<IActionResult> Index(string searchString, int pageNumber
-            , string currentFilter, string statusFilter, string typeFilter, string branch, bool showImmediateAttention = false)
+
+        public async Task<IActionResult> Index(
+     string searchString,
+     string searchOperator,
+     bool sortByPriority = false,
+     bool sortPriorityAscending = false,
+     int pageNumber = 1,
+     string currentFilter = "",
+     string statusFilter = "",
+     string typeFilter = "",
+     string branch = "",
+     bool showImmediateAttention = false)
         {
             List<Incident> incidents;
             int openIncidents = await _incidentService.GetTheNumberOfAllOpenIncidents();
@@ -44,37 +67,70 @@ namespace NoSQL_Project.Controllers
                     searchString = currentFilter;
                 }
 
-                //var incidents = _incidentService.GetAllIncidentsPerStatus(IncidentStatus.open, "").Result;
+                // Parse status and type filters
+                IncidentStatus? parsedStatus = null;
+                IncidentType? parsedType = null;
 
-                // Filter by both status and type
-                if (hasStatus && hasType &&
-                    Enum.TryParse<IncidentStatus>(statusFilter, true, out var parsedStatus) &&
-                    Enum.TryParse<IncidentType>(typeFilter, true, out var parsedType))
+                if (hasStatus && Enum.TryParse<IncidentStatus>(statusFilter, true, out var tempStatus))
                 {
-                    incidents = await _incidentService.GetIncidentsByStatusAndType(parsedStatus, parsedType, branchValue);
+                    parsedStatus = tempStatus;
                 }
-                // Filter by status only
-                else if (hasStatus &&
-                    Enum.TryParse<IncidentStatus>(statusFilter, true, out parsedStatus))
+
+                if (hasType && Enum.TryParse<IncidentType>(typeFilter, true, out var tempType))
                 {
-                    incidents = await _incidentService.GetAllIncidentsPerStatus(parsedStatus, branchValue);
+                    parsedType = tempType;
                 }
-                // Filter by type only
-                else if (hasType &&
-                    Enum.TryParse<IncidentType>(typeFilter, true, out parsedType))
+
+                //SEARCH FUNCTIONALITY
+
+                if (!string.IsNullOrWhiteSpace(searchString))
                 {
-                    incidents = await _incidentService.GetAllIncidentsByType(parsedType, branchValue);
+                    var searchOp = searchOperator?.ToLower() == "or" ? SearchOperator.Or : SearchOperator.And;
+
+
+                    incidents = await _searchService.SearchIncidentsAsync(
+                        searchString,
+                        searchOp,
+                        branchValue,
+                        parsedStatus,
+                        parsedType
+                    );
+
+                    ViewData["CurrentFilter"] = searchString;
+                    ViewData["SearchOperator"] = searchOperator?.ToLower() ?? "and";
                 }
-                // Show only incidents needing immediate attention
+                //SORT FUNCTIONALITY 
+                else if (sortByPriority)
+                {
+
+                    incidents = await _sortService.GetIncidentsSortedByPriorityAsync(branchValue, sortPriorityAscending);
+
+                    ViewData["SortByPriority"] = true;
+                    ViewData["SortPriorityAscending"] = sortPriorityAscending;
+                }
+
+                else if (hasStatus && hasType)
+                {
+                    incidents = await _incidentService.GetIncidentsByStatusAndType(parsedStatus.Value, parsedType.Value, branchValue);
+                }
+                else if (hasStatus)
+                {
+                    incidents = await _incidentService.GetAllIncidentsPerStatus(parsedStatus.Value, branchValue);
+                }
+                else if (hasType)
+                {
+                    incidents = await _incidentService.GetAllIncidentsByType(parsedType.Value, branchValue);
+                }
                 else if (showImmediateAttention)
                 {
                     incidents = immediateAttentionNeeded;
                 }
-                // No filters — show all
                 else
                 {
                     incidents = await _incidentService.GetAllWitoutclosed(branchValue);
                 }
+                var awaitingArchival = await _incidentService.GetAwaitingToBeArchivedIncidents();
+                ViewData["AwaitingArchival"] = awaitingArchival.Count();
                 ViewData["TypeFilter"] = typeFilter;
                 ViewData["CurrentStatus"] = statusFilter;
                 ViewData["NumberOfOpenIncidents"] = openIncidents;
@@ -83,7 +139,6 @@ namespace NoSQL_Project.Controllers
                 ViewBag.ImmediateAttentionNeeded = immediateAttentionNeeded;
                 ViewData["NumberImmediateAttentionNeeded"] = immediateAttentionNeeded.Count();
 
-
                 if (pageNumber < 1)
                 {
                     pageNumber = 1;
@@ -91,7 +146,6 @@ namespace NoSQL_Project.Controllers
 
                 int pageSize = 10;
                 return View(PaginatedList<Incident>.CreateAsync(incidents, pageNumber, pageSize));
-
             }
             catch (Exception ex)
             {
@@ -214,13 +268,11 @@ namespace NoSQL_Project.Controllers
             catch (KeyNotFoundException ex)
             {
                 TempData["Error"] = ex.Message;
-                Console.WriteLine(ex);
                 return RedirectToAction("Index");
             }
             catch (Exception ex)
             {
                 TempData["Error"] = $"Could not close incident: {ex.Message}";
-                Console.WriteLine(ex);
                 return RedirectToAction("Index");
             }
         }
@@ -248,6 +300,180 @@ namespace NoSQL_Project.Controllers
             {
                 TempData["Error"] = ex.Message;
                 return RedirectToAction("Index");
+            }
+        }
+
+        /// <summary>
+        /// Shows a regular employee's own tickets only.
+        /// Reuses existing search/sort/filter logic but filters by logged-in user.
+        /// Author: Dylan Mohlen
+        /// Date: 2025-01-08
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> MyTickets(
+            string searchString,
+            string searchOperator,
+            bool sortByPriority = false,
+            bool sortPriorityAscending = false,
+            int pageNumber = 1,
+            string currentFilter = "",
+            string statusFilter = "")
+        {
+            // Get logged-in user
+            var loggedInUser = HttpContext.Session.GetObject<User>("LoggedInUser");
+
+            if (loggedInUser == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            List<Incident> incidents;
+
+            try
+            {
+                if (searchString != null)
+                {
+                    pageNumber = 1;
+                }
+                else
+                {
+                    searchString = currentFilter;
+                }
+
+
+                IncidentStatus? parsedStatus = null;
+                if (!string.IsNullOrEmpty(statusFilter) && statusFilter != "All")
+                {
+                    if (Enum.TryParse<IncidentStatus>(statusFilter, true, out var tempStatus))
+                    {
+                        parsedStatus = tempStatus;
+                    }
+                }
+
+
+                if (!string.IsNullOrWhiteSpace(searchString))
+                {
+                    var searchOp = searchOperator?.ToLower() == "or" ? SearchOperator.Or : SearchOperator.And;
+
+
+                    var searchResults = await _searchService.SearchIncidentsAsync(
+                        searchString,
+                        searchOp,
+                        "",
+                        parsedStatus,
+                        null);
+
+
+                    incidents = FilterByUser(searchResults, loggedInUser);
+
+                    ViewData["CurrentFilter"] = searchString;
+                    ViewData["SearchOperator"] = searchOperator?.ToLower() ?? "and";
+                }
+
+                else if (sortByPriority)
+                {
+                    var allIncidents = await _incidentService.GetAllWitoutclosed("");
+                    var myIncidents = FilterByUser(allIncidents, loggedInUser);
+
+                    // Apply sorting
+                    incidents = sortPriorityAscending
+                        ? myIncidents.OrderByDescending(i => (int)i.Priority).ThenByDescending(i => i.ReportedAt).ToList()
+                        : myIncidents.OrderBy(i => (int)i.Priority).ThenByDescending(i => i.ReportedAt).ToList();
+
+                    ViewData["SortByPriority"] = true;
+                    ViewData["SortPriorityAscending"] = sortPriorityAscending;
+                }
+
+                else if (parsedStatus.HasValue)
+                {
+                    var allIncidents = await _incidentService.GetAllIncidentsPerStatus(parsedStatus.Value, "");
+                    incidents = FilterByUser(allIncidents, loggedInUser);
+                }
+                else
+                {
+
+                    var allIncidents = await _incidentService.GetAllWitoutclosed("");
+                    incidents = FilterByUser(allIncidents, loggedInUser);
+                }
+
+
+                var allMyIncidents = FilterByUser(_incidentService.GetAll(), loggedInUser);
+                ViewData["TotalTickets"] = allMyIncidents.Count;
+                ViewData["OpenTickets"] = allMyIncidents.Count(i => i.Status == IncidentStatus.open || i.Status == IncidentStatus.inProgress);
+                ViewData["ResolvedTickets"] = allMyIncidents.Count(i => i.Status == IncidentStatus.resolved || i.Status == IncidentStatus.closed);
+                ViewData["ClosedWithoutResolve"] = allMyIncidents.Count(i => i.Status == IncidentStatus.closed_without_resolve);
+                ViewData["CurrentStatus"] = statusFilter;
+
+                if (pageNumber < 1)
+                {
+                    pageNumber = 1;
+                }
+
+                int pageSize = 10;
+                return View(PaginatedList<Incident>.CreateAsync(incidents, pageNumber, pageSize));
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"Could not retrieve your tickets: {ex.Message}";
+                return View(new PaginatedList<Incident>(new List<Incident>(), 0, 1, 1));
+            }
+        }
+
+        private List<Incident> FilterByUser(List<Incident> incidents, User user)
+        {
+            return incidents
+                .Where(i => i.ReportedBy != null &&
+                           i.ReportedBy.FirstName == user.FirstName &&
+                           i.ReportedBy.LastName == user.LastName)
+                .ToList();
+        }
+        public async Task<IActionResult> DisplayAwaitingArchival(bool archive)
+        {
+            int pageSize = 5;
+            try
+            {
+                var awaitingArchivalIncidents = await _incidentService.GetAwaitingToBeArchivedIncidents();
+                pageSize += awaitingArchivalIncidents.Count();
+
+                return PartialView("_IncidentsToBeArchived", PaginatedList<Incident>.CreateAsync(awaitingArchivalIncidents, 1, pageSize));
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"Could not retrieve archived incidents: {ex.Message}";
+                List<Incident> empty = new List<Incident>();
+                return PartialView("_IncidentsToBeArchived", PaginatedList<Incident>.CreateAsync(empty, 1, pageSize));
+            }
+        }
+        public async Task<IActionResult> ArchiveOldIncidents()
+        {
+            try
+            {
+                var awaitingArchivalIncidents = await _incidentService.GetAwaitingToBeArchivedIncidents();
+                await _archiveIncidentService.ArchiveOldIncidentsAsync(awaitingArchivalIncidents);
+                await _incidentService.DeleteArchivedIncidents(awaitingArchivalIncidents);
+                TempData["Success"] = "Old incidents archived successfully.";
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"Could not archive incidents: {ex.Message}";
+                return RedirectToAction("Index");
+            }
+        }
+        public async Task<IActionResult> DisplayArchivedIncidents()
+        {
+            int pageSize = 5;
+            try
+            {
+                var archivedIncidents = await _archiveIncidentService.GetArchivedIncidents();
+                pageSize += archivedIncidents.Count();
+                return PartialView("_IncidentsToBeArchived", PaginatedList<Incident>.CreateAsync(archivedIncidents, 1, pageSize));
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"Could not retrieve archived incidents: {ex.Message}";
+                List<Incident> empty = new List<Incident>();
+                return PartialView("_IncidentsToBeArchived", PaginatedList<Incident>.CreateAsync(empty, 1, pageSize));
             }
         }
 

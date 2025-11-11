@@ -30,6 +30,9 @@ namespace NoSQL_Project.Repositories.Interfaces
 		Task<List<Incident>> GetAllOpenOverdueIncidents(string branch);
 
 
+        Task<List<Incident>> GetAllOpenOverdueIncidents(string branch);
+        Task<List<Incident>> GetAwaitingToBeArchivedIncidents();
+        Task DeleteArchivedIncidents(List<Incident> toDelete);
 
     }
 }

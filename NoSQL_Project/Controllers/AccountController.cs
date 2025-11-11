@@ -52,29 +52,52 @@ namespace NoSQL_Project.Controllers
         [HttpGet]
         public async Task<IActionResult> ResetPassword(string userId, string token)
         {
-            User user = await _userService.FindByIdAsync(userId);
-            if (user == null || user.RessetToken != token || user.RessetTokenExpiry < DateTime.UtcNow)
+            try
             {
-                return BadRequest("Invalid or expired resset link");
+                User user = await _userService.FindByIdAsync(userId);
+                if (user == null || user.RessetToken != token || user.RessetTokenExpiry < DateTime.UtcNow)
+                {
+                    throw new Exception("Invalid or Expired Resset Link");
+                }
+                return View(new ResetPasswordViewModel { Token = token, UserId = userId });
             }
-            return View(new ResetPasswordViewModel { Token = token, UserId = userId });
+            catch (Exception ex)
+            {
+                TempData["Error"] = ex.Message;
+                return View(new ResetPasswordViewModel());
+                
+            }
         }
         [HttpPost]
         public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
         {
-            User user = await _userService.FindByIdAsync(model.UserId);
-            if (user == null || user.RessetToken != model.Token || user.RessetTokenExpiry < DateTime.UtcNow)
+            //Checks is the password in both pass fields match
+            if (!ModelState.IsValid)
             {
-                return BadRequest("Invalid or expired resset link");
+                return View(model);
             }
-            user.PasswordHash = model.Password;
-            user = _userService.HashUserPassword(user);
-            user.RessetToken = null;
-            user.RessetTokenExpiry = null;
-            await _userService.UpdateUserAsync(user);
+            try
+            {
+                //Once again validates the link with against the token and the expiry time (Prehaps the user took too much time to resset their pass)
+                User user = await _userService.FindByIdAsync(model.UserId);
+                if (user == null || user.RessetToken != model.Token || user.RessetTokenExpiry < DateTime.UtcNow)
+                {
+                    throw new Exception("Invalid or expired resset link");
+                }
+                user.PasswordHash = model.Password;
+                user = _userService.HashUserPassword(user);
+                user.RessetToken = null;
+                user.RessetTokenExpiry = null;
+                await _userService.UpdateUserAsync(user);
 
-            TempData["Success"] = "Password has been reset successfully";
-            return RedirectToAction("Login", "Home");
+                TempData["Success"] = "Password has been reset successfully";
+                return RedirectToAction("Login", "Home");
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = ex.Message;
+                return View(model);
+            }
         }
 
     }

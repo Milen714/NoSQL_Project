@@ -20,80 +20,82 @@
 	}
 }
 
-<form id="addUserFrom" class="form-check p-4 border rounded shadow-sm bg-white" method="post" asp-action="AddNewUser">
-	<div class="mb-3 col align-items-center">
-		<label class="form-label fw-semibold" for="FirstName">First Name:</label>
-		<div class="col-sm-8">
-            <input class="form-text form-control" type="text" id="FirstName" name="FirstName" value="@Model.FirstName" required />
-		</div>
-	</div>
-	<div class="mb-3 row align-items-center">
-		<label class="form-label fw-semibold" for="LastName">Last Name:</label>
-        <div class="col-sm-8">
-            <input class="form-text form-control" type="text" id="LastName" name="LastName" value="@Model.LastName" required />
-		</div>
-	</div>
-	<div class="mb-3 row align-items-center">
-		<label class="form-label fw-semibold" for="Email">Email:</label>
-        <div class="col-sm-8">
-            <input class="form-text form-control" type="email" id="Email" name="EmailAddress" value="@Model.EmailAddress" required />
-		</div>
-	</div>
-	<div class="mb-3 row align-items-center">
-		<label class="form-label" for="Phone">Phone:</label>
-        <div class="col-sm-8">
-            <input class="form-text form-control" type="tel" id="Phone" name="PhoneNumber" value="@Model.PhoneNumber" required />
-		</div>
-	</div>
-	<div class="mb-3 row align-items-center">
-		<label  class="form-label" for="Password">Password:</label>
-        <div class="col-sm-8">
-            <input class="form-text form-control" type="password" id="Password" name="PasswordHash" required />
-		</div>
-	</div>
-	<div class="mb-3 row align-items-center">
-		<label class="form-label" for="Role">Role:</label>
-		<select style="color: black;" class="form-select" id="Role" name="UserType" required>
-			<option value="">Select Role</option>
-			@{
-				UserType[] roles = (UserType[])Enum.GetValues(typeof(UserType));
-				foreach(var role in roles)
-				{
-					<option style="color: black;" value="@role">@role</option>
-				}
+		<div class="add_User_Form">
+			<form id="addUserFrom" class="form-check " method="post" asp-action="AddNewUser">
+				<div class="mb-3 col align-items-center">
+					<label class="form-label fw-semibold" for="FirstName">First Name:</label>
+					<div class="col-sm-8">
+						<input class="form-text form-control" type="text" id="FirstName" name="FirstName" value="@Model.FirstName" required />
+					</div>
+				</div>
+				<div class="mb-3 row align-items-center">
+					<label class="form-label fw-semibold" for="LastName">Last Name:</label>
+					<div class="col-sm-8">
+						<input class="form-text form-control" type="text" id="LastName" name="LastName" value="@Model.LastName" required />
+					</div>
+				</div>
+				<div class="mb-3 row align-items-center">
+					<label class="form-label fw-semibold" for="Email">Email:</label>
+					<div class="col-sm-8">
+						<input class="form-text form-control" type="email" id="Email" name="EmailAddress" value="@Model.EmailAddress" required />
+					</div>
+				</div>
+				<div class="mb-3 row align-items-center">
+					<label class="form-label" for="Phone">Phone:</label>
+					<div class="col-sm-8">
+						<input class="form-text form-control" type="tel" id="Phone" name="PhoneNumber" value="@Model.PhoneNumber" required />
+					</div>
+				</div>
+				<div class="mb-3 row align-items-center">
+					<label class="form-label" for="Password">Password:</label>
+					<div class="col-sm-8">
+						<input class="form-text form-control" type="password" id="Password" name="PasswordHash" required />
+					</div>
+				</div>
+				<div class="mb-3 row align-items-center">
+					<label class="form-label" for="Role">Role:</label>
+					<select style="color: black;" class="form-select" id="Role" name="UserType" required>
+						<option value="">Select Role</option>
+						@{
+						UserType[] roles = (UserType[])Enum.GetValues(typeof(UserType));
+						foreach(var role in roles)
+						{
+						<option style="color: black;" value="@role">@role</option>
+						}
 
-			}
-		</select>
-	</div>
-	<div class="mb-3 row align-items-center">
-		<label class="form-label" for="Location">Location:</label>
-		<select class="form-select" id="Location" name="locationId" required>
-			<option value="">Select Location</option>
-			@{
-				if (ViewBag.Locations != null)
-				{
-					List<Location> dbLocations = ViewBag.Locations;
-					foreach (var location in dbLocations)
-					{
+						}
+					</select>
+				</div>
+				<div class="mb-3 row align-items-center">
+					<label class="form-label" for="Location">Location:</label>
+					<select class="form-select" id="Location" name="locationId" required>
+						<option value="">Select Location</option>
+						@{
+						if (ViewBag.Locations != null)
+						{
+						List<Location> dbLocations = ViewBag.Locations;
+						foreach (var location in dbLocations)
+						{
 						<option style="color: black;" value="@location.Id">@location.Branch</option>
-					}
-				}
-			}
-			
-		</select>
-	</div>
-	<div class="form-check mb-4">
-		<input class="form-check-input" type="checkbox" id="SendPassword" name="SendPassword" checked>
-		<label class="form-check-label" for="SendPassword">
-			Yes, a password e-mail will be sent to the user
-		</label>
-	</div>
+						}
+						}
+						}
 
-	<div class="d-flex justify-content-end me-5 gap-3">
-		<a href="/User/index" class="btn btn-outline-secondary px-4">Cancel</a>
-		<button type="submit" class="btn btn-primary px-4">Add User</button>
-	</div>
-</form>
+					</select>
+				</div>
+				<div class="form-check mb-4">
+					<input class="form-check-input" type="checkbox" id="SendPassword" name="SendPassword" checked>
+					<label class="form-check-label" for="SendPassword">
+						Yes, a password e-mail will be sent to the user
+					</label>
+				</div>
+
+				<div class="d-flex justify-content-end me-5 gap-3">
+					<a href="/User/index" class="btn btn-outline-secondary px-4">Cancel</a>
+					<button type="submit" class="btn btn-primary px-4">Add User</button>
+				</div>
+			</form>
+		</div>
 @{
 	
 }

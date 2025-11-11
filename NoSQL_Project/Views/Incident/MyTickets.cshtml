@@ -1,0 +1,343 @@
+﻿@using NoSQL_Project.Models.Enums
+@using NoSQL_Project.Commons
+@model PaginatedList<NoSQL_Project.Models.Incident>
+
+@{
+    ViewData["Title"] = "My Tickets";
+    var loggedInUser = Context.Session.GetObject<User>("LoggedInUser");
+}
+
+@if (TempData["Success"] != null)
+{
+    <p class="alert-success">@TempData["Success"]</p>
+}
+@if (TempData["Error"] != null)
+{
+    <p class="alert-danger">@TempData["Error"]</p>
+}
+
+<header class="main_container_header">
+    <div>
+        <h3>My Tickets</h3>
+        <p>Welcome, @loggedInUser?.FirstName @loggedInUser?.LastName</p>
+    </div>
+</header>
+
+
+<div class="charts_container">
+    <div id="chart_left_container" class="canvas_container">
+        <h4>Open Tickets</h4>
+        <p>@ViewData["OpenTickets"] tickets not resolved</p>
+        <canvas id="chart1" width="150" height="150"></canvas>
+    </div>
+    <div id="chart_middle_container" class="canvas_container">
+        <h4>Resolved Tickets</h4>
+        <p>@ViewData["ResolvedTickets"] successfully closed</p>
+        <canvas id="chart2" width="150" height="150"></canvas>
+    </div>
+    <div id="chart_right_container" class="canvas_container">
+        <h4>Closed Without Resolve</h4>
+        <p>@ViewData["ClosedWithoutResolve"] unresolved</p>
+        <canvas id="chart3" width="150" height="150"></canvas>
+    </div>
+</div>
+
+
+<div class="search_and_fileter_container">
+    <div class="search_sub_container" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+
+        
+        <form class="d-flex" role="search" method="get" asp-action="MyTickets" style="flex: 1; min-width: 400px;">
+            <input class="form-control me-2"
+                   type="search"
+                   name="searchString"
+                   placeholder="Search my tickets..."
+                   aria-label="Search"
+                   style="flex: 1;"
+                   value="@ViewData["CurrentFilter"]">
+
+            <select name="searchOperator" class="form-select me-2" style="width: 100px;">
+                <option value="and" selected="@(ViewData["SearchOperator"]?.ToString() == "and")">AND</option>
+                <option value="or" selected="@(ViewData["SearchOperator"]?.ToString() == "or")">OR</option>
+            </select>
+
+            <button class="btn btn-outline-success" type="submit" style="white-space: nowrap;">Search</button>
+
+            <input type="hidden" name="statusFilter" value="@ViewData["CurrentStatus"]" />
+        </form>
+
+       
+        <form method="get" asp-action="MyTickets" style="display: inline-block; margin-left: 10px;">
+            <input type="hidden" name="sortByPriority" value="true" />
+            <input type="hidden" name="sortPriorityAscending" value="false" />
+            <input type="hidden" name="statusFilter" value="@ViewData["CurrentStatus"]" />
+
+            <button class="btn btn-warning" type="submit" title="Sort by Priority: Critical → Low">
+                ⚡ Sort Priority
+            </button>
+        </form>
+
+    
+        <form method="get" asp-action="MyTickets" style="display: inline-block; margin-left: 5px;">
+            <input type="hidden" name="sortByPriority" value="true" />
+            <input type="hidden" name="sortPriorityAscending" value="true" />
+            <input type="hidden" name="statusFilter" value="@ViewData["CurrentStatus"]" />
+
+            <button class="btn btn-outline-warning" type="submit" title="Sort by Priority: Low → Critical">
+                🔄 Reverse
+            </button>
+        </form>
+    </div>
+
+    
+    <div class="search_container">
+        <div class="search_options_container">
+            <nav>
+                <ul class="search_options_ul">
+                    <li class="search_options_li">
+                        <a class="search_options_a @(string.IsNullOrEmpty(ViewContext.HttpContext.Request.Query["statusFilter"]) ? "activeFilter" : "")"
+                           asp-action="MyTickets">Active</a>
+                    </li>
+                    <li class="search_options_li">
+                        <a class="search_options_a @(ViewContext.HttpContext.Request.Query["statusFilter"] == "open" ? "activeFilter" : "")"
+                           asp-action="MyTickets" asp-route-statusFilter="open">Open</a>
+                    </li>
+                    <li class="search_options_li">
+                        <a class="search_options_a @(ViewContext.HttpContext.Request.Query["statusFilter"] == "inProgress" ? "activeFilter" : "")"
+                           asp-action="MyTickets" asp-route-statusFilter="inProgress">In Progress</a>
+                    </li>
+                    <li class="search_options_li">
+                        <a class="search_options_a @(ViewContext.HttpContext.Request.Query["statusFilter"] == "resolved" ? "activeFilter" : "")"
+                           asp-action="MyTickets" asp-route-statusFilter="resolved">Resolved</a>
+                    </li>
+                    <li class="search_options_li">
+                        <a class="search_options_a @(ViewContext.HttpContext.Request.Query["statusFilter"] == "closed" ? "activeFilter" : "")"
+                           asp-action="MyTickets" asp-route-statusFilter="closed">Closed</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+
+    <a class="btn btn-primary" href="/Incident/CreateIncident">Create New Ticket</a>
+</div>
+
+
+@if (!string.IsNullOrEmpty(ViewData["CurrentFilter"]?.ToString()) ||
+   (ViewData["SortByPriority"] != null && (bool)ViewData["SortByPriority"]))
+{
+    <div class="alert alert-info mt-3">
+        <strong>Active Filters:</strong>
+
+        @if (!string.IsNullOrEmpty(ViewData["CurrentFilter"]?.ToString()))
+        {
+            <span class="badge bg-success ms-2">
+                🔍 Search: "@ViewData["CurrentFilter"]" (@(ViewData["SearchOperator"]?.ToString().ToUpper() ?? "AND"))
+            </span>
+        }
+
+        @if (ViewData["SortByPriority"] != null && (bool)ViewData["SortByPriority"])
+        {
+            var sortDirection = ViewData["SortPriorityAscending"]?.ToString() == "True" ? "Low → Critical" : "Critical → Low";
+            <span class="badge bg-warning text-dark ms-2">
+                ⚡ Sorted by Priority (@sortDirection)
+            </span>
+        }
+
+        <a asp-action="MyTickets" class="btn btn-sm btn-outline-secondary ms-3">Clear All</a>
+    </div>
+}
+
+@* Table - Reused structure but simplified (no CRUD for regular users) *@
+<div class="table_NICE_container">
+    <table class="table_NICE">
+        <thead>
+            <tr>
+                <th>Priority</th>
+                <th>Title</th>
+                <th>Type</th>
+                <th>Status</th>
+                <th>Assigned to</th>
+                <th>Reported At</th>
+                <th>SLA</th>
+            </tr>
+        </thead>
+        <tbody class="table_NICE_body">
+            @if (Model.Items.Any())
+            {
+                @foreach (Incident incident in Model.Items)
+                {
+                    string incidentStatusStyle = "";
+                    string priorityLevelStyle = "";
+
+                    switch (incident.Priority)
+                    {
+                        case Priority.low:
+                            priorityLevelStyle = "priority_low";
+                            break;
+                        case Priority.medium:
+                            priorityLevelStyle = "priority_medium";
+                            break;
+                        case Priority.high:
+                            priorityLevelStyle = "priority_high";
+                            break;
+                        case Priority.critical:
+                            priorityLevelStyle = "priority_critical";
+                            break;
+                    }
+
+                    switch (incident.Status)
+                    {
+                        case IncidentStatus.open:
+                            incidentStatusStyle = "status_open";
+                            break;
+                        case IncidentStatus.resolved:
+                            incidentStatusStyle = "status_resolved";
+                            break;
+                        case IncidentStatus.closed_without_resolve:
+                            incidentStatusStyle = "status_closed_without_resolve";
+                            break;
+                        case IncidentStatus.inProgress:
+                            incidentStatusStyle = "status_in_progress";
+                            break;
+                        case IncidentStatus.closed:
+                            incidentStatusStyle = "status_closed";
+                            break;
+                    }
+
+                    <tr>
+                        <td>
+                            <div class="priority_label @priorityLevelStyle">@incident.Priority</div>
+                        </td>
+                        <td>
+                            <a class="incident_href" asp-controller="Incident" asp-action="IncidentDetails" asp-route-id="@incident.Id">
+                                @incident.Subject
+                            </a>
+                        </td>
+                        <td>@incident.IncidentType</td>
+                        <td>
+                            <div class="priority_label @incidentStatusStyle">@incident.Status</div>
+                        </td>
+                        @{
+                            var activeUser = incident.AssignedTo?.FirstOrDefault(a => a.IsActive);
+                        }
+                        <td>@(activeUser != null ? $"{activeUser.FirstName} {activeUser.LastName}" : "Unassigned")</td>
+                        <td>@incident.ReportedAt.ToString("g")</td>
+                        <td>@((incident.Deadline - DateTime.Now).Days) Days</td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="7" class="text-center" style="padding: 40px;">
+                        <h5>You haven't created any tickets yet.</h5>
+                        <a href="/Incident/CreateIncident" class="btn btn-primary mt-3">Create Your First Ticket</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+
+<div class="row">
+    <div class="col-md-6">
+        <p>Showing @Model.Items.Count of @ViewData["TotalTickets"] total tickets</p>
+    </div>
+    <div class="col-md-6">
+        <nav>
+            <ul class="pagination justify-content-center">
+                <li class="page-item @(Model.PageIndex == 1 ? "disabled" : "")">
+                    <a class="page-link text-black" asp-route-pageNumber="1"
+                       asp-route-statusFilter="@ViewData["CurrentStatus"]"
+                       asp-route-searchString="@ViewData["CurrentFilter"]"
+                       asp-route-searchOperator="@ViewData["SearchOperator"]"
+                       asp-route-sortByPriority="@ViewData["SortByPriority"]"
+                       asp-route-sortPriorityAscending="@ViewData["SortPriorityAscending"]">
+                        <span>First</span>
+                    </a>
+                </li>
+
+                <li class="page-item @(Model.HasPreviousPage ? "" : "disabled")">
+                    <a class="page-link text-black" asp-route-pageNumber="@(Model.PageIndex - 1)"
+                       asp-route-statusFilter="@ViewData["CurrentStatus"]"
+                       asp-route-searchString="@ViewData["CurrentFilter"]"
+                       asp-route-searchOperator="@ViewData["SearchOperator"]"
+                       asp-route-sortByPriority="@ViewData["SortByPriority"]"
+                       asp-route-sortPriorityAscending="@ViewData["SortPriorityAscending"]">
+                        <span>Previous</span>
+                    </a>
+                </li>
+
+                @for (int i = 1; i <= Model.TotalPages; i++)
+                {
+                    <li class="page-item @(Model.PageIndex == i ? "active" : "")">
+                        <a class="page-link text-black" asp-route-pageNumber="@i"
+                           asp-route-statusFilter="@ViewData["CurrentStatus"]"
+                           asp-route-searchString="@ViewData["CurrentFilter"]"
+                           asp-route-searchOperator="@ViewData["SearchOperator"]"
+                           asp-route-sortByPriority="@ViewData["SortByPriority"]"
+                           asp-route-sortPriorityAscending="@ViewData["SortPriorityAscending"]">@i</a>
+                    </li>
+                }
+
+                <li class="page-item @(Model.HasNextPage ? "" : "disabled")">
+                    <a class="page-link text-black" asp-route-pageNumber="@(Model.PageIndex + 1)"
+                       asp-route-statusFilter="@ViewData["CurrentStatus"]"
+                       asp-route-searchString="@ViewData["CurrentFilter"]"
+                       asp-route-searchOperator="@ViewData["SearchOperator"]"
+                       asp-route-sortByPriority="@ViewData["SortByPriority"]"
+                       asp-route-sortPriorityAscending="@ViewData["SortPriorityAscending"]">
+                        <span>Next</span>
+                    </a>
+                </li>
+
+                <li class="page-item @(Model.PageIndex == Model.TotalPages ? "disabled" : "")">
+                    <a class="page-link text-black" asp-route-pageNumber="@Model.TotalPages"
+                       asp-route-statusFilter="@ViewData["CurrentStatus"]"
+                       asp-route-searchString="@ViewData["CurrentFilter"]"
+                       asp-route-searchOperator="@ViewData["SearchOperator"]"
+                       asp-route-sortByPriority="@ViewData["SortByPriority"]"
+                       asp-route-sortPriorityAscending="@ViewData["SortPriorityAscending"]">
+                        <span>Last</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function drawDonut(canvasId, value, total, color){
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) return;
+
+            const context = canvas.getContext("2d");
+            const percent = total > 0 ? value / total : 0;
+
+            context.lineWidth = 25;
+            context.strokeStyle = "lightgrey";
+            context.beginPath();
+            context.arc(75, 75, 55, 0, 2 * Math.PI);
+            context.stroke();
+
+            context.strokeStyle = color;
+            context.beginPath();
+            context.arc(75, 75, 55, -0.5 * Math.PI, (percent * 2 * Math.PI) - 0.5 * Math.PI);
+            context.stroke();
+
+            //Text
+            context.fillStyle = "#888888";
+            context.font = "20px Arial";
+            context.textAlign = "center";
+            context.textBaseLine = "middle";
+            context.fillText(value + (total ? "/" + total : ""), 75, 75);
+        }
+
+        drawDonut("chart1", @ViewData["OpenTickets"], @ViewData["TotalTickets"], "orange");
+        drawDonut("chart2", @ViewData["ResolvedTickets"], @ViewData["TotalTickets"], "green");
+        drawDonut("chart3", @ViewData["ClosedWithoutResolve"], @ViewData["TotalTickets"], "red");
+    </script>
+}

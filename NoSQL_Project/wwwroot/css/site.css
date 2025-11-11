@@ -84,8 +84,8 @@ body {
     text-decoration: none;
     text-align: center;
     align-content: center;
-    width: 60%;
-    height: 40px;
+    min-width: 60%;
+    min-height: 40px;
     margin: 10px auto;
     justify-content: center;
     box-shadow: var(--shadow-m);
@@ -154,9 +154,10 @@ body {
     border-radius: 5px;
     color: var(--color-text-dark);
 }
-#addUserFrom {
-    background-color: #fff;
+.add_User_Form {
+    background-color: var(--color-bg-light);
 }
+
 
 #addUserFrom .form-label {
     color: var(--color-text-dark);
@@ -222,11 +223,15 @@ body {
     flex-direction: row;
     justify-content: space-between;
 }
+.main_container_header_sub {
+    display: flex;
+    flex-direction: row;
+    gap:15px;
+}
 
 .nav_li {
     padding: 5px;
     border-radius: 5px;
-    
 }
 .nav_li:hover, active{
     background-color: var(--color-primary-link-active);
@@ -465,4 +470,29 @@ body {
 }
 .option_select {
     color: var(--color-text-dark);
+}
+#forgotPassword_Container{
+    margin: 10px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+.forgotPassword_FormWrapper {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.forgotPassword_Header {
+    justify-self: flex-start;
+}
+.field-validation-error {
+    min-height: 20px;
+    padding: 10px;
+    border-radius: 10px;
+    background-color: lightcoral;
+    color: red;
+    font-family: "Roboto Mono", monospace;
 }
