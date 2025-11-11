@@ -446,7 +446,7 @@
             const container = document.getElementById('To_be_archived_container');
 			const toHideContaier = document.getElementById('Index_container');
 
-            fetch(`/Incident/${isArchived == true ? "DisplayArchivedIncidents" : "DisplayAwaitingArchival"}`)
+            fetch(`/Incident/${isArchived == true ? "DisplayArchivedIncidents" : "DisplayAwaitingArchival"}`, { cache: "reload" })
                 .then(response => {
                     if (!response.ok) {
                         throw new Error('Network response was not ok');
@@ -455,7 +455,9 @@
                 })
                 .then(html => {
 					toHideContaier.style.display = 'none';
+                    console.log(html);
                     container.innerHTML = html;
+                    container.style.display = 'block';
                       
                 })
                 .catch(error => console.error('Error loading partial view:', error));
@@ -464,6 +466,7 @@
               const toShow = document.getElementById('Index_container');
               const toHideContaier = document.getElementById('To_be_archived_container');
               toHideContaier.style.display = 'none';
+              toHideContaier.innerHTML = "";
               toShow.style.display = 'block';
           }
 

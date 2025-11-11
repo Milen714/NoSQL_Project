@@ -11,7 +11,7 @@
     <form asp-action="TransferIncident" method="post">
         <input type="hidden" name="incidentId" value="@incidentId" />
 
-    <table cellspacing="30">
+        <table class="table_NICE" >
         <tr>
             <td valign="top">
                 <table class="table">
@@ -22,7 +22,7 @@
                             <th>Total Incidents at the Moment</th>
                         </tr>
                     </thead>
-                    <tbody>
+                        <tbody class="table_NICE_body">
                         @foreach (var user in Model)
                         {
                             <tr>

@@ -199,6 +199,7 @@ body {
     background-color: var(--color-sidebar-bg);
     color: var(--color-text-light);
     margin-top: 10px;
+    overflow: hidden;
 }
 .main_nav_parent {
     height: 100vh;
@@ -214,6 +215,7 @@ body {
 }
 .main_container {
     width: 100%;
+    height: 100vh;
     color: var(--color-text-dark);
     background-color: var(--color-bg-light);
     margin-top: 10px;
@@ -221,10 +223,15 @@ body {
     border-top-left-radius: 30px;
     border-top: 2px solid var(--color-border-focus);
     border-left: 2px solid var(--color-border-focus);
+    overflow: scroll;
+}
+.main_container::-webkit-scrollbar {
+    display: none;
 }
 .main_container_header{
     display: flex;
     flex-direction: row;
+    margin-bottom: 10px;
     justify-content: space-between;
 }
 .main_container_header_sub {
@@ -407,7 +414,9 @@ body {
 }
 .search_and_fileter_container {
     display: flex;
-    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
 }
 .filter_button_class{
     border: 1px solid black;

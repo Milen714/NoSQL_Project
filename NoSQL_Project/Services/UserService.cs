@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using NoSQL_Project.Models;
+using NoSQL_Project.Models.Enums;
 using NoSQL_Project.Repositories.Interfaces;
 using NoSQL_Project.Services.Interfaces;
 using System.Security.Cryptography;
@@ -13,6 +14,10 @@ namespace NoSQL_Project.Services
         public UserService(IUserRepository userRepository)
         {
             _userRepository = userRepository;
+        }
+        public async Task<List<User>> GetActiveUsers(string searchString, UserType userTypeFilter, bool hasType)
+        {
+            return await _userRepository.GetActiveUsers(searchString, userTypeFilter, hasType);
         }
 
         public async Task Add(User user)
@@ -60,12 +65,6 @@ namespace NoSQL_Project.Services
             return token;
 
         }
-
-        public List<User> GetAll()
-        {
-            return _userRepository.GetAll().Result;
-        }
-
         public async Task<User> GetUserByEmailAsync(string email)
         {
             return await _userRepository.GetUserByEmailAsync(email);
@@ -73,7 +72,7 @@ namespace NoSQL_Project.Services
 
         public async Task UpdateUserAsync(User user)
         {
-            _userRepository.UpdateUserAsync(user);
+           await _userRepository.UpdateUserAsync(user);
         }
 
         public User HashUserPassword(User user)

@@ -474,12 +474,15 @@ namespace NoSQL_Project.Controllers
             {
                 var archivedIncidents = await _archiveIncidentService.GetArchivedIncidents();
                 pageSize += archivedIncidents.Count();
+                bool isArchivedView = true;
+                ViewData["isArchivedView"] = isArchivedView;
                 return PartialView("_IncidentsToBeArchived", PaginatedList<Incident>.CreateAsync(archivedIncidents, 1, pageSize));
             }
             catch (Exception ex)
             {
                 TempData["Error"] = $"Could not retrieve archived incidents: {ex.Message}";
                 List<Incident> empty = new List<Incident>();
+                ViewData["isArchivedView"] = true;
                 return PartialView("_IncidentsToBeArchived", PaginatedList<Incident>.CreateAsync(empty, 1, pageSize));
             }
         }

@@ -10,6 +10,8 @@ namespace NoSQL_Project.Models.Enums
         [BsonRepresentation(BsonType.String)]
         Reg_employee,
         [BsonRepresentation(BsonType.String)]
-        Service_employee
+        Service_employee,
+        [BsonRepresentation(BsonType.String)]
+        All_employee
     }
 }

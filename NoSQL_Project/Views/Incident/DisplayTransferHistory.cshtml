@@ -13,7 +13,8 @@
 }
 else
 {
-    <table class="table table-striped">
+	<article class="table_NICE_container">
+    <table class="table_NICE">
         <thead>
             <tr>
                 <th>Date of assignation</th>
@@ -21,7 +22,7 @@ else
                 <th>Message</th>                
             </tr>
         </thead>
-        <tbody>
+        <tbody class="table_NICE_body">
             @foreach (var assignee in Model)
             {
                 <tr>
@@ -32,6 +33,7 @@ else
             }
         </tbody>
     </table>
+	</article>
 }
 
 <a asp-controller="Incident" asp-action="IncidentDetails" asp-route-id="@incidentId" class="btn btn-secondary mt-2">Return</a>

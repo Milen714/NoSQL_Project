@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using MongoDB.Driver;
 using NoSQL_Project.Models;
+using NoSQL_Project.Models.Enums;
 using NoSQL_Project.Repositories.Interfaces;
 
 namespace NoSQL_Project.Repositories
@@ -15,15 +16,28 @@ namespace NoSQL_Project.Repositories
             _users = db.GetCollection<User>("USERS");
         }
 
-        public async Task<List<User>> GetAll()
+       
+        public async Task<List<User>> GetActiveUsers(string searchString, UserType userTypeFilter, bool hasType)
         {
+            FilterDefinition<User> emailFilter = FilterDefinition<User>.Empty;
+            FilterDefinition<User> typeFilter = FilterDefinition<User>.Empty;
             try
             {
-                return await _users.Find(_ => true).ToListAsync();
+                if (!string.IsNullOrWhiteSpace(searchString))
+                {
+                    emailFilter = Builders<User>.Filter.Regex(u => u.EmailAddress, new MongoDB.Bson.BsonRegularExpression(searchString, "i"));
+                }
+                if (hasType)
+                {
+                    typeFilter = Builders<User>.Filter.Eq(u => u.UserType, userTypeFilter);
+                }
+                var combinedFilter = Builders<User>.Filter.And(emailFilter, typeFilter);
+                var result = await _users.Find(combinedFilter).ToListAsync();
+                return result;
             }
             catch (Exception ex)
             {
-                throw new Exception("Could not retrieve users.");
+                throw new Exception(ex.Message);
             }
         }
 

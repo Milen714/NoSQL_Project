@@ -1,4 +1,6 @@
-﻿using ChapeauPOS.Commons;
+﻿using System.Runtime.ConstrainedExecution;
+using System.Threading.Tasks;
+using ChapeauPOS.Commons;
 using Microsoft.AspNetCore.Mvc;
 using NoSQL_Project.Commons;
 using NoSQL_Project.Models;
@@ -20,7 +22,7 @@ namespace NoSQL_Project.Controllers
         }
 
         [SessionAuthorize(UserType.Service_employee)]
-        public async Task<IActionResult> Index(string searchString, int pageNumber, string currentFilter)
+        public async Task<IActionResult> Index(string searchString, int pageNumber, string userTypeFilter, bool hasType)
         {
             try
             {
@@ -28,12 +30,14 @@ namespace NoSQL_Project.Controllers
                 {
                     pageNumber = 1;
                 }
-                else
-                {
-                    searchString = currentFilter;
-                }
 
-                var users = _userService.GetAll().Where(u => u.UserType == UserType.Service_employee);
+                UserType parsedType = UserType.All_employee;
+
+                if (hasType && Enum.TryParse<UserType>(userTypeFilter, true, out var tempStatus))
+                {
+                    parsedType = tempStatus;
+                }
+                var users = _userService.GetActiveUsers(searchString, parsedType, hasType).Result;
 
                 if (pageNumber < 1)
                 {
@@ -50,13 +54,21 @@ namespace NoSQL_Project.Controllers
                 return View(new PaginatedList<User>(new List<User>(), 0, 1, 1));
             }
         }
-
+        [SessionAuthorize(UserType.Service_employee)]
         public IActionResult AddNewUser()
         {
-            ViewBag.Locations = _locationService.GetAllLocations().Result;
-            return View(new User());
+            try
+            {
+                ViewBag.Locations = _locationService.GetAllLocations().Result;
+                return View(new User());
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = ex.Message;
+                return RedirectToAction("Index");
+            }
         }
-        //[SessionAuthorize(UserRoles.Admin)]
+        [SessionAuthorize(UserType.Service_employee)]
         [HttpPost]
         public async Task<IActionResult> AddNewUser(User user, string locationId)
         {
@@ -72,6 +84,57 @@ namespace NoSQL_Project.Controllers
             catch (Exception ex)
             {
                 TempData["Error"] = $"Failed to fullfill your submision: {ex.Message}";
+                return View(user);
+            }
+        }
+        [SessionAuthorize(UserType.Service_employee, UserType.Reg_employee)]
+        [HttpGet]
+        public async Task<IActionResult> EditUser(string id)
+        {
+            User user = await _userService.FindByIdAsync(id);
+            User loggedInUser = HttpContext.Session.GetObject<User>("LoggedInUser");
+            ViewBag.LoggedInUser = loggedInUser;
+            try
+            {
+
+                ViewBag.Locations = _locationService.GetAllLocations().Result;
+
+                return View(user);
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"Failed to save your changes: {ex.Message}";
+                return View(user);
+            }
+        }
+        [SessionAuthorize(UserType.Service_employee, UserType.Reg_employee)]
+        [HttpPost]
+        public async Task<IActionResult> EditUser(User user, string locationId, string newPassword)
+        {
+            try
+            {
+                if (!string.IsNullOrEmpty(newPassword))
+                {
+                    user.PasswordHash = newPassword;
+                    user = _userService.HashUserPassword(user);
+                }
+                Location userLocation = _locationService.GetLocationById(locationId).Result;
+                UserLocationRef userLocationRef = new UserLocationRef();
+                userLocationRef.MapLocation(userLocation);
+                user.Location = userLocationRef;
+                await _userService.UpdateUserAsync(user);
+
+                User loggedInUser = HttpContext.Session.GetObject<User>("LoggedInUser");
+                if(loggedInUser.UserType == UserType.Reg_employee)
+                {
+                    return RedirectToAction("MyTickets", "Incident");
+                }
+
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"Failed to save your changes: {ex.Message}";
                 return View(user);
             }
         }

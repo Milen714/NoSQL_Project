@@ -27,6 +27,8 @@ namespace NoSQL_Project.Models
 
         [BsonElement("phone_number")]
         public string PhoneNumber { get; set; } = default!;
+        [BsonElement("active")]
+        public bool Active { get; set; }
 
         [BsonElement("password_hash")]
         [BsonIgnoreIfNull]

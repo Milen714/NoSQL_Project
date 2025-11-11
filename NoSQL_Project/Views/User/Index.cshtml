@@ -14,22 +14,83 @@
     <p class="alert-danger">@TempData["Error"]</p>
 }
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <!-- Search bar (left) -->
-    <form class="d-flex" role="search">
-        <input class="form-control me-2" type="search" placeholder="Filter by email" aria-label="Search">
-        <button class="btn btn-outline-success" type="submit">Search</button>
-    </form>
+@{
+    string nullstring = null;
+}
 
-    <!-- Button (right) -->
+<div class="search_and_fileter_container">
+
+    <div class="search_sub_container">
+        <form class="d-flex" role="search" asp-action="Index" method="get">
+            <input class="form-control me-2" type="search"
+                   placeholder="@(ViewContext.HttpContext.Request.Query["searchString"] ==  nullstring? "Filter by email" : ViewContext.HttpContext.Request.Query["searchString"])"
+                   aria-label="Search" name="searchString">
+            <button class="btn btn-outline-success" type="submit">Search</button>
+        </form>
+    </div>
+
+    <div class="search_container">
+        <div class="search_options_container">
+            <nav>
+                <ul class="search_options_ul">
+                    <li class="search_options_li">
+                        <a class="search_options_a @(ViewContext.HttpContext.Request.Query["userTypeFilter"] ==  nullstring || ViewContext.HttpContext.Request.Query["userTypeFilter"] ==  "All" ? "activeFilter" : "")"
+                           asp-action="Index" asp-route-userTypeFilter="All" asp-route-hasType="false" asp-route-searchString="@Context.Request.Query["searchString"]">All</a>
+                    </li>
+                    <li class="search_options_li">
+                        <a class="search_options_a @(ViewContext.HttpContext.Request.Query["userTypeFilter"] == "Service_employee" ? "activeFilter" : "")"
+                           asp-action="Index" asp-route-userTypeFilter="Service_employee" asp-route-hasType="true" 
+                           asp-route-searchString="@Context.Request.Query["searchString"]">Service Employees</a>
+                    </li>
+                    <li class="search_options_li">
+                        <a class="search_options_a @(ViewContext.HttpContext.Request.Query["userTypeFilter"] == "Reg_employee" ? "activeFilter" : "")"
+                           asp-action="Index" asp-route-userTypeFilter="Reg_employee" asp-route-hasType="true" 
+                           asp-route-searchString="@Context.Request.Query["searchString"]">Regular Employees</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+
     <a id="newUserBtn" class="btn btn-success" href="/User/AddNewUser">+Add New User</a>
+
 </div>
+
+
+@if (!string.IsNullOrEmpty(ViewContext.HttpContext.Request.Query["searchString"]) ||
+    !string.IsNullOrEmpty(ViewContext.HttpContext.Request.Query["userTypeFilter"])) 
+{
+    <div class="alert alert-info mt-3">
+        <strong>Active Filters/Actions:</strong>
+
+        @if (!string.IsNullOrEmpty(ViewContext.HttpContext.Request.Query["searchString"]))
+        {
+            <span class="badge bg-success ms-2">
+                🔍 Search: "@ViewContext.HttpContext.Request.Query["searchString"]"
+            </span>
+        }
+
+        @if (!string.IsNullOrEmpty(ViewContext.HttpContext.Request.Query["userTypeFilter"]) && ViewContext.HttpContext.Request.Query["userTypeFilter"] != "All")
+        {
+            <span class="badge bg-info ms-2">
+                👤 User Type: @ViewContext.HttpContext.Request.Query["userTypeFilter"]
+            </span>
+        }
+
+       
+
+        <a asp-action="Index" class="btn btn-sm btn-outline-secondary ms-3">Clear All</a>
+    </div>
+}
+
+
 
 <div class="table_NICE_container">
     <table class="table_NICE">
         <thead>
             <tr>
-                <th>Name</th>
+                <th>First Name</th>
+                <th>Last Name</th>
                 <th>Email</th>
                 <th>User Type</th>
                 <th>Branch</th>
@@ -40,8 +101,21 @@
             @foreach (var u in Model.Items)
             {
                 <tr>
-                    <td>@u.FirstName</td>
-                    <td>@u.EmailAddress</td>
+                    <td>
+                        <a class="incident_href" asp-controller="User" asp-action="EditUser" asp-route-id="@u.Id">
+                            @u.FirstName
+                        </a>
+                    </td>
+                    <td>
+                        <a class="incident_href" asp-controller="User" asp-action="EditUser" asp-route-id="@u.Id">
+                            @u.LastName
+                        </a>
+                    </td>
+                    <td>
+                        <a class="incident_href" asp-controller="User" asp-action="EditUser" asp-route-id="@u.Id">
+                            @u.EmailAddress
+                        </a>
+                    </td>
                     <td>@u.UserType</td>
                     <td>@u.Location.Branch</td>
                     <td>@u.Location.BranchCode</td>
