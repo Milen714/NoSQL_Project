@@ -10,36 +10,42 @@
 <form asp-action="TransferIncident" method="post">
     <input type="hidden" name="incidentId" value="@incidentId" />
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Select</th>
-                <th>Name</th>
-                <th>Total Incidents at the Moment</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var user in Model)
-            {
-                <tr>
-                    <td>
-                        <input type="radio" name="userForTransferId" value="@user.UserId.ToString()" required />
-                    </td>
-                    <td>@user.FirstName @user.LastName</td>
-                    <td>@user.TotalIncidents</td>
-                </tr>
-            }
-        </tbody>
+    <table cellspacing="30">
+        <tr>
+            <td valign="top">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Select</th>
+                            <th>Name</th>
+                            <th>Total Incidents at the Moment</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var user in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <input type="radio" name="userForTransferId" value="@user.UserId.ToString()" required />
+                                </td>
+                                <td>@user.FirstName @user.LastName</td>
+                                <td>@user.TotalIncidents</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </td>
+
+            <td valign="top" align="center">
+                <br /><br /> 
+                <label for="transferMessage"><b>Message for Transfer</b></label><br />
+                <textarea id="transferMessage" name="transferMessage" rows="15" cols="40"
+                          placeholder="Write comments or the reason for your ticket transfer here"></textarea>
+            </td>
+        </tr>
     </table>
 
-    <div class="form-group mt-3">
-        <label for="transferMessage">Message for Transfer</label>
-        <textarea class="form-control" id="transferMessage" name="transferMessage" rows="3"
-                  placeholder="Write comments or the reason for your ticket transfer here"></textarea>
-    </div>
-
-    <button type="submit" class="btn btn-primary">Transfer</button>
+    <button type="submit" class="btn btn-primary mt-3">Transfer</button>
 </form>
 
 <a asp-controller="Incident" asp-action="IncidentDetails" asp-route-id="@incidentId" class="btn btn-secondary mt-2">Return</a>
-
