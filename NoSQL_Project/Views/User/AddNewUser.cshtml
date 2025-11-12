@@ -1,4 +1,4 @@
-﻿@using NoSQL_Project.Models.Enums
+@using NoSQL_Project.Models.Enums
 @model NoSQL_Project.Models.User
 @{
 	ViewData["Title"] = "Add New User";
@@ -57,30 +57,33 @@
 					<label class="form-label" for="Role">Role:</label>
 					<select style="color: black;" class="form-select" id="Role" name="UserType" required>
 						<option value="">Select Role</option>
-						@{
-						UserType[] roles = (UserType[])Enum.GetValues(typeof(UserType));
-						foreach(var role in roles)
+				@{
+					UserType[] roles = (UserType[])Enum.GetValues(typeof(UserType));
+					foreach(var role in roles)
+					{
+						if(role != UserType.All_employee)
 						{
-						<option style="color: black;" value="@role">@role</option>
+							<option style="color: black;" value="@role">@role</option>
 						}
+					}
 
-						}
+				}
 					</select>
 				</div>
 				<div class="mb-3 row align-items-center">
 					<label class="form-label" for="Location">Location:</label>
 					<select class="form-select" id="Location" name="locationId" required>
 						<option value="">Select Location</option>
-						@{
+					@{
 						if (ViewBag.Locations != null)
 						{
-						List<Location> dbLocations = ViewBag.Locations;
-						foreach (var location in dbLocations)
-						{
-						<option style="color: black;" value="@location.Id">@location.Branch</option>
+							List<Location> dbLocations = ViewBag.Locations;
+							foreach (var location in dbLocations)
+							{
+								<option style="color: black;" value="@location.Id">@location.Branch</option>
+							}
 						}
-						}
-						}
+					}
 
 					</select>
 				</div>
@@ -97,6 +100,3 @@
 				</div>
 			</form>
 		</div>
-@{
-	
-}
