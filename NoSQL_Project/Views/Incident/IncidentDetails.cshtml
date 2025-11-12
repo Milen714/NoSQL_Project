@@ -134,25 +134,23 @@
 						
 						<a asp-action="EditIncident" asp-route-id="@Model.Id" class="btn btn-primary">Edit</a>
 
-						<form asp-action="TransferIncident" method="get" style="display:inline;">
-							<input type="hidden" name="incidentId" value="@Model.Id" />
-							@if (Model.AssignedTo == null || !Model.AssignedTo.Any())
-							{
-								<button type="submit" class="btn btn-primary">Assign Incident</button>
-							}
-							else
-							{
-								<button type="submit" class="btn btn-primary">Transfer Incident</button>
-							}
-						</form>
+						@if (Model.Status == IncidentStatus.inProgress || Model.Status == IncidentStatus.open)
+						{
+							<form asp-action="TransferIncident" method="get" style="display:inline;">
+								<input type="hidden" name="incidentId" value="@Model.Id" />
+								@if (Model.AssignedTo == null || !Model.AssignedTo.Any())
+								{
+									<button type="submit" class="btn btn-primary">Assign Incident</button>
+								}
+								else
+								{
+									<button type="submit" class="btn btn-primary">Transfer Incident</button>
+								}
+							</form>
+						}
 
 					<a asp-action="DisplayTransferHistory" asp-route-incidentId="@Model.Id" class="btn btn-info">Assgination History</a>
 
-					<form asp-action="CloseIncident" method="post" style="display:inline;">
-						<input type="hidden" name="incidentId" value="@Model.Id" />
-						<input type="hidden" name="updatedStatus" value="resolved" />
-						<button type="submit" class="btn btn-warning">Resolve</button>
-					</form>
 						<form asp-action="CloseIncident" method="post" style="display:inline;">
 							<input type="hidden" name="incidentId" value="@Model.Id" />
 							<input type="hidden" name="updatedStatus" value="resolved" />

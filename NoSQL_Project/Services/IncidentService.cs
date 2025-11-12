@@ -157,9 +157,12 @@ namespace NoSQL_Project.Services
 			//pass the object to compare the id and the user that has to be passed to
 			await _incidentRepository.TransferIncidentAsync(existingIncident, existingUser);
 
-			await _incidentRepository.AddTransferMessage(existingIncident, userBeforeTransfer, transferMessage);
+			if (!string.IsNullOrWhiteSpace(transferMessage) && userBeforeTransfer != null)
+			{
+				await _incidentRepository.AddTransferMessage(existingIncident, userBeforeTransfer, transferMessage);
+			}
 		}
-
+		
 		public async Task <List<UserForTransferDto>> GetUsersForTransferAsync()
 		{
 			return await _incidentRepository.GetUsersForTransferAsync();			

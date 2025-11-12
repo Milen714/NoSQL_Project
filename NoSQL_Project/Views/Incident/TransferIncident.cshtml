@@ -1,52 +1,67 @@
 ﻿@model List<NoSQL_Project.Models.UserForTransferDto>
 
 @{
-    ViewData["Title"] = "Transfer Incident";
-    string incidentId = ViewBag.IncidentId;
+	ViewData["Title"] = "Transfer Incident";
+	string incidentId = ViewBag.IncidentId;
+	string currentAssigneeId = ViewBag.CurrentAssigneeId;
 }
 
 <h2>Transfer Incident</h2>
 
 <div class="table_NICE_container">
-    <form asp-action="TransferIncident" method="post">
-        <input type="hidden" name="incidentId" value="@incidentId" />
+	<form asp-action="TransferIncident" method="post">
+		<input type="hidden" name="incidentId" value="@incidentId" />
 
-        <table class="table_NICE" >
-        <tr>
-            <td valign="top">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Select</th>
-                            <th>Name</th>
-                            <th>Total Incidents at the Moment</th>
-                        </tr>
-                    </thead>
-                        <tbody class="table_NICE_body">
-                        @foreach (var user in Model)
-                        {
-                            <tr>
-                                <td>
-                                    <input type="radio" name="userForTransferId" value="@user.UserId.ToString()" required />
-                                </td>
-                                <td>@user.FirstName @user.LastName</td>
-                                <td>@user.TotalIncidents</td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </td>
+		<table class="table_NICE">
+			<tr>
+				<td valign="top">
+					<table class="table">
+						<thead>
+							<tr>
+								<th>Select</th>
+								<th>Name</th>
+								<th>Total Incidents at the Moment</th>
+							</tr>
+						</thead>
+						<tbody class="table_NICE_body">
+							@foreach (var user in Model)
+							{
+								<tr>
+									<td>
 
-            <td valign="top" align="center">
-                <br /><br /> 
-                <label for="transferMessage"><b>Message for Transfer</b></label><br />
-                <textarea id="transferMessage" name="transferMessage" rows="15" cols="40"
-                          placeholder="Write comments or the reason for your ticket transfer here"></textarea>
-            </td>
-        </tr>
-    </table>
+										@if (user.UserId.ToString() == currentAssigneeId)
+										{
+											<span class="badge bg-success">Active assignee</span>
+										}
+										else
+										{
+											<input type="radio" name="userForTransferId" value="@user.UserId.ToString()" required />
+										}
 
-    <button type="submit" class="btn btn-primary mt-3">Transfer</button>
-</form>
+									</td>
+									<td>@user.FirstName @user.LastName</td>
+									<td>@user.TotalIncidents</td>
+								</tr>
+							}
+						</tbody>
+					</table>
+				</td>
 
-<a asp-controller="Incident" asp-action="IncidentDetails" asp-route-id="@incidentId" class="btn btn-secondary mt-2">Return</a>
+
+				@if (ViewData["HideMessageBox"] == null)
+				{
+					<td valign="top" align="center">
+						<br /><br />
+						<label for="transferMessage"><b>Message for Transfer</b></label><br />
+						<textarea id="transferMessage" name="transferMessage" rows="15" cols="40"
+							  placeholder="Write comments or the reason for your ticket transfer here"></textarea>
+					</td>
+				}
+
+			</tr>
+		</table>
+
+		<button type="submit" class="btn btn-primary mt-3">Transfer</button>
+	</form>
+
+	<a asp-controller="Incident" asp-action="IncidentDetails" asp-route-id="@incidentId" class="btn btn-secondary mt-2">Return</a>

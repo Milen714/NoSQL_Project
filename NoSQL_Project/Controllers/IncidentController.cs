@@ -283,7 +283,17 @@ namespace NoSQL_Project.Controllers
         [HttpGet]
         public async Task<IActionResult> TransferIncident(string incidentId)
         {
+            var incident = await _incidentService.GetIncidentByIdAsync(incidentId);
+
             ViewBag.IncidentId = incidentId;
+
+			var currentAssignee = incident.AssignedTo?.LastOrDefault(a => a.IsActive);
+			ViewBag.CurrentAssigneeId = currentAssignee?.UserId.ToString();
+
+			if (!(incident.AssignedTo?.Any(a => a.IsActive) ?? false))
+            {
+                ViewData["HideMessageBox"] = true;
+            }
 
             var usersForTransfer = await _incidentService.GetUsersForTransferAsync();
             return View("TransferIncident", usersForTransfer);
