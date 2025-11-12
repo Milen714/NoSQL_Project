@@ -9,8 +9,8 @@ Individual assignments
 * Filtering: A preloaded list of (incident) tickets can be filtered using (common) keywords. This 
 is different from the search functionality because you will filter an already loaded list.  
 
-- Milen Savov (580601)
-## Milen's Individual functionalities:
+
+## Milen Savov (580601)Individual functionalities:
 1. Forget Password-functionality:
    * Users can click on `Forgot password?` located on the login page and go through the flow of resetting their password.
    * The functionality is fully operational and doesn't just display a fake email inbox view and subsequent password change-related views. My recommendation for testing the functionality is to create an account via the test "admin" account with a real email address at which you can receive emails and test the password reset.
