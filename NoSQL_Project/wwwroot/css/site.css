@@ -509,3 +509,10 @@ body {
     color: red;
     font-family: "Roboto Mono", monospace;
 }
+.input_field {
+    border-radius: 10px;
+    color: var(--color-text-secondary);
+}
+.dark_input_field {
+    background-color: var(--color-sidebar-bg);
+}

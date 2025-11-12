@@ -31,7 +31,8 @@ namespace NoSQL_Project.Repositories
                 {
                     typeFilter = Builders<User>.Filter.Eq(u => u.UserType, userTypeFilter);
                 }
-                var combinedFilter = Builders<User>.Filter.And(emailFilter, typeFilter);
+                var activeFilter = Builders<User>.Filter.Eq(u => u.Active, true);
+                var combinedFilter = Builders<User>.Filter.And(activeFilter,emailFilter, typeFilter);
                 var result = await _users.Find(combinedFilter).ToListAsync();
                 return result;
             }

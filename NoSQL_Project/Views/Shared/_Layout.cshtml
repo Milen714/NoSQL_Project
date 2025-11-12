@@ -38,13 +38,13 @@
                         <li class="nav_li">
                             <form action="/Home/SetTheme" method="post">
                                 <article class="input_group">
-                                    <label for="Theme">Theme</label>
-                                    <select onchange="this.form.submit()" id="Theme" name="theme" class="input_field">
-                                        <option style="color: black;" value="">
+                                    <label class="nav_li_a" for="Theme">Theme</label>
+                                    <select onchange="this.form.submit()" id="Theme" name="theme" class="input_field dark_input_field">
+                                        <option class="nav_li_a" value="">
                                             @(Context?.Request.Cookies["PreferedTheme"] ?? "Select Theme")
                                         </option>
-                                        <option value="Dark">Dark</option>
-                                        <option value="Light">Light</option>
+                                        <option class="nav_li_a" value="Dark">Dark</option>
+                                        <option class="nav_li_a" value="Light">Light</option>
                                     </select>
                                 </article>
                             </form>
@@ -62,7 +62,7 @@
                             </li>
                             <li class="nav_li">
                                 <a class="nav_li_a" asp-area="" asp-controller="Incident" asp-action="Index">
-                                    All Tickets
+                                   Ticket Dashboard
                                 </a>
                             </li>
                             <li class="nav_li">
