@@ -301,18 +301,27 @@ namespace NoSQL_Project.Controllers
             catch (Exception ex)
             {
                 TempData["Error"] = ex.Message;
-                return RedirectToAction("Index");
+				return RedirectToAction("IncidentDetails", new { id = incidentId }); ;
             }
         }
 
-        /// <summary>
-        /// Shows a regular employee's own tickets only.
-        /// Reuses existing search/sort/filter logic but filters by logged-in user.
-        /// Author: Dylan Mohlen
-        /// Date: 2025-01-08
-        /// </summary>
-        /// 
-        [SessionAuthorize(UserType.Service_employee, UserType.Reg_employee)]
+		[HttpGet]
+		public async Task<IActionResult> DisplayTransferHistory(string incidentId)
+		{
+			ViewBag.IncidentId = incidentId;
+
+			var transferHistory = await _incidentService.GetTransferHistory(incidentId);
+			return View("DisplayTransferHistory", transferHistory);
+		}
+
+		/// <summary>
+		/// Shows a regular employee's own tickets only.
+		/// Reuses existing search/sort/filter logic but filters by logged-in user.
+		/// Author: Dylan Mohlen
+		/// Date: 2025-01-08
+		/// </summary>
+		/// 
+		[SessionAuthorize(UserType.Service_employee, UserType.Reg_employee)]
         [HttpGet]
         public async Task<IActionResult> MyTickets(
             string searchString,
@@ -487,14 +496,7 @@ namespace NoSQL_Project.Controllers
             }
         }
 
-        [HttpGet]
-        public async Task<IActionResult> DisplayTransferHistory(string incidentId)
-        {
-			ViewBag.IncidentId = incidentId;
-
-			var transferHistory = await _incidentService.GetTransferHistory(incidentId);
-            return View("DisplayTransferHistory", transferHistory);
-		}
+       
 
     }
 }
