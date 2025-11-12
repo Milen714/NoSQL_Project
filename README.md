@@ -117,7 +117,7 @@ $sort: a final stage to sort the users' names by alphabetical order to improve t
 ### 5-TransferIncident
 The user can now see the other available users for transfer, select only one of them and in the same view (TransferIncident), the text box to include a message 
 
-**Initial versions of the code did not include the message or all the methods related to it. It was implemented later to improve the transfer history as a way to record the reasons for it, a direct message for the new user taking up the incident or anything else that they want to leave as "proof". 
+**Initial versions of the code did not include the message or all the methods related to it. It was implemented later to improve the transfer history as a way to record the reasons for it, a direct message for the new user taking up the incident or anything else that they might want to leave as "proof". 
 **The database and validation rules were changed to add this new field, and in the Assignee Snapshot object, they were added as well, marking the message field as nullable because it is not mandatory, a user can make an incident transfer without it.
 
 ### 6-IncidentController
@@ -137,13 +137,14 @@ Method TransferIncidentAsync: an update method that:
 
 -Creates the snapshot of the new assignee and adds it to the array (Update + Push operation) with an is_active field set to true
 
-**Initial versions of this method implemented a Select to read each element of the array, change the is_active field to false and return them in a list, then added the new assignee and replaced the whole array in MongoDB
-But after some considerations, I changed to the current version because it is simpler, more efficient and adjusted to the needs of the program. In the current scope of this functionality, there are no complex validations or logic applied to the assignee and only one field is changed (is_active), which can be successfully handled by the current method. 
+**Initial versions of this method implemented a Select to read each element of the array, change the is_active field to false and return them in a list, then added the new assignee and replaced the whole array in MongoDB. But after some considerations, I implemented the current version because it is simpler, more efficient and adjusted to the needs of the program. In the current scope of this functionality, there are no complex validations or logic applied to the assignee and only one field is changed (is_active), which can be successfully handled by the current method. 
 
 ### 9-Incident Repository 
 Method AddTransferMessage: an update method on the field message of Assigned To
 
 ### 10-DisplayTransferHistory 
 -Simple view with a table showing the date of the incident assignment, the user's name and last name and the message that they left before transferring it. 
+
 -Uses: method DisplayTransfeHistory in IncidentController, GetTransferHistory in IncidentService and GetTransferHistory in IncidentRepository
+
 -GetTransferHistory (repository method) finds the incident and returns a list of all assignations that will be displayed by the view.
