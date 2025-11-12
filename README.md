@@ -79,3 +79,68 @@ I implemented two separate functionalities using MongoDB aggregation pipelines:
 
 ## Conclusion
 This implementation demonstrates advanced MongoDB aggregation pipeline usage while maintaining clean separation of concerns and professional code quality.
+
+-Melissa Lemus (729185)
+-Transfer ticket to another person:
+
+1-IncidentDetail view 
+The transfer ticket to another person begins when the user presses the button for it. In the "IncidentDetail" view, a validation is implemented so if the array of assignees in the database "AssignedTo" is empty or doesn't exist, the button will show as "Assign Incident", otherwise as "Transfer Incident" because there's already an assignation active.
+
+**Assigned_to was initially a referencing field to only one user object with a snapshot of its data. But later on, I decided to make it into an array of these snapshots in order to create a history of the assignations that a ticket might have, not just the current user working on it. 
+
+**The assignation of the ticket is treated as a transference from no one to the user, therefore the same method is used in the controller for both actions
+
+2-IncidentController
+-GET Method TransferIncident: getting the users for transfer through _incidentService.GetUsersForTransferAsync and redirecting it to the TransferIncident View
+
+3-InicidentService 
+-The method GetUsersForTransferAsync called from the controller does not contain any logic, just a direct call to the repository
+
+4-IncidentRepository: 
+-The method GetUsersForTransferAsync builds the pipeline for getting all the users available for receiving a ticket transfer
+
+The pipeline:
+$unwind: to treat every assignation of the assigned_to array as a separate element
+$match: now we select only the assignations where is_active is true (a person is currently working on it) because the array is also composed of inactive (past) assignations 
+$group: these active assignments are grouped by userID, and it is shown their total amount of incidents, first name and last name
+$match: to filter on TotalIncidents that only users with 5 active incidents or fewer can receive a transference
+
+**Initial code for the pipeline did not include this match stage but after consideration, I added it to relate to real-life ticketing systems, otherwise, the incidents for a user could grow endlessly.
+
+$sort: a final stage to sort the users' names by alphabetical order to improve the aspect of the list
+
+-Finally, the result of the pipeline will be returned as a list of user DTO (the original Assignee object included many unnecessary fields for showing in the view)
+
+5-TransferIncident
+The user can now see the other available users for transfer, select only one of them and in the same view (TransferIncident), the text box to include a message 
+
+**Initial versions of the code did not include the message or all the methods related to it. It was implemented later to improve the transfer history as a way to record the reasons for it, a direct message for the new user taking up the incident or anything else that they want to leave as "proof". 
+**The database and validation rules were changed to add this new field, and in the Assignee Snapshot object, they were added as well, marking the message field as nullable because it is not mandatory, a user can make an incident transfer without it.
+
+6-IncidentController
+POST TransferIncident method will call the service to actually transfer the incident, redirect to the IncidentDetails with the changed parameters if everything went well, otherwise it will show an error message
+
+7-IncidentService 
+-Method TransferIncidentAsync calls the repository first to transfer the ticket and then to add the message AddTransferMessage. 
+-AddTransferMessage passed the message and the "old user" because, as the transfer operation occurs first, if we try to access the active assignee directly through the Incident object, what we would get is the new assignee after the transfer is successful and not the "old" user that actually sent the message.  
+
+**I tried as a variant to invert the method order and transfer the user later, but in the case of an error with the transference, the message will be added anyway because it will occur first, leading to a very high inconsistency between the result of these operations
+
+8-Incident Repository
+Method TransferIncidentAsync: an update method that:
+
+-Deactivates the current assignee (sets the field is_active to false wherever is true at the moment)
+**only happens if there is an active assignment to a user of this incident
+
+-Creates the snapshot of the new assignee and adds it to the array (Update + Push operation) with an is_active field set to true
+
+**Initial versions of this method implemented a Select to read each element of the array, change the is_active field to false and return them in a list, then added the new assignee and replaced the whole array in MongoDB
+But after some considerations, I changed to the current version because it is simpler, more efficient and adjusted to the needs of the program. In the current scope of this functionality, there are no complex validations or logic applied to the assignee and only one field is changed (is_active), which can be successfully handled by the current method. 
+
+9-Incident Repository
+Method AddTransferMessage: an update method on the field message of Assigned To
+
+10-DisplayTransferHistory
+-Simple view with a table showing the date of the incident assignment, the user's name and last name and the message that they left before transferring it. 
+-Uses: method DisplayTransfeHistory in IncidentController, GetTransferHistory in IncidentService and GetTransferHistory in IncidentRepository
+-GetTransferHistory (repository method) finds the incident and returns a list of all assignations that will be displayed by the view.
