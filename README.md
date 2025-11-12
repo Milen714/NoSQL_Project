@@ -1,3 +1,8 @@
+## Test User Account
+- testserviceemployee@mail.com  secret 123
+- To test the password reset functionality, an account with a real email must be created via the testserviceemployee@mail.com account.
+
+
 Individual assignments 
 
 - Hunter Pandt (726523)
@@ -11,7 +16,7 @@ is different from the search functionality because you will filter an already lo
    * The functionality is fully operational and doesn't just display a fake email inbox view and subsequent password change-related views. My recommendation for testing the functionality is to create an account via the test "admin" account with a real email address at which you can receive emails and test the password reset.
    * How does it work?
        * The user enters their email, and the account controller checks that the account associated with that email address exists in the database.
-       * The `$AccountController` calls `$GeneratePasswordResetTokenAsync`, which generates a random token that gets Base64 converted so it is suitable for use in a URL. This method also updates the user document in the DB with the resset token and 1 hr expiry time for the same token.
+       * The `$AccountController` calls `$GeneratePasswordResetTokenAsync`, which generates a random token that gets Base64 converted so it is suitable for use in a URL. This method also updates the user document in the DB with the reset token and 1 hr expiry time for the same token.
        * `$AccountController` builds the Callback URL (what you click in the body of the email to reset the password) and sends the email via `$GmailSenderService`
        * Once the user checks their inbox for the reset link and clicks it, the `$AccountController` `$ResetPassword(string userId, string token)` gets called via the link containing the userId and the reset token.
        * This method searches the DB for the user with the corresponding Id and compares the token provided in the callback URL with the one stored in the user document, as well as checking  if the token has expired.
