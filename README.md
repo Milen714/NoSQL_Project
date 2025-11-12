@@ -5,7 +5,7 @@
 
 Individual assignments 
 
-- Hunter Pandt (726523)
+## Hunter Pandt (726523) Individual functionalities:
 * Filtering: A preloaded list of (incident) tickets can be filtered using (common) keywords. This 
 is different from the search functionality because you will filter an already loaded list.  
 
@@ -28,7 +28,7 @@ is different from the search functionality because you will filter an already lo
  2. Archiving the entire database (For example, all tickets older than 2 years):
     * In the `$All Tickets` view, accessible for Service employees, the user can click on the `$Show awaiting for archival` button to see tickets that have been created at least two years ago and choose to archive them in a secondary archival database. (The little notification bubble on the button shows how many incidents are viable to be archived)
     * Once the `$Archive Incidents` button is pressed, the viable for archive tickets get written to the archive database in the same MongoDB cluster and deleted from the source database(as per the assignment requirements saying the data has to be "moved").
--Dylan Mohlen (675311)
+## Dylan Mohlen (675311) Individual functionalities:
 ## Overview
 I implemented two separate functionalities using MongoDB aggregation pipelines:
 1. Advanced search with AND/OR operators
