@@ -101,8 +101,11 @@ The transfer ticket to another person begins when the user presses the button fo
 
 ### The pipeline:
 $unwind: to treat every assignation of the assigned_to array as a separate element
+
 $match: now we select only the assignations where is_active is true (a person is currently working on it) because the array is also composed of inactive (past) assignations 
+
 $group: these active assignments are grouped by userID, and it is shown their total amount of incidents, first name and last name
+
 $match: to filter on TotalIncidents that only users with 5 active incidents or fewer can receive a transference
 
 **Initial code for the pipeline did not include this match stage but after consideration, I added it to relate to real-life ticketing systems, otherwise, the incidents for a user could grow endlessly.
