@@ -122,6 +122,7 @@ namespace NoSQL_Project.Controllers
                 UserLocationRef userLocationRef = new UserLocationRef();
                 userLocationRef.MapLocation(userLocation);
                 user.Location = userLocationRef;
+                user.Active = true;
                 await _userService.UpdateUserAsync(user);
 
                 User loggedInUser = HttpContext.Session.GetObject<User>("LoggedInUser");
