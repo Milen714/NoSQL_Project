@@ -1,5 +1,5 @@
 ## Test User Account
-- testserviceemployee@mail.com  secret 123
+- testserviceemployee@mail.com   password: secret123
 - To test the password reset functionality, an account with a real email must be created via the testserviceemployee@mail.com account.
 
 
